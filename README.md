@@ -1,29 +1,95 @@
-# Create T3 App
+# VV Realtor
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+A modern real estate website built with the latest web technologies, featuring property listings, mortgage calculator, and appointment bookings along with a mobile-first responsive design.
 
-## What's next? How do I make an app with this?
+## Tech Stack
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+- **Framework**: [Next.js 15](https://nextjs.org/) — React framework with App Router and Turbopack
+- **Authentication**: [Better Auth](https://www.better-auth.com/) — Secure authentication with email/password and OAuth support
+- **Database**: [PostgreSQL](https://www.postgresql.org/) — Production-grade relational database
+- **ORM**: [Drizzle ORM](https://orm.drizzle.team/) — Lightweight TypeScript ORM for PostgreSQL
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) — Utility-first CSS framework
+- **Validation**: [Zod](https://zod.dev/) — TypeScript-first schema validation
+- **UI Components**: [ShadCN](https://ui.shadcn.com/) — Accessible, customizable UI components
+- **Runtime**: [Bun](https://bun.sh/) — All-in-one JavaScript runtime and package manager
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+## Features
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+- 🏠 **Property Listings** — Browse available properties for sale and rent
+- 🔐 **User Authentication** — Secure sign-up/sign-in with email/password
+- 👤 **User Account Management** — Update profile, manage sessions, delete account
+- 📱 **Responsive Design** — Fully optimized for mobile, tablet, and desktop
+- 🎨 **Modern UI** — Clean, professional design with Tailwind CSS
 
-## Learn More
+## Getting Started
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+### Prerequisites
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+- [Bun](https://bun.sh/) installed
+- [Docker](https://www.docker.com/) (for local PostgreSQL)
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+### Installation
 
-## How do I deploy this?
+```bash
+# Install dependencies
+bun install
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+# Start development services (PostgreSQL)
+bun run docker:up
+
+# Push schema to database
+bun run db:push
+
+# Start development server
+bun run dev
+```
+
+The app will be available at [http://localhost:3000](http://localhost:3000).
+
+### Environment Variables
+
+Create a `.env` file with the following variables:
+
+```env
+DATABASE_URL=postgres://postgres:password@localhost:5432/vv_realtor
+BETTER_AUTH_URL=http://localhost:3000
+BETTER_AUTH_SECRET=your-secret-key
+```
+
+## Available Scripts
+
+| Command                | Description                     |
+| ---------------------- | ------------------------------- |
+| `bun run dev`          | Start development server        |
+| `bun run build`        | Build for production            |
+| `bun run start`        | Start production server         |
+| `bun run check`        | Run lint and type checks        |
+| `bun run format:check` | Check code formatting           |
+| `bun run docker:up`    | Start PostgreSQL container      |
+| `bun run docker:down`  | Stop PostgreSQL container       |
+| `bun run db:push`      | Push schema changes to database |
+| `bun run db:generate`  | Generate Drizzle types          |
+
+## Project Structure
+
+```
+src/
+├── app/                    # Next.js App Router pages
+│   ├── api/               # API routes
+│   ├── auth/              # Authentication pages
+│   └── account/           # User account page
+├── components/            # React components
+│   ├── layout/            # Layout components (Navbar, Footer)
+│   ├── sections/          # Page sections (Hero, etc.)
+│   └── ui/               # ShadCN UI components
+├── lib/                   # Utilities and helpers
+│   └── zod/              # Zod validation schemas
+├── server/                # Server-side code
+│   ├── better-auth/       # Authentication configuration
+│   └── db/               # Database schemas and connection
+└── utils/                 # Utility functions
+```
+
+## License
+
+MIT
