@@ -1,0 +1,183 @@
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import { CircleUserRound, Menu } from "lucide-react";
+
+import { buttonVariants } from "@/components/ui/button";
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuList,
+  navigationMenuTriggerStyleTransparent,
+} from "@/components/ui/navigation-menu";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
+import { authClient } from "@/server/better-auth/client";
+
+export function NavigationBar() {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const { data: session, isPending } = authClient.useSession();
+
+  const isAuthenticated = !!session?.user;
+
+  return (
+    <header className="bg-background/95 supports-backdrop-filter:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur-md">
+      <div className="container mx-auto flex h-16 items-center px-4 md:px-6">
+        <div className="mr-4 hidden md:flex">
+          <Link href="/" className="mr-6 flex items-center space-x-2">
+            <span className="hidden text-xl font-bold sm:inline-block">
+              Vince Villanueva
+            </span>
+          </Link>
+          <NavigationMenu>
+            <NavigationMenuList>
+              <NavigationMenuItem className="bg-transparent">
+                <Link
+                  href="/listings"
+                  className={navigationMenuTriggerStyleTransparent()}
+                >
+                  Listings
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link
+                  href="/buy"
+                  className={navigationMenuTriggerStyleTransparent()}
+                >
+                  Buy
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link
+                  href="/sell"
+                  className={navigationMenuTriggerStyleTransparent()}
+                >
+                  Sell
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link
+                  href="/about"
+                  className={navigationMenuTriggerStyleTransparent()}
+                >
+                  About
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link
+                  href="/contact"
+                  className={navigationMenuTriggerStyleTransparent()}
+                >
+                  Contact
+                </Link>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+        </div>
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+          <SheetTrigger
+            className={cn(
+              buttonVariants({ variant: "ghost", size: "icon" }),
+              "mr-2 md:hidden",
+            )}
+          >
+            <Menu className="h-6 w-6" />
+            <span className="sr-only">Toggle Menu</span>
+          </SheetTrigger>
+          <SheetContent side="left" className="pr-0">
+            <Link
+              href="/"
+              className="flex items-center"
+              onClick={() => setIsOpen(false)}
+            >
+              <span className="p-4 text-xl font-bold">
+                Vince <span className="">Villanueva</span>
+              </span>
+            </Link>
+            <div className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
+              <div className="flex flex-col space-y-3">
+                <Link
+                  href="/listings"
+                  onClick={() => setIsOpen(false)}
+                  className="py-2 text-lg font-medium"
+                >
+                  Listings
+                </Link>
+                <Link
+                  href="/buy"
+                  onClick={() => setIsOpen(false)}
+                  className="py-2 text-lg font-medium"
+                >
+                  Buy
+                </Link>
+                <Link
+                  href="/sell"
+                  onClick={() => setIsOpen(false)}
+                  className="py-2 text-lg font-medium"
+                >
+                  Sell
+                </Link>
+                <Link
+                  href="/about"
+                  onClick={() => setIsOpen(false)}
+                  className="py-2 text-lg font-medium"
+                >
+                  About
+                </Link>
+                <Link
+                  href="/contact"
+                  onClick={() => setIsOpen(false)}
+                  className="py-2 text-lg font-medium"
+                >
+                  Contact
+                </Link>
+                {!isPending &&
+                  (isAuthenticated ? (
+                    <Link
+                      href="/account"
+                      onClick={() => setIsOpen(false)}
+                      className="py-2 text-lg font-medium"
+                    >
+                      My Account
+                    </Link>
+                  ) : (
+                    <Link
+                      href="/auth/sign-in"
+                      onClick={() => setIsOpen(false)}
+                      className={cn(
+                        buttonVariants({ variant: "default" }),
+                        "max-w-25",
+                      )}
+                    >
+                      Sign In
+                    </Link>
+                  ))}
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
+        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
+          <div className="w-full flex-1 md:w-auto md:flex-none">
+            {/* Search could go here if needed in header */}
+          </div>
+          <nav className="flex items-center space-x-2">
+            {!isPending &&
+              (isAuthenticated ? (
+                <Link href="/account" className="rounded-full bg-black p-2">
+                  <CircleUserRound color="#FFFFFF" />
+                </Link>
+              ) : (
+                <Link
+                  href="/auth/sign-in"
+                  className={buttonVariants({ size: "sm" })}
+                >
+                  Sign In
+                </Link>
+              ))}
+          </nav>
+        </div>
+      </div>
+    </header>
+  );
+}
