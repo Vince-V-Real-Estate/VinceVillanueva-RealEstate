@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { CircleUserRound, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -13,13 +13,10 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { authClient } from "@/server/better-auth/client";
+import { AccountControls } from "@/components/layout/AccountControls";
 
 export function NavigationBar() {
   const [isOpen, setIsOpen] = React.useState(false);
-  const { data: session, isPending } = authClient.useSession();
-
-  const isAuthenticated = !!session?.user;
 
   return (
     <header className="bg-background/95 supports-backdrop-filter:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur-md">
@@ -132,27 +129,10 @@ export function NavigationBar() {
                 >
                   Contact
                 </Link>
-                {!isPending &&
-                  (isAuthenticated ? (
-                    <Link
-                      href="/account"
-                      onClick={() => setIsOpen(false)}
-                      className="py-2 text-lg font-medium"
-                    >
-                      My Account
-                    </Link>
-                  ) : (
-                    <Link
-                      href="/auth/sign-in"
-                      onClick={() => setIsOpen(false)}
-                      className={cn(
-                        buttonVariants({ variant: "default" }),
-                        "max-w-25",
-                      )}
-                    >
-                      Sign In
-                    </Link>
-                  ))}
+                <AccountControls
+                  variant="mobile"
+                  onNavigate={() => setIsOpen(false)}
+                />
               </div>
             </div>
           </SheetContent>
@@ -162,19 +142,7 @@ export function NavigationBar() {
             {/* Search could go here if needed in header */}
           </div>
           <nav className="flex items-center space-x-2">
-            {!isPending &&
-              (isAuthenticated ? (
-                <Link href="/account" className="rounded-full bg-black p-2">
-                  <CircleUserRound color="#FFFFFF" />
-                </Link>
-              ) : (
-                <Link
-                  href="/auth/sign-in"
-                  className={buttonVariants({ size: "sm" })}
-                >
-                  Sign In
-                </Link>
-              ))}
+            <AccountControls variant="desktop" />
           </nav>
         </div>
       </div>
