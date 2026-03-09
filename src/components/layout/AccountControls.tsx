@@ -57,7 +57,10 @@ function AccountSessionControls({ variant, onNavigate }: AccountControlsProps) {
     }
 
     return (
-      <Link href="/account" className="rounded-full bg-black p-2">
+      <Link
+        href="/account"
+        className="rounded-full bg-black p-2 hover:bg-white"
+      >
         <CircleUserRound color="#FFFFFF" />
       </Link>
     );

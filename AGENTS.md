@@ -7,7 +7,7 @@ This document is for autonomous coding agents. It captures constraints and patte
 - Start from the task surface; load only relevant modules.
 - For auth/runtime issues: load `src/server/better-auth/*`, `src/server/db/index.ts`, `src/env.js` first.
 - For database changes: load `src/server/db/schema.ts` and `drizzle.config.ts`.
-- For API routes: load the specific route file and any helper modules.
+- For API routes: utilize `` load the specific route file and any helper modules.
 
 ## 2) Runtime and Boundary Invariants
 
@@ -126,7 +126,7 @@ bun build        # ensure production build works
 - PascalCase components
 - Use interfaces for public APIs
 - Implement all styling in TailwindCSS
-- Rely on ShadCN library components when possible
+<!-- - Rely on ShadCN library components when possible except for forms for lead generation that should be designed with creativity. -->
 
 ## 11) Anti-Patterns
 
@@ -177,3 +177,10 @@ Example: `[ERROR] [api] POST /api/listings Error: connection refused`
 ## 13) MCP
 
 - When working with MCP, view `mcp/opencode.json`
+
+## 14) Context Budgeting (Load Only What You Need)
+
+- Do not ingest broad project context by default. Start from the task surface and load only relevant modules.
+- For API work, prioritize: `src/utils/api/route-helpers.ts` and the target route file.
+- For mortgage calculation logic, load only the specific engine under `src/utils/calculation`.
+- For auth/runtime issues, load `src/server/better-auth/*`, `src/server/db/index.ts`, and `src/env.js` first.

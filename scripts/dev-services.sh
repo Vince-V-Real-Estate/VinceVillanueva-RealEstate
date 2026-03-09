@@ -9,7 +9,7 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 cd "$PROJECT_ROOT"
 
 # Load environment variables
-if [ -f .env ]; then
+if [[ -f .env ]]; then
   set -a
   source .env
   set +a
