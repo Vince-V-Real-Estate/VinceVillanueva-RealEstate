@@ -9,7 +9,7 @@ import { createLogger } from "@/lib/logger";
 import { env } from "@/env";
 import { db } from "@/server/db";
 import { user, lead } from "@/server/db/schema";
-import { eq, desc, sql, or, isNull } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 
 const log = createLogger("leads-api");
 
@@ -201,9 +201,9 @@ export const GET = withApiHandler(
     // Session is guaranteed by requireRole: "admin"
     const userId = session!.user.id;
 
-    // Get all leads for this realtor (or legacy leads with no realtorId), ordered by most recent
+    // Get all leads for this realtor, ordered by most recent
     const allLeads = await db.query.lead.findMany({
-      where: or(eq(lead.realtorId, userId), isNull(lead.realtorId)),
+      where: eq(lead.realtorId, userId),
       orderBy: [desc(lead.createdAt)],
     });
 
@@ -215,8 +215,17 @@ export const GET = withApiHandler(
       newsletter: [],
     };
 
+    const bySourceMap: Record<string, (typeof allLeads)[number][]> = bySource;
     for (const l of allLeads) {
-      bySource[l.source].push(l);
+      const bucket = bySourceMap[l.source];
+      if (!bucket) {
+        log.warn("Skipping lead with unknown source", {
+          source: l.source,
+          id: l.id,
+        });
+        continue;
+      }
+      bucket.push(l);
     }
 
     // Get total row count for database usage

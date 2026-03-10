@@ -7,6 +7,7 @@ import { z } from "zod";
 import { cn } from "@/lib/utils";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { useState } from "react";
+import type { LeadSource } from "@/utils/leads/types";
 
 const log = createLogger("lead-capture");
 
@@ -21,7 +22,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 interface LeadCaptureFormProps {
-  type: "listings" | "valuation" | "call" | "contact";
+  type: Exclude<LeadSource, "newsletter">;
   className?: string;
   onSuccess?: () => void;
 }
@@ -95,8 +96,6 @@ export function LeadCaptureForm({
         return "Get Valuation Report";
       case "call":
         return "Book Consultation";
-      case "contact":
-        return "Send Message";
       default:
         return "Submit Request";
     }
@@ -174,7 +173,7 @@ export function LeadCaptureForm({
         </div>
 
         {/* Optional Phone */}
-        {(type === "listings" || type === "call" || type === "contact") && (
+        {(type === "listings" || type === "call") && (
           <div className="group relative">
             <label htmlFor="phone" className={labelClasses("phone")}>
               Phone Number{" "}
@@ -222,7 +221,7 @@ export function LeadCaptureForm({
         )}
 
         {/* Message */}
-        {(type === "contact" || type === "call") && (
+        {type === "call" && (
           <div className="group relative pt-2">
             <label htmlFor="message" className={labelClasses("message")}>
               How can we help?

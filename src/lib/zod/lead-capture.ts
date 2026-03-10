@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { LEAD_SOURCES } from "@/utils/leads/types";
 
 export const leadCaptureSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -6,7 +7,7 @@ export const leadCaptureSchema = z.object({
   phone: z.string().optional(),
   message: z.string().optional(),
   address: z.string().optional(), // For home valuation
-  type: z.enum(["listings", "valuation", "call", "contact"]),
+  source: z.enum(LEAD_SOURCES),
 });
 
 export type LeadCaptureValues = z.infer<typeof leadCaptureSchema>;

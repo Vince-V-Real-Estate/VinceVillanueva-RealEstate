@@ -28,12 +28,16 @@ export function Footer() {
 
   const onSubmit = async (data: NewsletterFormData) => {
     setSubmitStatus("idle");
+    const rawPrefix = data.email.split("@")[0]?.trim() ?? "";
+    const fullName =
+      rawPrefix.length >= 2 ? rawPrefix : "Newsletter Subscriber";
+
     try {
       const response = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fullName: data.email.split("@")[0] ?? "Newsletter Subscriber",
+          fullName,
           email: data.email,
           source: "newsletter",
         }),

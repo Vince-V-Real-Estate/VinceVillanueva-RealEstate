@@ -15,6 +15,20 @@
       "when": 1773102174518,
       "tag": "0001_nasty_iron_lad",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1773108923547,
+      "tag": "0002_slippery_lionheart",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1773109034380,
+      "tag": "0003_mean_bloodscream",
+      "breakpoints": true
     }
   ]
 }

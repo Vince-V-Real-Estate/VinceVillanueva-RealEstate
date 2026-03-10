@@ -16,9 +16,9 @@ export const lead = pgTable("lead", {
   message: text("message"),
   address: text("address"),
   source: leadSourceEnum("source").notNull(),
-  realtorId: text("realtor_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
+  realtorId: text("realtor_id").references(() => user.id, {
+    onDelete: "cascade",
+  }),
   createdAt: timestamp("created_at")
     .$defaultFn(() => new Date())
     .notNull(),

@@ -52,10 +52,10 @@ export function ListingsCTA() {
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex flex-col items-center gap-12 lg:flex-row lg:gap-0">
           <div className="m-auto w-full">
-            <h2 className="text:center text-center text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
+            <h2 className="text-center text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
               Featured Listings
             </h2>
-            <div className="l relative flex w-full items-center justify-center py-10 xl:mx-auto xl:w-full">
+            <div className="relative flex w-full items-center justify-center py-10 xl:mx-auto xl:w-full">
               {/* Carousel replacing the #LuxuryListing image */}
               <Carousel slides={FEATURED_LISTINGS} />
             </div>
