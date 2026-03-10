@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Menu } from "lucide-react";
+import { Menu, LayoutDashboard } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -14,9 +14,12 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { AccountControls } from "@/components/layout/AccountControls";
+import { authClient } from "@/server/better-auth/client";
 
 export function NavigationBar() {
   const [isOpen, setIsOpen] = React.useState(false);
+  const { data: session } = authClient.useSession();
+  const isAdmin = session?.user?.role === "admin";
 
   return (
     <header className="bg-background/95 supports-backdrop-filter:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur-md">
@@ -129,6 +132,16 @@ export function NavigationBar() {
                 >
                   Contact
                 </Link>
+                {isAdmin && (
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-2 py-2 text-lg font-medium text-blue-600"
+                  >
+                    <LayoutDashboard className="h-5 w-5" />
+                    Dashboard
+                  </Link>
+                )}
                 <AccountControls
                   variant="mobile"
                   onNavigate={() => setIsOpen(false)}
@@ -142,6 +155,18 @@ export function NavigationBar() {
             {/* Search could go here if needed in header */}
           </div>
           <nav className="flex items-center space-x-2">
+            {isAdmin && (
+              <Link
+                href="/dashboard"
+                className={cn(
+                  buttonVariants({ variant: "ghost", size: "sm" }),
+                  "hidden gap-2 md:flex",
+                )}
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                Dashboard
+              </Link>
+            )}
             <AccountControls variant="desktop" />
           </nav>
         </div>

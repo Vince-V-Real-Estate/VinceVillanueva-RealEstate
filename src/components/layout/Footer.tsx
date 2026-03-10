@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,6 +14,9 @@ import { createLogger } from "@/lib/logger";
 const log = createLogger("newsletter");
 
 export function Footer() {
+  const [submitStatus, setSubmitStatus] = useState<
+    "idle" | "success" | "error"
+  >("idle");
   const {
     register,
     handleSubmit,
@@ -23,9 +27,36 @@ export function Footer() {
   });
 
   const onSubmit = async (data: NewsletterFormData) => {
-    // TODO: Implement newsletter subscription logic
-    log.info("Newsletter subscription", data);
-    reset();
+    setSubmitStatus("idle");
+    const rawPrefix = data.email.split("@")[0]?.trim() ?? "";
+    const fullName =
+      rawPrefix.length >= 2 ? rawPrefix : "Newsletter Subscriber";
+
+    try {
+      const response = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName,
+          email: data.email,
+          source: "newsletter",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to subscribe");
+      }
+
+      log.info("Newsletter subscription successful", { email: data.email });
+      setSubmitStatus("success");
+      reset();
+
+      // Reset success message after 3 seconds
+      setTimeout(() => setSubmitStatus("idle"), 3000);
+    } catch (error) {
+      log.error("Newsletter subscription failed", error);
+      setSubmitStatus("error");
+    }
   };
 
   return (
@@ -115,11 +146,12 @@ export function Footer() {
                   className="border-input placeholder:text-muted-foreground focus-visible:ring-ring flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-1 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
                   placeholder="Enter your email"
                   type="email"
+                  disabled={isSubmitting || submitStatus === "success"}
                   {...register("email")}
                 />
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || submitStatus === "success"}
                   className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring inline-flex h-9 items-center justify-center rounded-md px-4 py-2 text-sm font-medium shadow-xs focus-visible:ring-1 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
                 >
                   {isSubmitting ? "..." : "Join"}
@@ -127,6 +159,16 @@ export function Footer() {
               </div>
               {errors.email && (
                 <p className="text-sm text-red-500">{errors.email.message}</p>
+              )}
+              {submitStatus === "success" && (
+                <p className="text-sm text-green-600">
+                  Thanks for subscribing!
+                </p>
+              )}
+              {submitStatus === "error" && (
+                <p className="text-sm text-red-500">
+                  Something went wrong. Please try again.
+                </p>
               )}
             </form>
           </div>
