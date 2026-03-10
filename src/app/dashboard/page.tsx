@@ -63,24 +63,36 @@ function LeadTable({ leads, source }: { leads: Lead[]; source: LeadSource }) {
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-left text-sm">
+      <table className="w-full border-collapse text-left text-sm">
         <thead className="border-b border-gray-200 bg-gray-50 text-xs text-gray-600 uppercase">
           <tr>
-            <th className="px-4 py-3">Name</th>
-            <th className="px-4 py-3">Email</th>
-            <th className="px-4 py-3">Phone</th>
-            {source === "valuation" && <th className="px-4 py-3">Address</th>}
-            {source === "call" && <th className="px-4 py-3">Message</th>}
-            <th className="px-4 py-3">Date</th>
+            <th className="w-1/5 border-r border-gray-200 px-4 py-3">Name</th>
+            <th className="w-1/5 border-r border-gray-200 px-4 py-3">Email</th>
+            {source !== "valuation" && source !== "newsletter" && (
+              <th className="w-1/5 border-r border-gray-200 px-4 py-3">
+                Phone
+              </th>
+            )}
+            {source === "valuation" && (
+              <th className="w-1/5 border-r border-gray-200 px-4 py-3">
+                Address
+              </th>
+            )}
+            {source === "call" && (
+              <th className="w-1/5 border-r border-gray-200 px-4 py-3">
+                Message
+              </th>
+            )}
+            <th className="w-1/5 px-4 py-3">Date</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
           {leads.map((lead) => (
             <tr key={lead.id} className="hover:bg-gray-50">
-              <td className="px-4 py-3 font-medium text-gray-900">
+              <td className="border-r border-gray-100 px-4 py-3 font-medium text-gray-900">
                 {lead.fullName}
               </td>
-              <td className="px-4 py-3">
+              <td className="border-r border-gray-100 px-4 py-3">
                 <a
                   href={`mailto:${lead.email}`}
                   className="text-blue-600 hover:underline"
@@ -88,25 +100,27 @@ function LeadTable({ leads, source }: { leads: Lead[]; source: LeadSource }) {
                   {lead.email}
                 </a>
               </td>
-              <td className="px-4 py-3">
-                {lead.phone ? (
-                  <a
-                    href={`tel:${lead.phone}`}
-                    className="text-blue-600 hover:underline"
-                  >
-                    {lead.phone}
-                  </a>
-                ) : (
-                  <span className="text-gray-400">—</span>
-                )}
-              </td>
+              {source !== "valuation" && source !== "newsletter" && (
+                <td className="border-r border-gray-100 px-4 py-3">
+                  {lead.phone ? (
+                    <a
+                      href={`tel:${lead.phone}`}
+                      className="text-blue-600 hover:underline"
+                    >
+                      {lead.phone}
+                    </a>
+                  ) : (
+                    <span className="text-gray-400">—</span>
+                  )}
+                </td>
+              )}
               {source === "valuation" && (
-                <td className="max-w-[200px] truncate px-4 py-3">
+                <td className="max-w-[200px] truncate border-r border-gray-100 px-4 py-3">
                   {lead.address ?? <span className="text-gray-400">—</span>}
                 </td>
               )}
               {source === "call" && (
-                <td className="max-w-[200px] truncate px-4 py-3">
+                <td className="max-w-[200px] truncate border-r border-gray-100 px-4 py-3">
                   {lead.message ?? <span className="text-gray-400">—</span>}
                 </td>
               )}
@@ -189,8 +203,8 @@ export default function DashboardPage() {
         if (!response.ok) {
           throw new Error("Failed to fetch leads");
         }
-        const data = (await response.json()) as { data: LeadsData };
-        setLeadsData(data.data);
+        const data = (await response.json()) as LeadsData;
+        setLeadsData(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
