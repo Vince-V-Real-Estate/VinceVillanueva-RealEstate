@@ -1,8 +1,10 @@
 import { createAuthClient } from "better-auth/react";
 import { inferAdditionalFields } from "better-auth/client/plugins";
+import { dashClient } from "@better-auth/infra/client";
 
 export const authClient = createAuthClient({
   plugins: [
+    dashClient(),
     inferAdditionalFields({
       user: {
         firstName: {

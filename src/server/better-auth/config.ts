@@ -1,5 +1,6 @@
 import { betterAuth, type BetterAuthOptions } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { dash } from "@better-auth/infra";
 
 import { env } from "@/env";
 import { db } from "@/server/db";
@@ -15,6 +16,11 @@ function getAuthOptions(): BetterAuthOptions {
       enabled: true,
     },
     socialProviders: buildSocialProviders(env),
+    plugins: [
+      ...(env.BETTER_AUTH_API_KEY
+        ? [dash({ apiKey: env.BETTER_AUTH_API_KEY })]
+        : []),
+    ],
     user: {
       deleteUser: {
         enabled: true,
