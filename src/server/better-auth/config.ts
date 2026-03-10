@@ -7,7 +7,6 @@ import { buildSocialProviders } from "@/server/better-auth/social-providers";
 
 function getAuthOptions(): BetterAuthOptions {
   return {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     baseURL: env.BETTER_AUTH_URL,
     database: drizzleAdapter(db, {
       provider: "pg",

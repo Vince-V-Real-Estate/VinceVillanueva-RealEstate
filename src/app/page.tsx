@@ -1,7 +1,9 @@
 import dynamic from "next/dynamic";
-import { Gallery } from "@/components/sections/Gallery";
 import { MortgageCTA } from "@/components/sections/MortgageCTA";
-import { Neighborhoods } from "@/components/sections/Neighborhoods";
+// import { Neighborhoods } from "@/components/sections/Neighborhoods";
+import { HomeValuation } from "@/components/sections/HomeValuation";
+import { ListingsCTA } from "@/components/sections/ListingsCTA";
+import { CallCTA } from "@/components/sections/CallCTA";
 
 const Hero = dynamic(
   () => import("@/components/sections/Hero").then((m) => m.Hero),
@@ -14,9 +16,11 @@ export default function HomePage() {
   return (
     <>
       <Hero />
+      <HomeValuation />
+      {/* <Neighborhoods /> */}
       <MortgageCTA />
-      <Gallery />
-      <Neighborhoods />
+      <ListingsCTA />
+      <CallCTA />
     </>
   );
 }

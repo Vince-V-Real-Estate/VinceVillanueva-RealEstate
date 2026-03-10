@@ -1,12 +1,20 @@
 "use client";
 import Image from "next/image";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Bed, Bath, Square, MapPin } from "lucide-react";
 import { useState, useRef, useId, useEffect } from "react";
 
-interface SlideData {
+export interface SlideData {
   title: string;
   button: string;
   src: string;
+  price: string;
+  address: string;
+  specs: {
+    beds: number;
+    baths: number;
+    sqft: number;
+  };
+  mlsId?: string;
 }
 
 interface SlideProps {
@@ -63,13 +71,13 @@ const Slide = ({ slide, index, current, handleSlideClick }: SlideProps) => {
     event.currentTarget.style.opacity = "1";
   };
 
-  const { src, title } = slide;
+  const { src, title, price, address, specs } = slide;
 
   return (
     <div className="perspective-distant transform-3d">
       <li
         ref={slideRef}
-        className="relative z-10 mx-[4vmin] flex h-[70vmin] w-[70vmin] flex-1 flex-col items-center justify-center text-center text-white opacity-100 transition-all duration-300 ease-in-out"
+        className="group relative z-10 mx-[4vmin] flex h-[60vmin] w-[60vmin] flex-1 flex-col items-center justify-center text-center text-white opacity-100 transition-all duration-300 ease-in-out md:h-[40vmin] md:w-[40vmin]"
         onClick={() => handleSlideClick(index)}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
@@ -83,7 +91,7 @@ const Slide = ({ slide, index, current, handleSlideClick }: SlideProps) => {
         }}
       >
         <div
-          className="absolute top-0 left-0 h-full w-full overflow-hidden rounded-[1%] bg-[#1D1F2F] transition-all duration-150 ease-out"
+          className="absolute top-0 left-0 h-full w-full overflow-hidden rounded-2xl bg-[#1D1F2F] shadow-2xl transition-all duration-150 ease-out"
           style={{
             transform:
               current === index
@@ -103,24 +111,49 @@ const Slide = ({ slide, index, current, handleSlideClick }: SlideProps) => {
             loading="eager"
             decoding="sync"
           />
-          {current === index && (
-            <div className="absolute inset-0 bg-black/30 transition-all duration-1000" />
-          )}
+
+          {/* Default Overlay (Gradient) */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-40" />
+
+          {/* Hover Details Overlay */}
+          <div className="absolute inset-0 flex flex-col justify-end bg-black/40 p-6 opacity-0 backdrop-blur-[2px] transition-opacity duration-300 group-hover:opacity-100">
+            <div className="translate-y-4 transform text-left transition-transform duration-300 group-hover:translate-y-0">
+              <span className="mb-2 inline-block rounded bg-white/20 px-2 py-1 text-xs font-bold tracking-wider text-white uppercase backdrop-blur-md">
+                Featured
+              </span>
+              <h3 className="mb-1 text-2xl font-bold text-white">{price}</h3>
+              <div className="mb-3 flex items-center gap-1 text-sm text-gray-200">
+                <MapPin className="h-3 w-3" />
+                <span className="truncate">{address}</span>
+              </div>
+
+              <div className="flex items-center justify-between border-t border-white/20 pt-3 text-sm font-medium text-white">
+                <div className="flex items-center gap-1.5">
+                  <Bed className="h-4 w-4 text-white/80" />
+                  <span>{specs.beds} Beds</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Bath className="h-4 w-4 text-white/80" />
+                  <span>{specs.baths} Baths</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Square className="h-4 w-4 text-white/80" />
+                  <span>{specs.sqft} sqft</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
+        {/* Title always visible if not hovered? Or maybe just hide it on hover */}
         <article
-          className={`relative p-[4vmin] transition-opacity duration-1000 ease-in-out ${
+          className={`absolute top-6 left-6 text-left transition-opacity duration-300 ease-in-out ${
             current === index ? "visible opacity-100" : "invisible opacity-0"
-          }`}
+          } group-hover:opacity-0`}
         >
-          <h2 className="relative text-lg font-semibold md:text-2xl lg:text-4xl">
+          <h2 className="text-xl font-bold drop-shadow-md md:text-2xl lg:text-3xl">
             {title}
           </h2>
-          <div className="flex justify-center">
-            {/* <button className="mx-auto mt-6 flex h-12 w-fit items-center justify-center rounded-2xl border border-transparent bg-white px-4 py-2 text-xs text-black shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)] transition duration-200 hover:shadow-lg sm:text-sm">
-              {button}
-            </button> */}
-          </div>
         </article>
       </li>
     </div>
@@ -140,13 +173,13 @@ const CarouselControl = ({
 }: CarouselControlProps) => {
   return (
     <button
-      className={`mx-2 flex h-10 w-10 items-center justify-center rounded-full border-3 border-transparent bg-neutral-200 transition duration-200 hover:-translate-y-0.5 focus:border-[#6D64F7] focus:outline-none active:translate-y-0.5 dark:bg-neutral-800 ${
+      className={`mx-2 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/50 backdrop-blur-md transition duration-200 hover:bg-white hover:text-black focus:outline-none ${
         type === "previous" ? "rotate-180" : ""
       }`}
       title={title}
       onClick={handleClick}
     >
-      <ArrowRight className="text-neutral-600 dark:text-neutral-200" />
+      <ArrowRight className="h-5 w-5" />
     </button>
   );
 };
@@ -178,27 +211,29 @@ export default function Carousel({ slides }: CarouselProps) {
 
   return (
     <div
-      className="relative mx-auto h-[70vmin] w-[70vmin] overflow-hidden"
+      className="relative mx-auto h-[60vmin] w-[60vmin] overflow-visible md:h-[40vmin] md:w-[40vmin]" // Overflow visible to allow tilt effect to not be clipped? Actually overflow-hidden is usually needed for the track.
       aria-labelledby={`carousel-heading-${id}`}
     >
-      <ul
-        className="absolute mx-[-4vmin] flex transition-transform duration-1000 ease-in-out"
-        style={{
-          transform: `translateX(-${current * (100 / slides.length)}%)`,
-        }}
-      >
-        {slides.map((slide, index) => (
-          <Slide
-            key={index}
-            slide={slide}
-            index={index}
-            current={current}
-            handleSlideClick={handleSlideClick}
-          />
-        ))}
-      </ul>
+      <div className="absolute inset-0 overflow-hidden">
+        <ul
+          className="absolute mx-[-4vmin] flex transition-transform duration-1000 ease-in-out"
+          style={{
+            transform: `translateX(-${current * (100 / slides.length)}%)`,
+          }}
+        >
+          {slides.map((slide, index) => (
+            <Slide
+              key={index}
+              slide={slide}
+              index={index}
+              current={current}
+              handleSlideClick={handleSlideClick}
+            />
+          ))}
+        </ul>
+      </div>
 
-      <div className="absolute top-[calc(100%-4rem)] z-20 flex w-full justify-center">
+      <div className="absolute -bottom-16 z-20 flex w-full justify-center">
         <CarouselControl
           type="previous"
           title="Go to previous slide"

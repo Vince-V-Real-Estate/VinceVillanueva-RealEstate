@@ -1,6 +1,6 @@
 import { getSession, type Session } from "@/server/better-auth/server";
 import { createLogger } from "@/lib/logger";
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import type { ZodError, ZodSchema } from "zod";
 
 const log = createLogger("api");
@@ -65,6 +65,14 @@ type ApiHandler = (
 ) => Promise<HandlerResult>;
 
 /**
+ * Next.js App Router context type for dynamic routes.
+ * In Next.js 15, params is always a Promise.
+ */
+type NextRouteContext = {
+  params: Promise<Record<string, string>>;
+};
+
+/**
  * Higher-order function that wraps API route handlers with common boilerplate.
  *
  * Provides:
@@ -104,17 +112,18 @@ type ApiHandler = (
  * );
  * ```
  */
-export function withApiHandler(config: ApiHandlerConfig, handler: ApiHandler) {
+export function withApiHandler(
+  config: ApiHandlerConfig,
+  handler: ApiHandler,
+): (request: NextRequest, context: NextRouteContext) => Promise<NextResponse> {
   const requireAuth = config.requireAuth ?? true;
 
   return async (
-    request: Request,
-    context?: {
-      params?: Promise<Record<string, string>> | Record<string, string>;
-    },
+    request: NextRequest,
+    context: NextRouteContext,
   ): Promise<NextResponse> => {
-    /** Resolve Next.js dynamic route params (may be a Promise in App Router) */
-    const resolvedParams = await Promise.resolve(context?.params ?? {});
+    /** Resolve Next.js dynamic route params (always a Promise in Next.js 15) */
+    const resolvedParams = await context.params;
 
     try {
       // ── Step 1: Authenticate if required ──────────────────────────────
