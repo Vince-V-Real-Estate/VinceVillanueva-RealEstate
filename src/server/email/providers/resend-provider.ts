@@ -35,8 +35,7 @@ export class ResendProvider implements EmailProvider {
       log.info("Email sent via Resend", { messageId: data?.id });
       return { success: true, messageId: data?.id };
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Unknown Resend error";
+      const errorMessage = err instanceof Error ? err.message : String(err);
       log.error("Resend send failure", err);
       return { success: false, error: errorMessage };
     }
