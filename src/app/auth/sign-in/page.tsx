@@ -90,9 +90,6 @@ export default function SignInPage() {
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? "Signing in..." : "Sign In"}
             </Button>
-            <Button variant="outline" className="w-full" type="button">
-              Login with Google
-            </Button>
           </form>
         </CardContent>
         <CardFooter className="flex flex-col gap-2">

@@ -6,7 +6,7 @@ import {
 import { Lead } from "@/utils/leads/lead";
 import { LEAD_SOURCES, type LeadSource } from "@/utils/leads/types";
 import { createLogger } from "@/lib/logger";
-import { env } from "@/env";
+import { getEmailService } from "@/server/email";
 import { db } from "@/server/db";
 import { user, lead } from "@/server/db/schema";
 import { eq, desc, sql, type InferSelectModel } from "drizzle-orm";
@@ -21,11 +21,6 @@ const log = createLogger("leads-api");
  * Adjust based on your actual database limits
  */
 const ESTIMATED_MAX_ROWS = 10000;
-
-/**
- * Zapier webhook URL for spreadsheet integration
- */
-const ZAPIER_WEBHOOK_URL = env.ZAPIER_WEBHOOK_URL;
 
 /**
  * Zod schema for lead submission validation
@@ -55,80 +50,8 @@ const createLeadSchema = z.object({
 });
 
 /**
- * Gets a human-readable label for a lead source.
- */
-function getSourceLabel(source: string): string {
-  const labels: Record<string, string> = {
-    listings: "Get New Listings",
-    valuation: "Home Valuation Request",
-    call: "Schedule a Call",
-    newsletter: "Newsletter Subscription",
-  };
-  return labels[source] ?? source;
-}
-
-/**
- * Formats a date to MM-DD-YYYY format.
- */
-function formatDate(date: Date): string {
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const year = date.getFullYear();
-  return `${month}-${day}-${year}`;
-}
-
-/**
- * Sends lead data to Zapier webhook for spreadsheet integration.
- */
-async function sendToZapier(data: {
-  fullName: string;
-  email: string;
-  phone?: string;
-  address?: string;
-  message?: string;
-  source: string;
-  createdAt: Date;
-}): Promise<boolean> {
-  // Skip if webhook URL not configured
-  if (!ZAPIER_WEBHOOK_URL) {
-    log.warn("Zapier webhook URL not configured, skipping");
-    return false;
-  }
-
-  try {
-    const response = await fetch(ZAPIER_WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        fullName: data.fullName,
-        email: data.email,
-        phone: data.phone ?? "",
-        address: data.address ?? "",
-        message: data.message ?? "",
-        source: getSourceLabel(data.source),
-        createdAt: formatDate(data.createdAt),
-      }),
-    });
-
-    if (!response.ok) {
-      log.error("Zapier webhook failed", {
-        status: response.status,
-        statusText: response.statusText,
-      });
-      return false;
-    }
-
-    log.info("Lead sent to Zapier", { email: data.email, source: data.source });
-    return true;
-  } catch (error) {
-    log.error("Failed to send lead to Zapier", error);
-    return false;
-  }
-}
-
-/**
  * POST /api/leads
- * Public endpoint - creates a new lead and sends to Zapier webhook
+ * Public endpoint - creates a new lead
  */
 export const POST = withApiHandler(
   { endpoint: "/api/leads", method: "POST", requireAuth: false },
@@ -166,18 +89,14 @@ export const POST = withApiHandler(
     const savedLead = await leadInstance.save();
     log.info("Lead created", { id: savedLead.id, source });
 
-    // Send to Zapier webhook (non-blocking - don't fail if webhook fails)
-    sendToZapier({
-      fullName,
-      email,
-      phone: phone === "" ? undefined : phone,
-      address: address === "" ? undefined : address,
-      message: message === "" ? undefined : message,
-      source,
-      createdAt: new Date(),
-    }).catch((error) => {
-      log.error("Failed to send lead to Zapier webhook", error);
-    });
+    // Send email notification to the realtor (fire-and-forget: a failed
+    // email should never prevent the lead from being saved).
+    const emailService = getEmailService();
+    emailService
+      .sendLeadNotification(leadInstance.toEmailData())
+      .catch((err) => {
+        log.error("Unexpected email notification error", err);
+      });
 
     return {
       data: {
