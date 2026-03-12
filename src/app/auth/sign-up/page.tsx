@@ -119,9 +119,6 @@ export default function SignUpPage() {
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? "Creating account..." : "Create an account"}
             </Button>
-            <Button variant="outline" className="w-full" type="button">
-              Sign up with Google
-            </Button>
           </form>
         </CardContent>
         <CardFooter className="flex flex-col gap-2">
