@@ -1,6 +1,5 @@
 import dynamic from "next/dynamic";
 import { MortgageCTA } from "@/components/sections/MortgageCTA";
-// import { Neighborhoods } from "@/components/sections/Neighborhoods";
 import { HomeValuation } from "@/components/sections/HomeValuation";
 import { ListingsCTA } from "@/components/sections/ListingsCTA";
 import { CallCTA } from "@/components/sections/CallCTA";
@@ -10,17 +9,16 @@ const Hero = dynamic(
   {
     ssr: true,
   },
-);
+)
 
 export default function HomePage() {
   return (
     <>
       <Hero />
       <HomeValuation />
-      {/* <Neighborhoods /> */}
-      <MortgageCTA />
       <ListingsCTA />
-      <CallCTA />
+      <MortgageCTA />
+      <CallCTA/>
     </>
   );
 }
