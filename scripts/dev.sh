@@ -10,7 +10,7 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 cd "$PROJECT_ROOT"
 
 # Load environment variables
-if [ -f .env ]; then
+if [[ -f .env ]]; then
   set -a
   source .env
   set +a
@@ -45,7 +45,7 @@ is_production_db() {
 
 echo "Checking database configuration..."
 
-if [ -z "$DATABASE_URL" ]; then
+if [[ -z "$DATABASE_URL" ]]; then
   echo "Error: DATABASE_URL is not set in .env"
   exit 1
 fi
