@@ -7,6 +7,21 @@ import { createLogger } from "@/lib/logger";
 const f = createUploadthing();
 const log = createLogger("uploadthing");
 
+const adminOnlyMiddleware = async () => {
+  const session = await getSession();
+
+  if (!session?.user) {
+    throw new UploadThingError("Unauthorized");
+  }
+
+  const user = session.user as { id: string; role?: unknown };
+  if (user.role !== "admin") {
+    throw new UploadThingError("Forbidden: admin access required");
+  }
+
+  return { userId: user.id };
+};
+
 /**
  * UploadThing file router.
  *
@@ -25,20 +40,7 @@ export const uploadRouter = {
       maxFileCount: 10,
     },
   })
-    .middleware(async () => {
-      const session = await getSession();
-
-      if (!session?.user) {
-        throw new UploadThingError("Unauthorized");
-      }
-
-      const role = (session.user as Record<string, unknown>).role;
-      if (role !== "admin") {
-        throw new UploadThingError("Forbidden: admin access required");
-      }
-
-      return { userId: session.user.id };
-    })
+    .middleware(adminOnlyMiddleware)
     .onUploadComplete(async ({ metadata, file }) => {
       log.info("Featured listing image uploaded", {
         userId: metadata.userId,
@@ -59,20 +61,7 @@ export const uploadRouter = {
       maxFileCount: 5,
     },
   })
-    .middleware(async () => {
-      const session = await getSession();
-
-      if (!session?.user) {
-        throw new UploadThingError("Unauthorized");
-      }
-
-      const role = (session.user as Record<string, unknown>).role;
-      if (role !== "admin") {
-        throw new UploadThingError("Forbidden: admin access required");
-      }
-
-      return { userId: session.user.id };
-    })
+    .middleware(adminOnlyMiddleware)
     .onUploadComplete(async ({ metadata, file }) => {
       log.info("Listing document uploaded", {
         userId: metadata.userId,
