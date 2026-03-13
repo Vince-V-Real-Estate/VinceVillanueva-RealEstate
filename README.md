@@ -89,7 +89,3 @@ src/
 │   └── db/               # Database schemas and connection
 └── utils/                 # Utility functions
 ```
-
-## License
-
-MIT
