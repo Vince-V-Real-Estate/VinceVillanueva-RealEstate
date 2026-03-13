@@ -24,6 +24,7 @@ export const env = createEnv({
     RESEND_API_KEY: z.string().min(1),
     RESEND_FROM: z.string().min(1),
     RESEND_TO: z.string().email(),
+    UPLOADTHING_TOKEN: z.string().min(1),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -62,6 +63,7 @@ export const env = createEnv({
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     RESEND_FROM: process.env.RESEND_FROM,
     RESEND_TO: process.env.RESEND_TO,
+    UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
     NODE_ENV: process.env.NODE_ENV,
   },
   /**
