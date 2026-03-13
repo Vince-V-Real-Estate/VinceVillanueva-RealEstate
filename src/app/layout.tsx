@@ -3,7 +3,10 @@ import "@/styles/globals.css";
 import { type Metadata } from "next";
 import { Geist, Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
+import { extractRouterConfig } from "uploadthing/server";
 
+import { uploadRouter } from "@/app/api/uploadthing/core";
 import { NavigationBar } from "@/components/layout/NavigationBar";
 import { Footer } from "@/components/layout/Footer";
 
@@ -27,6 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={cn(geist.variable, "font-sans", inter.variable)}>
       <body className="flex min-h-screen flex-col">
+        <NextSSRPlugin routerConfig={extractRouterConfig(uploadRouter)} />
         <NavigationBar />
         <main className="flex-1">{children}</main>
         <Footer />
