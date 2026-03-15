@@ -9,6 +9,7 @@ import {
   listFeaturedListings,
   parseFeaturedListingsLimit,
 } from "@/server/featured-listings/service";
+import { deleteUploadThingFileByUrl } from "@/server/uploadthing/cleanup";
 import {
   parseAndValidateBody,
   withApiHandler,
@@ -84,10 +85,26 @@ export const POST = withApiHandler(
       );
     }
 
-    const listing = await createFeaturedListingForRealtor(
-      realtorId,
-      result.data,
-    );
+    let listing;
+
+    try {
+      listing = await createFeaturedListingForRealtor(realtorId, result.data);
+    } catch (error) {
+      await deleteUploadThingFileByUrl(result.data.imageUrl, {
+        reason: "listing-create-failure",
+        realtorId,
+      });
+
+      log.error(
+        "Featured listing create failed; image cleanup attempted",
+        error,
+        {
+          realtorId,
+        },
+      );
+
+      throw error;
+    }
 
     log.info("Featured listing created", {
       listingId: listing.id,

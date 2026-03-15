@@ -97,9 +97,11 @@ export function extractUploadThingFileKey(fileUrl: string): string | null {
 /** Options for the delete operation, including context for logging */
 interface DeleteUploadThingFileByUrlOptions {
   /** Reason for deletion - used for logging and debugging */
-  reason: "listing-delete" | "listing-image-replace";
-  /** Associated listing ID for correlation in logs */
-  listingId: string;
+  reason: "listing-delete" | "listing-image-replace" | "listing-create-failure";
+  /** Associated listing ID for correlation in logs (when available) */
+  listingId?: string;
+  /** Realtor ID for correlation in logs (useful when listing ID does not exist yet) */
+  realtorId?: string;
 }
 
 /**
@@ -117,6 +119,7 @@ export async function deleteUploadThingFileByUrl(
   if (!fileKey) {
     log.warn("UploadThing cleanup skipped: unsupported file URL", {
       listingId: options.listingId,
+      realtorId: options.realtorId,
       reason: options.reason,
       fileUrl,
     });
@@ -128,6 +131,7 @@ export async function deleteUploadThingFileByUrl(
     if (!result.success || result.deletedCount < 1) {
       log.warn("UploadThing cleanup reported unsuccessful result", {
         listingId: options.listingId,
+        realtorId: options.realtorId,
         reason: options.reason,
         fileKey,
         result,

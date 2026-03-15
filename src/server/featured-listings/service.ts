@@ -105,11 +105,15 @@ export async function createFeaturedListingForRealtor(
   realtorId: string,
   input: FeaturedListingMutationInput,
 ): Promise<FeaturedListing> {
+  const now = new Date();
+
   const [createdListing] = await db
     .insert(featuredListing)
     .values({
       ...input,
       realtorId,
+      createdAt: now,
+      updatedAt: now,
     })
     .returning();
 
