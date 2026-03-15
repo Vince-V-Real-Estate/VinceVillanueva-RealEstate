@@ -87,7 +87,7 @@ const Slide = ({
     <div className="perspective-distant transform-3d">
       <li
         ref={slideRef}
-        className="group relative z-10 mx-[4vmin] flex h-[60vmin] w-[60vmin] flex-1 flex-col items-center justify-center text-center text-white opacity-100 transition-all duration-300 ease-in-out md:h-[40vmin] md:w-[40vmin]"
+        className="group relative z-10 mx-[4vmin] flex h-[85vw] w-[85vw] flex-1 flex-col items-center justify-center text-center text-white opacity-100 transition-all duration-300 ease-in-out sm:h-[60vmin] sm:w-[60vmin] md:h-[40vmin] md:w-[40vmin]"
         onClick={() => handleSlideClick(index)}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
@@ -285,7 +285,7 @@ export default function Carousel({ slides }: CarouselProps) {
 
   return (
     <div
-      className="relative mx-auto h-[60vmin] w-[60vmin] overflow-visible md:h-[40vmin] md:w-[40vmin]" // Overflow visible to allow tilt effect to not be clipped? Actually overflow-hidden is usually needed for the track.
+      className="relative mx-auto h-[85vw] w-[85vw] overflow-visible sm:h-[60vmin] sm:w-[60vmin] md:h-[40vmin] md:w-[40vmin]" // Overflow visible to allow tilt effect to not be clipped? Actually overflow-hidden is usually needed for the track.
       aria-labelledby={`carousel-heading-${id}`}
     >
       <div className="absolute inset-0 overflow-hidden">
