@@ -136,42 +136,46 @@ export async function updateFeaturedListingForRealtor(
   listing: FeaturedListing;
   previousImageUrl: string | null;
 } | null> {
-  const existingListing = await db.query.featuredListing.findFirst({
-    where: and(
-      eq(featuredListing.id, id),
-      eq(featuredListing.realtorId, realtorId),
-    ),
+  const listingOwnershipFilter = and(
+    eq(featuredListing.id, id),
+    eq(featuredListing.realtorId, realtorId),
+  );
+
+  return db.transaction(async (tx) => {
+    const [lockedListing] = await tx
+      .select()
+      .from(featuredListing)
+      .where(listingOwnershipFilter)
+      .for("update");
+
+    if (!lockedListing) {
+      return null;
+    }
+
+    const [updatedListing] = await tx
+      .update(featuredListing)
+      .set({
+        ...input,
+        updatedAt: new Date(),
+      })
+      .where(listingOwnershipFilter)
+      .returning();
+
+    if (!updatedListing) {
+      return null;
+    }
+
+    // Capture previous image URL under the same row lock to avoid stale cleanup targets.
+    const previousImageUrl =
+      input.imageUrl !== undefined && input.imageUrl !== lockedListing.imageUrl
+        ? lockedListing.imageUrl
+        : null;
+
+    return {
+      listing: toFeaturedListing(updatedListing),
+      previousImageUrl,
+    };
   });
-
-  if (!existingListing) {
-    return null;
-  }
-
-  const [updatedListing] = await db
-    .update(featuredListing)
-    .set({
-      ...input,
-      updatedAt: new Date(),
-    })
-    .where(
-      and(eq(featuredListing.id, id), eq(featuredListing.realtorId, realtorId)),
-    )
-    .returning();
-
-  if (!updatedListing) {
-    return null;
-  }
-
-  // Track previous image URL if a new one was provided and differs from existing
-  const previousImageUrl =
-    input.imageUrl !== undefined && input.imageUrl !== existingListing.imageUrl
-      ? existingListing.imageUrl
-      : null;
-
-  return {
-    listing: toFeaturedListing(updatedListing),
-    previousImageUrl,
-  };
 }
 
 /**
