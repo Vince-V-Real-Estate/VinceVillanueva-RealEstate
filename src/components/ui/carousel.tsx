@@ -206,11 +206,17 @@ interface CarouselProps {
 
 export default function Carousel({ slides }: CarouselProps) {
   const router = useRouter();
+  const id = useId();
   const [current, setCurrent] = useState(0);
   const [isTouchInput, setIsTouchInput] = useState(false);
   const [mobileDetailsIndex, setMobileDetailsIndex] = useState<number | null>(
     null,
   );
+
+  const normalizedCurrent =
+    slides.length > 0
+      ? ((current % slides.length) + slides.length) % slides.length
+      : 0;
 
   useEffect(() => {
     const media = window.matchMedia("(hover: none), (pointer: coarse)");
@@ -227,37 +233,19 @@ export default function Carousel({ slides }: CarouselProps) {
     };
   }, []);
 
-  useEffect(() => {
-    if (slides.length === 0) {
-      setCurrent(0);
-      setMobileDetailsIndex(null);
-      return;
-    }
-
-    if (current >= slides.length) {
-      setCurrent(0);
-    }
-  }, [current, slides.length]);
-
-  useEffect(() => {
-    if (!isTouchInput) {
-      setMobileDetailsIndex(null);
-    }
-  }, [isTouchInput]);
-
   if (slides.length === 0) {
     return null;
   }
 
   const handlePreviousClick = () => {
     setMobileDetailsIndex(null);
-    const previous = current - 1;
+    const previous = normalizedCurrent - 1;
     setCurrent(previous < 0 ? slides.length - 1 : previous);
   };
 
   const handleNextClick = () => {
     setMobileDetailsIndex(null);
-    const next = current + 1;
+    const next = normalizedCurrent + 1;
     setCurrent(next === slides.length ? 0 : next);
   };
 
@@ -268,7 +256,7 @@ export default function Carousel({ slides }: CarouselProps) {
     }
 
     if (isTouchInput) {
-      if (current !== index) {
+      if (normalizedCurrent !== index) {
         setCurrent(index);
         setMobileDetailsIndex(index);
         return;
@@ -285,7 +273,7 @@ export default function Carousel({ slides }: CarouselProps) {
       return;
     }
 
-    if (current !== index) {
+    if (normalizedCurrent !== index) {
       setCurrent(index);
       return;
     }
@@ -294,8 +282,6 @@ export default function Carousel({ slides }: CarouselProps) {
       router.push(selectedSlide.href);
     }
   };
-
-  const id = useId();
 
   return (
     <div
@@ -306,7 +292,7 @@ export default function Carousel({ slides }: CarouselProps) {
         <ul
           className="absolute mx-[-4vmin] flex transition-transform duration-1000 ease-in-out"
           style={{
-            transform: `translateX(-${current * (100 / slides.length)}%)`,
+            transform: `translateX(-${normalizedCurrent * (100 / slides.length)}%)`,
           }}
         >
           {slides.map((slide, index) => (
@@ -314,10 +300,10 @@ export default function Carousel({ slides }: CarouselProps) {
               key={slide.id ?? index}
               slide={slide}
               index={index}
-              current={current}
+              current={normalizedCurrent}
               showDetailsOverlay={
                 isTouchInput &&
-                current === index &&
+                normalizedCurrent === index &&
                 mobileDetailsIndex === index
               }
               handleSlideClick={handleSlideClick}

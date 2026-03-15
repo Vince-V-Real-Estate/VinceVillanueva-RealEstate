@@ -8,7 +8,6 @@ import { FeaturedListingsManager } from "@/components/dashboard/FeaturedListings
 import {
   NavigationMenu,
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";

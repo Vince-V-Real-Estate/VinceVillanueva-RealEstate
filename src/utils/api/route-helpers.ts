@@ -10,20 +10,27 @@ const log = createLogger("api");
  * Contains the authenticated session, resolved URL params,
  * and any additional validated resource IDs.
  */
-export interface RouteContext {
+export interface RouteContext<
+  TResourceIds extends Record<string, string> = Record<string, string>,
+> {
   /** The authenticated user session (only present when requireAuth is true) */
   session: Session | null;
   /** Resolved dynamic route params (e.g., { id: "abc123" }) */
   params: Record<string, string>;
-  /** Additional validated resource IDs extracted from params */
-  resourceIds?: Record<string, string>;
+  /**
+   * Validated resource IDs extracted from params.
+   * Empty object when `paramsSchema` is not configured.
+   */
+  resourceIds: TResourceIds;
 }
 
 /**
  * Configuration options for the API handler wrapper.
  * Controls authentication, role-based access, and logging context.
  */
-export interface ApiHandlerConfig {
+export interface ApiHandlerConfig<
+  TResourceIds extends Record<string, string> = Record<string, string>,
+> {
   /**
    * Endpoint path for logging and debugging.
    * Use bracket placeholders for dynamic segments (e.g., "/api/listings/[id]").
@@ -46,6 +53,12 @@ export interface ApiHandlerConfig {
    * Requires the user table to have a "role" column.
    */
   requireRole?: "client" | "admin";
+
+  /**
+   * Optional Zod schema for validating dynamic route params.
+   * Parsed values are exposed on `context.resourceIds`.
+   */
+  paramsSchema?: ZodSchema<TResourceIds>;
 }
 
 /**
@@ -59,9 +72,11 @@ type HandlerResult = NextResponse | { data: unknown; status?: number };
  * The handler function signature.
  * Receives the raw Request and the enriched RouteContext.
  */
-type ApiHandler = (
+type ApiHandler<
+  TResourceIds extends Record<string, string> = Record<string, string>,
+> = (
   request: Request,
-  context: RouteContext,
+  context: RouteContext<TResourceIds>,
 ) => Promise<HandlerResult>;
 
 /**
@@ -79,6 +94,7 @@ type NextRouteContext = {
  * - Session validation (opt-in via `requireAuth`, defaults to true)
  * - Role-based access control (opt-in via `requireRole`)
  * - Automatic param resolution from Next.js dynamic routes
+ * - Optional route param validation via `paramsSchema`
  * - Consistent error handling with structured JSON responses
  * - Simple return type: return `{ data }` and it gets JSON-serialized
  *
@@ -112,9 +128,11 @@ type NextRouteContext = {
  * );
  * ```
  */
-export function withApiHandler(
-  config: ApiHandlerConfig,
-  handler: ApiHandler,
+export function withApiHandler<
+  TResourceIds extends Record<string, string> = Record<string, string>,
+>(
+  config: ApiHandlerConfig<TResourceIds>,
+  handler: ApiHandler<TResourceIds>,
 ): (request: NextRequest, context: NextRouteContext) => Promise<NextResponse> {
   const requireAuth = config.requireAuth ?? true;
 
@@ -124,6 +142,7 @@ export function withApiHandler(
   ): Promise<NextResponse> => {
     /** Resolve Next.js dynamic route params (always a Promise in Next.js 15) */
     const resolvedParams = await context.params;
+    let resourceIds = {} as TResourceIds;
 
     try {
       // ── Step 1: Authenticate if required ──────────────────────────────
@@ -149,13 +168,31 @@ export function withApiHandler(
         }
       }
 
-      // ── Step 3: Execute the route handler ─────────────────────────────
+      // ── Step 3: Validate route params when schema is provided ─────────
+      if (config.paramsSchema) {
+        const paramsResult = config.paramsSchema.safeParse(resolvedParams);
+
+        if (!paramsResult.success) {
+          return NextResponse.json(
+            {
+              error: "Validation failed",
+              details: formatZodErrors(paramsResult.error),
+            },
+            { status: 400 },
+          );
+        }
+
+        resourceIds = paramsResult.data;
+      }
+
+      // ── Step 4: Execute the route handler ─────────────────────────────
       const result = await handler(request, {
         session,
         params: resolvedParams,
+        resourceIds,
       });
 
-      // ── Step 4: Normalize the response ────────────────────────────────
+      // ── Step 5: Normalize the response ────────────────────────────────
       if (result instanceof NextResponse) {
         return result;
       }

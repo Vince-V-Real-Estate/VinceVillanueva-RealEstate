@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 
 import {
   featuredListingIdSchema,
@@ -18,34 +19,9 @@ import {
 
 const log = createLogger("featured-listings-api");
 
-/**
- * Validates and parses a featured listing ID from a raw string.
- * Uses Zod schema to ensure the ID matches the expected format (UUID).
- * @param rawId - The raw ID string from the URL parameter
- * @returns The validated ID string, or null if validation fails
- */
-function parseFeaturedListingId(rawId: string): string | null {
-  const result = featuredListingIdSchema.safeParse(rawId);
-  if (!result.success) {
-    return null;
-  }
-
-  return result.data;
-}
-
-/**
- * Extracts and validates the featured listing ID from the URL parameters.
- * @param params - The Next.js route parameters object
- * @returns The validated listing ID, or null if missing or invalid
- */
-function getListingIdFromParams(params: Record<string, string>): string | null {
-  const rawId = params.id;
-  if (!rawId) {
-    return null;
-  }
-
-  return parseFeaturedListingId(rawId);
-}
+const featuredListingParamsSchema = z.object({
+  id: featuredListingIdSchema,
+});
 
 /**
  * GET handler for fetching a single featured listing by ID.
@@ -57,15 +33,10 @@ export const GET = withApiHandler(
     endpoint: "/api/featured-listings/[id]",
     method: "GET",
     requireAuth: false,
+    paramsSchema: featuredListingParamsSchema,
   },
-  async (_request, { params }) => {
-    const listingId = getListingIdFromParams(params);
-    if (!listingId) {
-      return NextResponse.json(
-        { error: "Invalid featured listing id" },
-        { status: 400 },
-      );
-    }
+  async (_request, { resourceIds }) => {
+    const listingId = resourceIds.id;
 
     const listing = await getFeaturedListingById(listingId);
     if (!listing) {
@@ -89,15 +60,10 @@ export const PATCH = withApiHandler(
     endpoint: "/api/featured-listings/[id]",
     method: "PATCH",
     requireRole: "admin",
+    paramsSchema: featuredListingParamsSchema,
   },
-  async (request, { params, session }) => {
-    const listingId = getListingIdFromParams(params);
-    if (!listingId) {
-      return NextResponse.json(
-        { error: "Invalid featured listing id" },
-        { status: 400 },
-      );
-    }
+  async (request, { resourceIds, session }) => {
+    const listingId = resourceIds.id;
 
     const result = await parseAndValidateBody(
       request,
@@ -148,15 +114,10 @@ export const DELETE = withApiHandler(
     endpoint: "/api/featured-listings/[id]",
     method: "DELETE",
     requireRole: "admin",
+    paramsSchema: featuredListingParamsSchema,
   },
-  async (_request, { params, session }) => {
-    const listingId = getListingIdFromParams(params);
-    if (!listingId) {
-      return NextResponse.json(
-        { error: "Invalid featured listing id" },
-        { status: 400 },
-      );
-    }
+  async (_request, { resourceIds, session }) => {
+    const listingId = resourceIds.id;
 
     const realtorId = session!.user.id;
     const deleteResult = await deleteFeaturedListingForRealtor(
