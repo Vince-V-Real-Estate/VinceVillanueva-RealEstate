@@ -9,8 +9,15 @@ import {
 import { db } from "@/server/db";
 import { featuredListing } from "@/server/db/schema";
 
+/** Type alias for the Drizzle model row type */
 type FeaturedListingRow = InferSelectModel<typeof featuredListing>;
 
+/**
+ * Converts a database row to a FeaturedListing API response object.
+ * Handles conversion of Date objects to ISO date strings.
+ * @param row - Raw database row from Drizzle
+ * @returns FeaturedListing object with string timestamps
+ */
 function toFeaturedListing(row: FeaturedListingRow): FeaturedListing {
   return {
     id: row.id,
@@ -31,6 +38,11 @@ interface ListFeaturedListingsOptions {
   realtorId?: string;
 }
 
+/**
+ * Retrieves featured listings from the database.
+ * @param options - Optional filters: limit (max results) and realtorId (filter by owner)
+ * @returns Array of featured listings ordered by creation date (newest first)
+ */
 export async function listFeaturedListings(
   options: ListFeaturedListingsOptions = {},
 ): Promise<FeaturedListing[]> {
@@ -45,6 +57,11 @@ export async function listFeaturedListings(
   return rows.map(toFeaturedListing);
 }
 
+/**
+ * Retrieves a single featured listing by its unique ID.
+ * @param id - The listing's unique identifier
+ * @returns The featured listing, or null if not found
+ */
 export async function getFeaturedListingById(
   id: string,
 ): Promise<FeaturedListing | null> {
@@ -59,6 +76,12 @@ export async function getFeaturedListingById(
   return toFeaturedListing(row);
 }
 
+/**
+ * Counts the total number of featured listings owned by a specific realtor.
+ * Used to enforce the maximum listings limit (5) before creation.
+ * @param realtorId - The realtor's user ID
+ * @returns Count of featured listings for this realtor
+ */
 export async function countFeaturedListingsForRealtor(
   realtorId: string,
 ): Promise<number> {
@@ -70,6 +93,14 @@ export async function countFeaturedListingsForRealtor(
   return Number(countResult[0]?.count ?? 0);
 }
 
+/**
+ * Creates a new featured listing in the database.
+ * Associates the listing with the given realtor's account.
+ * @param realtorId - The ID of the realtor creating the listing
+ * @param input - Listing data (title, imageUrl, price, address, bedrooms, bathrooms, squareFeet)
+ * @returns The newly created listing with generated ID and timestamps
+ * @throws Error if the insert operation fails to return a result
+ */
 export async function createFeaturedListingForRealtor(
   realtorId: string,
   input: FeaturedListingMutationInput,
@@ -89,6 +120,14 @@ export async function createFeaturedListingForRealtor(
   return toFeaturedListing(createdListing);
 }
 
+/**
+ * Updates an existing featured listing, ensuring the caller owns the listing.
+ * Returns the previous image URL if it was replaced, enabling cleanup.
+ * @param id - The listing's unique identifier
+ * @param realtorId - The ID of the realtor making the update (must own the listing)
+ * @param input - Partial listing data to update
+ * @returns Updated listing with previous image URL (if replaced), or null if not found/unauthorized
+ */
 export async function updateFeaturedListingForRealtor(
   id: string,
   realtorId: string,
@@ -123,6 +162,7 @@ export async function updateFeaturedListingForRealtor(
     return null;
   }
 
+  // Track previous image URL if a new one was provided and differs from existing
   const previousImageUrl =
     input.imageUrl !== undefined && input.imageUrl !== existingListing.imageUrl
       ? existingListing.imageUrl
@@ -134,6 +174,13 @@ export async function updateFeaturedListingForRealtor(
   };
 }
 
+/**
+ * Deletes a featured listing from the database, verifying ownership.
+ * Returns the deleted status and the associated image URL for cleanup.
+ * @param id - The listing's unique identifier
+ * @param realtorId - The ID of the realtor deleting the listing (must own it)
+ * @returns Object with deleted status and the image URL (if any) for cleanup
+ */
 export async function deleteFeaturedListingForRealtor(
   id: string,
   realtorId: string,
@@ -153,6 +200,11 @@ export async function deleteFeaturedListingForRealtor(
   };
 }
 
+/**
+ * Parses and validates the "limit" query parameter for listing endpoints.
+ * @param limitParam - The raw string value from the URL query parameter
+ * @returns Valid integer limit (1-5), or null if invalid/missing (defaults handled by caller)
+ */
 export function parseFeaturedListingsLimit(
   limitParam: string | null,
 ): number | null {
@@ -173,4 +225,5 @@ export function parseFeaturedListingsLimit(
   return parsedLimit;
 }
 
+/** Alias for parseFeaturedListingsLimit - may be used for consistency with other modules */
 export const getFeaturedListingsLimit = parseFeaturedListingsLimit;

@@ -18,6 +18,12 @@ import {
 
 const log = createLogger("featured-listings-api");
 
+/**
+ * Validates and parses a featured listing ID from a raw string.
+ * Uses Zod schema to ensure the ID matches the expected format (UUID).
+ * @param rawId - The raw ID string from the URL parameter
+ * @returns The validated ID string, or null if validation fails
+ */
 function parseFeaturedListingId(rawId: string): string | null {
   const result = featuredListingIdSchema.safeParse(rawId);
   if (!result.success) {
@@ -27,6 +33,11 @@ function parseFeaturedListingId(rawId: string): string | null {
   return result.data;
 }
 
+/**
+ * Extracts and validates the featured listing ID from the URL parameters.
+ * @param params - The Next.js route parameters object
+ * @returns The validated listing ID, or null if missing or invalid
+ */
 function getListingIdFromParams(params: Record<string, string>): string | null {
   const rawId = params.id;
   if (!rawId) {
@@ -36,6 +47,11 @@ function getListingIdFromParams(params: Record<string, string>): string | null {
   return parseFeaturedListingId(rawId);
 }
 
+/**
+ * GET handler for fetching a single featured listing by ID.
+ * Public endpoint - no authentication required.
+ * Returns the listing details or 404 if not found.
+ */
 export const GET = withApiHandler(
   {
     endpoint: "/api/featured-listings/[id]",
@@ -63,6 +79,11 @@ export const GET = withApiHandler(
   },
 );
 
+/**
+ * PATCH handler for updating a featured listing.
+ * Requires admin role. Validates input, updates the listing in the database,
+ * and cleans up the previous image file if a new one was uploaded.
+ */
 export const PATCH = withApiHandler(
   {
     endpoint: "/api/featured-listings/[id]",
@@ -100,6 +121,7 @@ export const PATCH = withApiHandler(
       );
     }
 
+    // Clean up old image if a new one was uploaded to replace it
     if (updateResult.previousImageUrl) {
       await deleteUploadThingFileByUrl(updateResult.previousImageUrl, {
         reason: "listing-image-replace",
@@ -116,6 +138,11 @@ export const PATCH = withApiHandler(
   },
 );
 
+/**
+ * DELETE handler for removing a featured listing.
+ * Requires admin role. Deletes the listing from the database and
+ * removes the associated image file from UploadThing storage.
+ */
 export const DELETE = withApiHandler(
   {
     endpoint: "/api/featured-listings/[id]",
@@ -143,6 +170,7 @@ export const DELETE = withApiHandler(
       );
     }
 
+    // Clean up the image file from UploadThing when listing is deleted
     if (deleteResult.imageUrl) {
       await deleteUploadThingFileByUrl(deleteResult.imageUrl, {
         reason: "listing-delete",

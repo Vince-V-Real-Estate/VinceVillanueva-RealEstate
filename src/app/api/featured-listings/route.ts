@@ -16,6 +16,12 @@ import {
 
 const log = createLogger("featured-listings-api");
 
+/**
+ * GET handler for listing all featured listings.
+ * Public endpoint - no authentication required.
+ * Supports optional "limit" query parameter (1-5, defaults to 5).
+ * Returns listings ordered by creation date (newest first).
+ */
 export const GET = withApiHandler(
   {
     endpoint: "/api/featured-listings",
@@ -47,6 +53,11 @@ export const GET = withApiHandler(
   },
 );
 
+/**
+ * POST handler for creating a new featured listing.
+ * Requires admin role. Enforces maximum listing limit (5) per realtor.
+ * Validates input against Zod schema before insertion.
+ */
 export const POST = withApiHandler(
   {
     endpoint: "/api/featured-listings",

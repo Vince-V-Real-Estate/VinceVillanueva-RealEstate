@@ -5,6 +5,12 @@ import {
   type FeaturedListing,
 } from "@/lib/featured-listings/types";
 
+/**
+ * Converts a FeaturedListing domain object into a SlideData object for use in the homepage carousel.
+ * Handles formatting of price and building of the detail page URL.
+ * @param listing - The featured listing data from the API/database
+ * @returns SlideData formatted for the carousel component
+ */
 export function mapFeaturedListingToCarouselSlide(
   listing: FeaturedListing,
 ): SlideData {
