@@ -2,27 +2,49 @@
 
 import { UploadButton, UploadDropzone } from "@/lib/uploadthing";
 import { type UploadRouter } from "@/app/api/uploadthing/core";
+import { createLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
+
+const log = createLogger("file-upload");
 
 interface FileUploadProps {
   endpoint: keyof UploadRouter;
-  onUploadComplete: (res: { url: string; name: string }[]) => void;
+  onUploadComplete: (res: UploadedUploadThingFile[]) => void;
   onUploadError?: (error: Error) => void;
+  onUploadBegin?: (fileName: string) => void;
   className?: string;
+  disabled?: boolean;
+  uploadLabel?: string;
+  uploadHelpText?: string;
+  mobileButtonText?: string;
+}
+
+export interface UploadedUploadThingFile {
+  name: string;
+  url?: string;
+  ufsUrl?: string;
+  serverData?: { url?: string } | null;
 }
 
 export function FileUpload({
   endpoint,
   onUploadComplete,
   onUploadError,
+  onUploadBegin,
   className,
+  disabled,
+  uploadLabel,
+  uploadHelpText,
+  mobileButtonText,
 }: FileUploadProps) {
   return (
-    <div className={cn("w-full", className)}>
+    <div className={cn("w-full overflow-hidden", className)}>
       {/* Desktop View: Dropzone */}
       <div className="hidden md:block">
         <UploadDropzone
           endpoint={endpoint}
+          disabled={disabled}
+          onUploadBegin={onUploadBegin}
           onClientUploadComplete={(res) => {
             if (res) {
               onUploadComplete(res);
@@ -32,7 +54,7 @@ export function FileUpload({
             if (onUploadError) {
               onUploadError(error);
             } else {
-              console.error(error);
+              log.error("Upload failed", error);
               alert(`Upload failed: ${error.message}`);
             }
           }}
@@ -62,6 +84,8 @@ export function FileUpload({
                 <path d="m16 16-4-4-4 4" />
               </svg>
             ),
+            ...(uploadLabel ? { label: uploadLabel } : {}),
+            ...(uploadHelpText ? { allowedContent: uploadHelpText } : {}),
           }}
         />
       </div>
@@ -70,6 +94,8 @@ export function FileUpload({
       <div className="block md:hidden">
         <UploadButton
           endpoint={endpoint}
+          disabled={disabled}
+          onUploadBegin={onUploadBegin}
           onClientUploadComplete={(res) => {
             if (res) {
               onUploadComplete(res);
@@ -79,7 +105,7 @@ export function FileUpload({
             if (onUploadError) {
               onUploadError(error);
             } else {
-              console.error(error);
+              log.error("Upload failed", error);
               alert(`Upload failed: ${error.message}`);
             }
           }}
@@ -88,6 +114,10 @@ export function FileUpload({
               "w-full bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-3 rounded-md text-sm font-medium transition-colors shadow-sm",
             container: "w-full flex flex-col items-center gap-2",
             allowedContent: "text-muted-foreground text-xs text-center",
+          }}
+          content={{
+            ...(mobileButtonText ? { button: mobileButtonText } : {}),
+            ...(uploadHelpText ? { allowedContent: uploadHelpText } : {}),
           }}
         />
       </div>
