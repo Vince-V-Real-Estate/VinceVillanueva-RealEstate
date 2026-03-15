@@ -1,11 +1,12 @@
 "use client";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { ArrowRight, Bed, Bath, Square, MapPin } from "lucide-react";
 import { useState, useRef, useId, useEffect } from "react";
 
 export interface SlideData {
+  id?: string;
   title: string;
-  button: string;
   src: string;
   price: string;
   address: string;
@@ -14,6 +15,8 @@ export interface SlideData {
     baths: number;
     sqft: number;
   };
+  href?: string;
+  button?: string;
   mlsId?: string;
 }
 
@@ -21,10 +24,17 @@ interface SlideProps {
   slide: SlideData;
   index: number;
   current: number;
+  showDetailsOverlay: boolean;
   handleSlideClick: (index: number) => void;
 }
 
-const Slide = ({ slide, index, current, handleSlideClick }: SlideProps) => {
+const Slide = ({
+  slide,
+  index,
+  current,
+  showDetailsOverlay,
+  handleSlideClick,
+}: SlideProps) => {
   const slideRef = useRef<HTMLLIElement>(null);
 
   const xRef = useRef(0);
@@ -116,7 +126,13 @@ const Slide = ({ slide, index, current, handleSlideClick }: SlideProps) => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-40" />
 
           {/* Hover Details Overlay */}
-          <div className="absolute inset-0 flex flex-col justify-end bg-black/40 p-6 opacity-0 backdrop-blur-[2px] transition-opacity duration-300 group-hover:opacity-100">
+          <div
+            className={`absolute inset-0 flex flex-col justify-end bg-black/40 p-6 backdrop-blur-[2px] transition-opacity duration-300 ${
+              showDetailsOverlay
+                ? "opacity-100"
+                : "opacity-0 group-hover:opacity-100"
+            }`}
+          >
             <div className="translate-y-4 transform text-left transition-transform duration-300 group-hover:translate-y-0">
               <span className="mb-2 inline-block rounded bg-white/20 px-2 py-1 text-xs font-bold tracking-wider text-white uppercase backdrop-blur-md">
                 Featured
@@ -149,7 +165,7 @@ const Slide = ({ slide, index, current, handleSlideClick }: SlideProps) => {
         <article
           className={`absolute top-6 left-6 text-left transition-opacity duration-300 ease-in-out ${
             current === index ? "visible opacity-100" : "invisible opacity-0"
-          } group-hover:opacity-0`}
+          } ${showDetailsOverlay ? "opacity-0" : "group-hover:opacity-0"}`}
         >
           <h2 className="text-xl font-bold drop-shadow-md md:text-2xl lg:text-3xl">
             {title}
@@ -189,21 +205,93 @@ interface CarouselProps {
 }
 
 export default function Carousel({ slides }: CarouselProps) {
+  const router = useRouter();
   const [current, setCurrent] = useState(0);
+  const [isTouchInput, setIsTouchInput] = useState(false);
+  const [mobileDetailsIndex, setMobileDetailsIndex] = useState<number | null>(
+    null,
+  );
+
+  useEffect(() => {
+    const media = window.matchMedia("(hover: none), (pointer: coarse)");
+
+    const updateTouchInput = () => {
+      setIsTouchInput(media.matches);
+    };
+
+    updateTouchInput();
+    media.addEventListener("change", updateTouchInput);
+
+    return () => {
+      media.removeEventListener("change", updateTouchInput);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (slides.length === 0) {
+      setCurrent(0);
+      setMobileDetailsIndex(null);
+      return;
+    }
+
+    if (current >= slides.length) {
+      setCurrent(0);
+    }
+  }, [current, slides.length]);
+
+  useEffect(() => {
+    if (!isTouchInput) {
+      setMobileDetailsIndex(null);
+    }
+  }, [isTouchInput]);
+
+  if (slides.length === 0) {
+    return null;
+  }
 
   const handlePreviousClick = () => {
+    setMobileDetailsIndex(null);
     const previous = current - 1;
     setCurrent(previous < 0 ? slides.length - 1 : previous);
   };
 
   const handleNextClick = () => {
+    setMobileDetailsIndex(null);
     const next = current + 1;
     setCurrent(next === slides.length ? 0 : next);
   };
 
   const handleSlideClick = (index: number) => {
+    const selectedSlide = slides[index];
+    if (!selectedSlide) {
+      return;
+    }
+
+    if (isTouchInput) {
+      if (current !== index) {
+        setCurrent(index);
+        setMobileDetailsIndex(index);
+        return;
+      }
+
+      if (mobileDetailsIndex !== index) {
+        setMobileDetailsIndex(index);
+        return;
+      }
+
+      if (selectedSlide.href) {
+        router.push(selectedSlide.href);
+      }
+      return;
+    }
+
     if (current !== index) {
       setCurrent(index);
+      return;
+    }
+
+    if (selectedSlide.href) {
+      router.push(selectedSlide.href);
     }
   };
 
@@ -223,10 +311,15 @@ export default function Carousel({ slides }: CarouselProps) {
         >
           {slides.map((slide, index) => (
             <Slide
-              key={index}
+              key={slide.id ?? index}
               slide={slide}
               index={index}
               current={current}
+              showDetailsOverlay={
+                isTouchInput &&
+                current === index &&
+                mobileDetailsIndex === index
+              }
               handleSlideClick={handleSlideClick}
             />
           ))}
