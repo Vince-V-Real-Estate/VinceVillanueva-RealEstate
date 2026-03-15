@@ -7,16 +7,23 @@ import { createLogger } from "@/lib/logger";
 const f = createUploadthing();
 const log = createLogger("uploadthing");
 
+function createUploadThingForbiddenError(message: string): Error {
+  return new UploadThingError({
+    code: "FORBIDDEN",
+    message,
+  }) as unknown as Error;
+}
+
 const adminOnlyMiddleware = async () => {
   const session = await getSession();
 
   if (!session?.user) {
-    throw new UploadThingError("Unauthorized");
+    throw createUploadThingForbiddenError("Unauthorized");
   }
 
   const user = session.user as { id: string; role?: unknown };
   if (user.role !== "admin") {
-    throw new UploadThingError("Forbidden: admin access required");
+    throw createUploadThingForbiddenError("Forbidden: admin access required");
   }
 
   return { userId: user.id };
@@ -32,12 +39,12 @@ const adminOnlyMiddleware = async () => {
 export const uploadRouter = {
   /**
    * Featured listing images (hero / gallery).
-   * Admin-only. Accepts jpg, png, webp up to 8 MB, max 10 files per request.
+   * Admin-only. Accepts jpg, png, webp up to 8 MB, one file per request.
    */
   featuredListingImage: f({
     image: {
       maxFileSize: "8MB",
-      maxFileCount: 10,
+      maxFileCount: 1,
     },
   })
     .middleware(adminOnlyMiddleware)

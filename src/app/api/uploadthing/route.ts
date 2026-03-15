@@ -11,15 +11,24 @@ const { GET: utGet, POST: utPost } = createRouteHandler({
   router: uploadRouter,
 });
 
+function isUploadThingHookRequest(request: NextRequest): boolean {
+  const hook = request.headers.get("uploadthing-hook");
+  return hook === "callback" || hook === "error";
+}
+
 /**
- * Gate every UploadThing request behind an authenticated session.
- * Individual file-route middleware still enforces role-level checks,
- * but this prevents unauthenticated traffic from reaching UploadThing at all.
+ * Gate client-initiated UploadThing requests behind an authenticated session.
+ * Server-to-server UploadThing hook callbacks are exempt because they do not
+ * include browser cookies; signature verification is handled by UploadThing.
  */
 async function requireSession(
   request: NextRequest,
   handler: (req: NextRequest) => Promise<Response>,
 ): Promise<Response> {
+  if (isUploadThingHookRequest(request)) {
+    return handler(request);
+  }
+
   const session = await getSession();
 
   if (!session?.user) {

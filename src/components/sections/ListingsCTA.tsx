@@ -1,52 +1,50 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import { LeadCaptureForm } from "@/components/forms/lead-capture";
 import Carousel, { type SlideData } from "@/components/ui/carousel";
+import { fetchFeaturedListings } from "@/lib/featured-listings/client";
+import { mapFeaturedListingToCarouselSlide } from "@/lib/featured-listings/mappers";
+import { createLogger } from "@/lib/logger";
 
-const FEATURED_LISTINGS: SlideData[] = [
-  {
-    title: "Modern Waterfront Estate",
-    button: "View Details",
-    src: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=2940&auto=format&fit=crop",
-    price: "$4,250,000",
-    address: "1234 Ocean Dr, Vancouver, BC",
-    specs: { beds: 5, baths: 4, sqft: 4200 },
-  },
-  {
-    title: "Downtown Penthouse",
-    button: "View Details",
-    src: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2940&auto=format&fit=crop",
-    price: "$2,800,000",
-    address: "567 Skyline Ave, Vancouver, BC",
-    specs: { beds: 3, baths: 3, sqft: 2100 },
-  },
-  {
-    title: "Luxury West Van Home",
-    button: "View Details",
-    src: "https://images.unsplash.com/photo-1600596542815-22b5dbf1529e?q=80&w=2938&auto=format&fit=crop",
-    price: "$5,900,000",
-    address: "890 Marine Dr, West Vancouver, BC",
-    specs: { beds: 6, baths: 7, sqft: 5500 },
-  },
-  {
-    title: "Modern Family Home",
-    button: "View Details",
-    src: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2940&auto=format&fit=crop",
-    price: "$1,950,000",
-    address: "321 Oak St, Burnaby, BC",
-    specs: { beds: 4, baths: 3, sqft: 2800 },
-  },
-  {
-    title: "Architectural Masterpiece",
-    button: "View Details",
-    src: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2953&auto=format&fit=crop",
-    price: "$3,500,000",
-    address: "456 Cedar Ln, North Vancouver, BC",
-    specs: { beds: 4, baths: 4, sqft: 3600 },
-  },
-];
+const log = createLogger("listings-cta");
 
 export function ListingsCTA() {
+  const [slides, setSlides] = useState<SlideData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadFeaturedListings = async () => {
+      try {
+        const listings = await fetchFeaturedListings({
+          signal: controller.signal,
+        });
+        setSlides(listings.map(mapFeaturedListingToCarouselSlide));
+        setLoadError(null);
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+
+        log.error("Failed to load featured listings carousel", error);
+        setLoadError("Featured listings are temporarily unavailable.");
+        setSlides([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    void loadFeaturedListings();
+
+    return () => {
+      controller.abort();
+    };
+  }, []);
+
   return (
     <section className="w-full overflow-hidden bg-zinc-50 py-24 md:py-32">
       <div className="container mx-auto px-4 md:px-6">
@@ -56,8 +54,17 @@ export function ListingsCTA() {
               Featured Listings
             </h2>
             <div className="relative flex w-full items-center justify-center py-10 xl:mx-auto xl:w-full">
-              {/* Carousel replacing the #LuxuryListing image */}
-              <Carousel slides={FEATURED_LISTINGS} />
+              {isLoading ? (
+                <div className="flex h-[60vmin] w-[60vmin] items-center justify-center rounded-2xl bg-gray-100 text-gray-500 md:h-[40vmin] md:w-[40vmin]">
+                  Loading featured listings...
+                </div>
+              ) : slides.length > 0 ? (
+                <Carousel slides={slides} />
+              ) : (
+                <div className="flex h-[60vmin] w-[60vmin] items-center justify-center rounded-2xl bg-gray-100 px-6 text-center text-gray-500 md:h-[40vmin] md:w-[40vmin]">
+                  {loadError ?? "No featured listings available yet."}
+                </div>
+              )}
             </div>
           </div>
 
