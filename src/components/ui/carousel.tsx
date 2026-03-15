@@ -127,7 +127,7 @@ const Slide = ({
 
           {/* Hover Details Overlay */}
           <div
-            className={`absolute inset-0 flex flex-col justify-end bg-black/40 p-6 backdrop-blur-[2px] transition-opacity duration-300 ${
+            className={`absolute inset-0 flex flex-col justify-end bg-black/40 p-8 backdrop-blur-[2px] transition-opacity duration-300 sm:p-10 ${
               showDetailsOverlay
                 ? "opacity-100"
                 : "opacity-0 group-hover:opacity-100"
@@ -163,7 +163,7 @@ const Slide = ({
 
         {/* Title always visible if not hovered? Or maybe just hide it on hover */}
         <article
-          className={`absolute top-6 left-6 text-left transition-opacity duration-300 ease-in-out ${
+          className={`absolute top-8 right-8 left-8 text-left transition-opacity duration-300 ease-in-out sm:top-10 sm:right-10 sm:left-10 ${
             current === index ? "visible opacity-100" : "invisible opacity-0"
           } ${showDetailsOverlay ? "opacity-0" : "group-hover:opacity-0"}`}
         >
