@@ -22,6 +22,7 @@ function toFeaturedListing(row: FeaturedListingRow): FeaturedListing {
   return {
     id: row.id,
     title: row.title,
+    description: row.description,
     imageUrl: row.imageUrl,
     price: row.price,
     address: row.address,

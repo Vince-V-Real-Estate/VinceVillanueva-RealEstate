@@ -17,6 +17,7 @@ export function mapFeaturedListingToCarouselSlide(
   return {
     id: listing.id,
     title: listing.title,
+    description: listing.description,
     src: listing.imageUrl,
     price: formatFeaturedListingPrice(listing.price),
     address: listing.address,
