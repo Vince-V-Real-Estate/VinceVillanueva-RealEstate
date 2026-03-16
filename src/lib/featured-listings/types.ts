@@ -11,6 +11,7 @@ export const FEATURED_LISTING_BASE_PATH = "/listing/featured";
 export interface FeaturedListing {
   id: string;
   title: string;
+  description: string;
   imageUrl: string;
   price: number;
   address: string;
@@ -27,6 +28,7 @@ export interface FeaturedListing {
  */
 export interface FeaturedListingMutationInput {
   title: string;
+  description: string;
   imageUrl: string;
   price: number;
   address: string;
