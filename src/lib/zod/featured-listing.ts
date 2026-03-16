@@ -1,6 +1,11 @@
 import { z } from "zod";
 
 const BATHROOM_INCREMENT = 0.5;
+const DESCRIPTION_MAX_WORDS = 50;
+
+function countWords(value: string): number {
+  return value.trim().split(/\s+/).filter(Boolean).length;
+}
 
 export const featuredListingIdSchema = z
   .string()
@@ -12,6 +17,15 @@ export const featuredListingInputSchema = z.object({
     .trim()
     .min(2, "Title must be at least 2 characters")
     .max(120, "Title cannot exceed 120 characters"),
+  description: z
+    .string()
+    .trim()
+    .min(10, "Description must be at least 10 characters")
+    .max(400, "Description cannot exceed 400 characters")
+    .refine(
+      (value) => countWords(value) <= DESCRIPTION_MAX_WORDS,
+      `Description cannot exceed ${DESCRIPTION_MAX_WORDS} words`,
+    ),
   imageUrl: z.string().url("A valid image URL is required"),
   price: z
     .number()

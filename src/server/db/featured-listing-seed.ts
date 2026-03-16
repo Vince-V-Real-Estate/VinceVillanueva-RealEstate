@@ -15,6 +15,8 @@ import { featuredListing, user } from "./schema";
 const DUMMY_LISTINGS = [
   {
     title: "Modern Downtown Condo with City Views",
+    description:
+      "Bright corner condo with floor-to-ceiling windows, open living spaces, and quick access to shops, transit, and waterfront trails.",
     imageUrl: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
     price: 549000,
     address: "123 Main Street, Unit 1501, Vancouver, BC V6B 2W9",
@@ -24,6 +26,8 @@ const DUMMY_LISTINGS = [
   },
   {
     title: "Charming Family Home in Quiet Neighborhood",
+    description:
+      "Spacious family home featuring a large backyard, updated kitchen, and flexible rooms ideal for growing households and home offices.",
     imageUrl:
       "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800",
     price: 899000,

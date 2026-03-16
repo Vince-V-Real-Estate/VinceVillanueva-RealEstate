@@ -12,6 +12,7 @@ import { user } from "./user-schema";
 export const featuredListing = pgTable("featured_listing", {
   id: uuid("id").primaryKey().defaultRandom(),
   title: text("title").notNull(),
+  description: text("description").notNull(),
   imageUrl: text("image_url").notNull(),
   price: integer("price").notNull(),
   address: text("address").notNull(),
