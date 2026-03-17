@@ -9,11 +9,11 @@
  * Currently only Resend is implemented.
  */
 
-import { env } from "@/env";
-import { ResendProvider } from "./resend-provider";
-import type { EmailProvider } from "../types";
+import {env} from "@/env";
+import {ResendProvider} from "./resend-provider";
+import type {EmailProvider} from "../types";
 
-export { ResendProvider } from "./resend-provider";
+export {ResendProvider} from "./resend-provider";
 
 /**
  * Create the configured email provider.
@@ -23,6 +23,6 @@ export { ResendProvider } from "./resend-provider";
  * `EMAIL_PROVIDER=resend|graph|zapier`.
  */
 export function createEmailProvider(): EmailProvider {
-  // Future: read process.env.EMAIL_PROVIDER and branch here.
-  return new ResendProvider(env.RESEND_API_KEY);
+	// Future: read process.env.EMAIL_PROVIDER and branch here.
+	return new ResendProvider(env.RESEND_API_KEY);
 }

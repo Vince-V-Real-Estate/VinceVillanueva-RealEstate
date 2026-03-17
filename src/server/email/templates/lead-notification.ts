@@ -6,44 +6,39 @@
  * `<style>` blocks.
  */
 
-import type { ILeadEmailData } from "@/utils/leads/types";
+import type {ILeadEmailData} from "@/utils/leads/types";
 
 /** Human-readable labels for each lead source. */
 const SOURCE_LABELS: Record<ILeadEmailData["source"], string> = {
-  listings: "New Listings Alert",
-  valuation: "Home Valuation Request",
-  call: "Consultation Request",
-  newsletter: "Newsletter Subscription",
+	listings: "New Listings Alert",
+	valuation: "Home Valuation Request",
+	call: "Consultation Request",
+	newsletter: "Newsletter Subscription",
 };
 
 /** Accent colour per source so the realtor can triage at a glance. */
 const SOURCE_COLORS: Record<ILeadEmailData["source"], string> = {
-  listings: "#2563eb",
-  valuation: "#7c3aed",
-  call: "#059669",
-  newsletter: "#d97706",
+	listings: "#2563eb",
+	valuation: "#7c3aed",
+	call: "#059669",
+	newsletter: "#d97706",
 };
 
 /** Format a Date to a concise, human-readable string. */
 function formatDate(date: Date): string {
-  return date.toLocaleDateString("en-US", {
-    weekday: "short",
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
+	return date.toLocaleDateString("en-US", {
+		weekday: "short",
+		year: "numeric",
+		month: "short",
+		day: "numeric",
+		hour: "numeric",
+		minute: "2-digit",
+	});
 }
 
 /** Escape HTML entities to prevent XSS in email bodies. */
 function esc(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+	return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
 // ---------------------------------------------------------------------------
@@ -57,29 +52,29 @@ function esc(value: string): string {
  * whenever a visitor submits a form on the website.
  */
 export function buildLeadNotificationHtml(data: ILeadEmailData): string {
-  const sourceLabel = SOURCE_LABELS[data.source];
-  const accent = SOURCE_COLORS[data.source];
-  const submitted = formatDate(data.createdAt);
+	const sourceLabel = SOURCE_LABELS[data.source];
+	const accent = SOURCE_COLORS[data.source];
+	const submitted = formatDate(data.createdAt);
 
-  // -- optional detail rows ------------------------------------------------
-  const detailRows: string[] = [];
+	// -- optional detail rows ------------------------------------------------
+	const detailRows: string[] = [];
 
-  detailRows.push(row("Name", esc(data.fullName)));
-  detailRows.push(row("Email", emailLink(data.email)));
+	detailRows.push(row("Name", esc(data.fullName)));
+	detailRows.push(row("Email", emailLink(data.email)));
 
-  if (data.phone) {
-    detailRows.push(row("Phone", phoneLink(data.phone)));
-  }
-  if (data.address) {
-    detailRows.push(row("Address", esc(data.address)));
-  }
-  if (data.message) {
-    detailRows.push(row("Message", esc(data.message)));
-  }
+	if (data.phone) {
+		detailRows.push(row("Phone", phoneLink(data.phone)));
+	}
+	if (data.address) {
+		detailRows.push(row("Address", esc(data.address)));
+	}
+	if (data.message) {
+		detailRows.push(row("Message", esc(data.message)));
+	}
 
-  detailRows.push(row("Submitted", submitted));
+	detailRows.push(row("Submitted", submitted));
 
-  return /* html */ `
+	return /* html */ `
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
@@ -172,7 +167,7 @@ export function buildLeadNotificationHtml(data: ILeadEmailData): string {
  * Build a subject line for the lead notification email.
  */
 export function buildLeadNotificationSubject(data: ILeadEmailData): string {
-  return `New Lead: ${SOURCE_LABELS[data.source]} - ${data.fullName}`;
+	return `New Lead: ${SOURCE_LABELS[data.source]} - ${data.fullName}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -181,7 +176,7 @@ export function buildLeadNotificationSubject(data: ILeadEmailData): string {
 
 /** Single detail-table row with a label and value. */
 function row(label: string, value: string): string {
-  return `
+	return `
           <tr>
             <td style="padding:10px 14px;width:100px;font-size:13px;font-weight:600;color:#71717a;vertical-align:top;border-bottom:1px solid #f4f4f5;">
               ${label}
@@ -194,13 +189,13 @@ function row(label: string, value: string): string {
 
 /** Clickable mailto link. */
 function emailLink(email: string): string {
-  const safe = esc(email);
-  return `<a href="mailto:${safe}" style="color:#2563eb;text-decoration:underline;">${safe}</a>`;
+	const safe = esc(email);
+	return `<a href="mailto:${safe}" style="color:#2563eb;text-decoration:underline;">${safe}</a>`;
 }
 
 /** Clickable tel link. */
 function phoneLink(phone: string): string {
-  const safe = esc(phone);
-  const digits = phone.replace(/[^\d+]/g, "");
-  return `<a href="tel:${digits}" style="color:#2563eb;text-decoration:underline;">${safe}</a>`;
+	const safe = esc(phone);
+	const digits = phone.replace(/[^\d+]/g, "");
+	return `<a href="tel:${digits}" style="color:#2563eb;text-decoration:underline;">${safe}</a>`;
 }
