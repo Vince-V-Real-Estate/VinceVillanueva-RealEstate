@@ -1,11 +1,8 @@
 import {z} from "zod";
+import {countWords} from "@/lib/utils/string";
 
 const BATHROOM_INCREMENT = 0.5;
 const DESCRIPTION_MAX_WORDS = 50;
-
-function countWords(value: string): number {
-	return value.trim().split(/\s+/).filter(Boolean).length;
-}
 
 export const featuredListingIdSchema = z.string().uuid("Invalid featured listing id");
 

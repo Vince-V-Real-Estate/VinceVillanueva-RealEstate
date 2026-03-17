@@ -1,26 +1,16 @@
-import { NextResponse } from "next/server";
-import { z } from "zod";
+import {NextResponse} from "next/server";
+import {z} from "zod";
 
-import {
-  featuredListingIdSchema,
-  updateFeaturedListingInputSchema,
-} from "@/lib/zod/featured-listing";
-import { createLogger } from "@/lib/logger";
-import {
-  deleteFeaturedListingForRealtor,
-  getFeaturedListingById,
-  updateFeaturedListingForRealtor,
-} from "@/server/featured-listings/service";
-import { deleteUploadThingFileByUrl } from "@/server/uploadthing/cleanup";
-import {
-  parseAndValidateBody,
-  withApiHandler,
-} from "@/utils/api/route-helpers";
+import {featuredListingIdSchema, updateFeaturedListingInputSchema} from "@/lib/zod/featured-listing";
+import {createLogger} from "@/lib/logger";
+import {deleteFeaturedListingForRealtor, getFeaturedListingById, updateFeaturedListingForRealtor} from "@/server/featured-listings/service";
+import {deleteUploadThingFileByUrl} from "@/server/uploadthing/cleanup";
+import {parseAndValidateBody, withApiHandler} from "@/utils/api/route-helpers";
 
 const log = createLogger("featured-listings-api");
 
 const featuredListingParamsSchema = z.object({
-  id: featuredListingIdSchema,
+	id: featuredListingIdSchema,
 });
 
 /**
@@ -29,25 +19,22 @@ const featuredListingParamsSchema = z.object({
  * Returns the listing details or 404 if not found.
  */
 export const GET = withApiHandler(
-  {
-    endpoint: "/api/featured-listings/[id]",
-    method: "GET",
-    requireAuth: false,
-    paramsSchema: featuredListingParamsSchema,
-  },
-  async (_request, { resourceIds }) => {
-    const listingId = resourceIds.id;
+	{
+		endpoint: "/api/featured-listings/[id]",
+		method: "GET",
+		requireAuth: false,
+		paramsSchema: featuredListingParamsSchema,
+	},
+	async (_request, {resourceIds}) => {
+		const listingId = resourceIds.id;
 
-    const listing = await getFeaturedListingById(listingId);
-    if (!listing) {
-      return NextResponse.json(
-        { error: "Featured listing not found" },
-        { status: 404 },
-      );
-    }
+		const listing = await getFeaturedListingById(listingId);
+		if (!listing) {
+			return NextResponse.json({error: "Featured listing not found"}, {status: 404});
+		}
 
-    return { data: { listing } };
-  },
+		return {data: {listing}};
+	},
 );
 
 /**
@@ -56,52 +43,42 @@ export const GET = withApiHandler(
  * and cleans up the previous image file if a new one was uploaded.
  */
 export const PATCH = withApiHandler(
-  {
-    endpoint: "/api/featured-listings/[id]",
-    method: "PATCH",
-    requireRole: "admin",
-    paramsSchema: featuredListingParamsSchema,
-  },
-  async (request, { resourceIds, session }) => {
-    const listingId = resourceIds.id;
+	{
+		endpoint: "/api/featured-listings/[id]",
+		method: "PATCH",
+		requireRole: "admin",
+		paramsSchema: featuredListingParamsSchema,
+	},
+	async (request, {resourceIds, session}) => {
+		const listingId = resourceIds.id;
 
-    const result = await parseAndValidateBody(
-      request,
-      updateFeaturedListingInputSchema,
-    );
-    if ("error" in result) {
-      return result.error;
-    }
+		const result = await parseAndValidateBody(request, updateFeaturedListingInputSchema);
+		if ("error" in result) {
+			return result.error;
+		}
 
-    const realtorId = session!.user.id;
-    const updateResult = await updateFeaturedListingForRealtor(
-      listingId,
-      realtorId,
-      result.data,
-    );
+		const realtorId = session!.user.id;
+		const updateResult = await updateFeaturedListingForRealtor(listingId, realtorId, result.data);
 
-    if (!updateResult) {
-      return NextResponse.json(
-        { error: "Featured listing not found" },
-        { status: 404 },
-      );
-    }
+		if (!updateResult) {
+			return NextResponse.json({error: "Featured listing not found"}, {status: 404});
+		}
 
-    // Clean up old image if a new one was uploaded to replace it
-    if (updateResult.previousImageUrl) {
-      await deleteUploadThingFileByUrl(updateResult.previousImageUrl, {
-        reason: "listing-image-replace",
-        listingId,
-      });
-    }
+		// Clean up old image if a new one was uploaded to replace it
+		if (updateResult.previousImageUrl) {
+			await deleteUploadThingFileByUrl(updateResult.previousImageUrl, {
+				reason: "listing-image-replace",
+				listingId,
+			});
+		}
 
-    log.info("Featured listing updated", {
-      listingId,
-      realtorId,
-    });
+		log.info("Featured listing updated", {
+			listingId,
+			realtorId,
+		});
 
-    return { data: { listing: updateResult.listing } };
-  },
+		return {data: {listing: updateResult.listing}};
+	},
 );
 
 /**
@@ -110,40 +87,34 @@ export const PATCH = withApiHandler(
  * removes the associated image file from UploadThing storage.
  */
 export const DELETE = withApiHandler(
-  {
-    endpoint: "/api/featured-listings/[id]",
-    method: "DELETE",
-    requireRole: "admin",
-    paramsSchema: featuredListingParamsSchema,
-  },
-  async (_request, { resourceIds, session }) => {
-    const listingId = resourceIds.id;
+	{
+		endpoint: "/api/featured-listings/[id]",
+		method: "DELETE",
+		requireRole: "admin",
+		paramsSchema: featuredListingParamsSchema,
+	},
+	async (_request, {resourceIds, session}) => {
+		const listingId = resourceIds.id;
 
-    const realtorId = session!.user.id;
-    const deleteResult = await deleteFeaturedListingForRealtor(
-      listingId,
-      realtorId,
-    );
-    if (!deleteResult.deleted) {
-      return NextResponse.json(
-        { error: "Featured listing not found" },
-        { status: 404 },
-      );
-    }
+		const realtorId = session!.user.id;
+		const deleteResult = await deleteFeaturedListingForRealtor(listingId, realtorId);
+		if (!deleteResult.deleted) {
+			return NextResponse.json({error: "Featured listing not found"}, {status: 404});
+		}
 
-    // Clean up the image file from UploadThing when listing is deleted
-    if (deleteResult.imageUrl) {
-      await deleteUploadThingFileByUrl(deleteResult.imageUrl, {
-        reason: "listing-delete",
-        listingId,
-      });
-    }
+		// Clean up the image file from UploadThing when listing is deleted
+		if (deleteResult.imageUrl) {
+			await deleteUploadThingFileByUrl(deleteResult.imageUrl, {
+				reason: "listing-delete",
+				listingId,
+			});
+		}
 
-    log.info("Featured listing deleted", {
-      listingId,
-      realtorId,
-    });
+		log.info("Featured listing deleted", {
+			listingId,
+			realtorId,
+		});
 
-    return { data: { success: true } };
-  },
+		return {data: {success: true}};
+	},
 );

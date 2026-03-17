@@ -7,18 +7,10 @@ import {FeaturedListingImageUpload} from "./FeaturedListingImageUpload";
 import type {FeaturedListingFormState} from "./types";
 
 import type {UploadedUploadThingFile} from "@/components/ui/file-upload";
+import {countWords} from "@/lib/utils/string";
 import type {JSX} from "react";
 
 const MAX_DESCRIPTION_WORDS = 50;
-
-/**
- * Counts the number of words in a given string.
- * @param {string} value - The string to count words in.
- * @returns {number} The number of words in the string.
- */
-function countWords(value: string): number {
-	return value.trim().split(/\s+/).filter(Boolean).length;
-}
 
 interface FeaturedListingFormProps {
 	formAction: (payload: FormData) => void;

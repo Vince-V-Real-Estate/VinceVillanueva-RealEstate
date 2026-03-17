@@ -5,6 +5,7 @@ import {FeaturedListingsApiError, createFeaturedListing, deleteFeaturedListing, 
 import {MAX_FEATURED_LISTINGS, type FeaturedListing, type FeaturedListingMutationInput} from "@/lib/featured-listings/types";
 import {createLogger} from "@/lib/logger";
 import type {UploadedUploadThingFile} from "@/components/ui/file-upload";
+import {countWords} from "@/lib/utils/string";
 
 import {CurrentFeaturedListings} from "./featured-listings/CurrentFeaturedListings";
 import {FeaturedListingForm} from "./featured-listings/FeaturedListingForm";
@@ -40,15 +41,6 @@ const MAX_BATHROOMS = 20;
 const MIN_SQUARE_FEET = 100;
 const MAX_SQUARE_FEET = 50000;
 const MAX_DESCRIPTION_WORDS = 50;
-
-/**
- * Counts the number of words in a given string.
- * @param {string} value - The string to count words in.
- * @returns {number} The number of words in the string.
- */
-function countWords(value: string): number {
-	return value.trim().split(/\s+/).filter(Boolean).length;
-}
 
 /**
  * Converts a FeaturedListing object to form state for editing.

@@ -9,17 +9,17 @@ export const FEATURED_LISTING_BASE_PATH = "/listing/featured";
  * Contains all property details along with system-generated fields (id, timestamps).
  */
 export interface FeaturedListing {
-  id: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  price: number;
-  address: string;
-  bedrooms: number;
-  bathrooms: number;
-  squareFeet: number;
-  createdAt: string;
-  updatedAt: string;
+	id: string;
+	title: string;
+	description: string;
+	imageUrl: string;
+	price: number;
+	address: string;
+	bedrooms: number;
+	bathrooms: number;
+	squareFeet: number;
+	createdAt: string;
+	updatedAt: string;
 }
 
 /**
@@ -27,14 +27,14 @@ export interface FeaturedListing {
  * All fields are required (no partial updates).
  */
 export interface FeaturedListingMutationInput {
-  title: string;
-  description: string;
-  imageUrl: string;
-  price: number;
-  address: string;
-  bedrooms: number;
-  bathrooms: number;
-  squareFeet: number;
+	title: string;
+	description: string;
+	imageUrl: string;
+	price: number;
+	address: string;
+	bedrooms: number;
+	bathrooms: number;
+	squareFeet: number;
 }
 
 /** Partial input type for updating an existing featured listing - all fields optional */
@@ -42,13 +42,13 @@ export type FeaturedListingUpdateInput = Partial<FeaturedListingMutationInput>;
 
 /** Response shape for the list endpoint containing all featured listings */
 export interface FeaturedListingsListResponse {
-  listings: FeaturedListing[];
-  maxFeaturedListings: number;
+	listings: FeaturedListing[];
+	maxFeaturedListings: number;
 }
 
 /** Response shape for single listing endpoints (GET by ID, POST, PATCH) */
 export interface FeaturedListingResponse {
-  listing: FeaturedListing;
+	listing: FeaturedListing;
 }
 
 /**
@@ -57,14 +57,14 @@ export interface FeaturedListingResponse {
  * @returns Full relative path (e.g., "/listing/featured/uuid")
  */
 export function buildFeaturedListingPath(featuredId: string): string {
-  return `${FEATURED_LISTING_BASE_PATH}/${featuredId}`;
+	return `${FEATURED_LISTING_BASE_PATH}/${featuredId}`;
 }
 
 /** Reusable currency formatter configured for Canadian Dollars (CAD) */
 const currencyFormatter = new Intl.NumberFormat("en-CA", {
-  style: "currency",
-  currency: "CAD",
-  maximumFractionDigits: 0,
+	style: "currency",
+	currency: "CAD",
+	maximumFractionDigits: 0,
 });
 
 /**
@@ -73,7 +73,7 @@ const currencyFormatter = new Intl.NumberFormat("en-CA", {
  * @returns Formatted string (e.g., "$450,000")
  */
 export function formatFeaturedListingPrice(price: number): string {
-  return currencyFormatter.format(price);
+	return currencyFormatter.format(price);
 }
 
 /**
@@ -82,5 +82,5 @@ export function formatFeaturedListingPrice(price: number): string {
  * @returns String representation ("2" or "2.5")
  */
 export function formatBathroomCount(value: number): string {
-  return Number.isInteger(value) ? `${value}` : value.toFixed(1);
+	return Number.isInteger(value) ? `${value}` : value.toFixed(1);
 }

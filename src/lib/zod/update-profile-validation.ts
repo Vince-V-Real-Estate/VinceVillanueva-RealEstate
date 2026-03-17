@@ -1,7 +1,7 @@
-import { z } from "zod";
+import {z} from "zod";
 
 export const updateProfileSchema = z.object({
-  name: z.string().min(1, "Name is required").max(100, "Name is too long"),
+	name: z.string().min(1, "Name is required").max(100, "Name is too long"),
 });
 
 export type UpdateProfileFormData = z.infer<typeof updateProfileSchema>;

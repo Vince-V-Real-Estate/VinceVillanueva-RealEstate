@@ -1,12 +1,12 @@
-import { type Config } from "drizzle-kit";
+import {type Config} from "drizzle-kit";
 
-import { env } from "@/env";
+import {env} from "@/env";
 
 export default {
-  schema: "./src/server/db/schemas/*.ts",
-  dialect: "postgresql",
-  dbCredentials: {
-    url: env.DATABASE_URL,
-  },
-  tablesFilter: ["vv_realtor_*"],
+	schema: "./src/server/db/schemas/*.ts",
+	dialect: "postgresql",
+	dbCredentials: {
+		url: env.DATABASE_URL,
+	},
+	tablesFilter: ["vv_realtor_*"],
 } satisfies Config;
