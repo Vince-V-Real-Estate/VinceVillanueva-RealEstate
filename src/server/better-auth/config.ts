@@ -17,6 +17,19 @@ function getAuthOptions(): BetterAuthOptions {
 		},
 		socialProviders: buildSocialProviders(env),
 		plugins: [...(env.BETTER_AUTH_API_KEY ? [dash({apiKey: env.BETTER_AUTH_API_KEY})] : [])],
+		advanced: {
+			ipAddress: {
+				/**
+				 * Headers checked in order of priority to resolve the real client IP
+				 * behind reverse proxies. Covers Vercel and Cloudflare deployments.
+				 *
+				 * - x-vercel-forwarded-for  : set by Vercel's edge network
+				 * - cf-connecting-ip        : set by Cloudflare's proxy
+				 * - x-forwarded-for         : standard proxy header (fallback)
+				 */
+				ipAddressHeaders: ["x-vercel-forwarded-for", "cf-connecting-ip", "x-forwarded-for"],
+			},
+		},
 		user: {
 			deleteUser: {
 				enabled: true,
