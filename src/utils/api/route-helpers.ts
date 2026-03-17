@@ -1,7 +1,7 @@
-import { getSession, type Session } from "@/server/better-auth/server";
-import { createLogger } from "@/lib/logger";
-import { type NextRequest, NextResponse } from "next/server";
-import type { ZodError, ZodSchema } from "zod";
+import {getSession, type Session} from "@/server/better-auth/server";
+import {createLogger} from "@/lib/logger";
+import {type NextRequest, NextResponse} from "next/server";
+import type {ZodError, ZodSchema} from "zod";
 
 const log = createLogger("api");
 
@@ -10,55 +10,51 @@ const log = createLogger("api");
  * Contains the authenticated session, resolved URL params,
  * and any additional validated resource IDs.
  */
-export interface RouteContext<
-  TResourceIds extends Record<string, string> = Record<string, string>,
-> {
-  /** The authenticated user session (only present when requireAuth is true) */
-  session: Session | null;
-  /** Resolved dynamic route params (e.g., { id: "abc123" }) */
-  params: Record<string, string>;
-  /**
-   * Validated resource IDs extracted from params.
-   * Empty object when `paramsSchema` is not configured.
-   */
-  resourceIds: TResourceIds;
+export interface RouteContext<TResourceIds extends Record<string, string> = Record<string, string>> {
+	/** The authenticated user session (only present when requireAuth is true) */
+	session: Session | null;
+	/** Resolved dynamic route params (e.g., { id: "abc123" }) */
+	params: Record<string, string>;
+	/**
+	 * Validated resource IDs extracted from params.
+	 * Empty object when `paramsSchema` is not configured.
+	 */
+	resourceIds: TResourceIds;
 }
 
 /**
  * Configuration options for the API handler wrapper.
  * Controls authentication, role-based access, and logging context.
  */
-export interface ApiHandlerConfig<
-  TResourceIds extends Record<string, string> = Record<string, string>,
-> {
-  /**
-   * Endpoint path for logging and debugging.
-   * Use bracket placeholders for dynamic segments (e.g., "/api/listings/[id]").
-   */
-  endpoint: string;
+export interface ApiHandlerConfig<TResourceIds extends Record<string, string> = Record<string, string>> {
+	/**
+	 * Endpoint path for logging and debugging.
+	 * Use bracket placeholders for dynamic segments (e.g., "/api/listings/[id]").
+	 */
+	endpoint: string;
 
-  /** HTTP method this handler responds to */
-  method: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
+	/** HTTP method this handler responds to */
+	method: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 
-  /**
-   * Whether the route requires an authenticated session.
-   * If true, returns 401 when no valid session exists.
-   * @default true
-   */
-  requireAuth?: boolean;
+	/**
+	 * Whether the route requires an authenticated session.
+	 * If true, returns 401 when no valid session exists.
+	 * @default true
+	 */
+	requireAuth?: boolean;
 
-  /**
-   * Restrict access to users with a specific role.
-   * Only checked when requireAuth is true.
-   * Requires the user table to have a "role" column.
-   */
-  requireRole?: "client" | "admin";
+	/**
+	 * Restrict access to users with a specific role.
+	 * Only checked when requireAuth is true.
+	 * Requires the user table to have a "role" column.
+	 */
+	requireRole?: "client" | "admin";
 
-  /**
-   * Optional Zod schema for validating dynamic route params.
-   * Parsed values are exposed on `context.resourceIds`.
-   */
-  paramsSchema?: ZodSchema<TResourceIds>;
+	/**
+	 * Optional Zod schema for validating dynamic route params.
+	 * Parsed values are exposed on `context.resourceIds`.
+	 */
+	paramsSchema?: ZodSchema<TResourceIds>;
 }
 
 /**
@@ -66,25 +62,20 @@ export interface ApiHandlerConfig<
  * Handlers can return a NextResponse directly for full control,
  * or a simple { data, status } object that gets JSON-serialized automatically.
  */
-type HandlerResult = NextResponse | { data: unknown; status?: number };
+type HandlerResult = NextResponse | {data: unknown; status?: number};
 
 /**
  * The handler function signature.
  * Receives the raw Request and the enriched RouteContext.
  */
-type ApiHandler<
-  TResourceIds extends Record<string, string> = Record<string, string>,
-> = (
-  request: Request,
-  context: RouteContext<TResourceIds>,
-) => Promise<HandlerResult>;
+type ApiHandler<TResourceIds extends Record<string, string> = Record<string, string>> = (request: Request, context: RouteContext<TResourceIds>) => Promise<HandlerResult>;
 
 /**
  * Next.js App Router context type for dynamic routes.
  * In Next.js 15, params is always a Promise.
  */
 type NextRouteContext = {
-  params: Promise<Record<string, string>>;
+	params: Promise<Record<string, string>>;
 };
 
 /**
@@ -128,91 +119,77 @@ type NextRouteContext = {
  * );
  * ```
  */
-export function withApiHandler<
-  TResourceIds extends Record<string, string> = Record<string, string>,
->(
-  config: ApiHandlerConfig<TResourceIds>,
-  handler: ApiHandler<TResourceIds>,
+export function withApiHandler<TResourceIds extends Record<string, string> = Record<string, string>>(
+	config: ApiHandlerConfig<TResourceIds>,
+	handler: ApiHandler<TResourceIds>,
 ): (request: NextRequest, context: NextRouteContext) => Promise<NextResponse> {
-  const requireAuth = config.requireAuth ?? true;
+	const requireAuth = config.requireAuth ?? true;
 
-  return async (
-    request: NextRequest,
-    context: NextRouteContext,
-  ): Promise<NextResponse> => {
-    /** Resolve Next.js dynamic route params (always a Promise in Next.js 15) */
-    const resolvedParams = await context.params;
-    let resourceIds = {} as TResourceIds;
+	return async (request: NextRequest, context: NextRouteContext): Promise<NextResponse> => {
+		/** Resolve Next.js dynamic route params (always a Promise in Next.js 15) */
+		const resolvedParams = await context.params;
+		let resourceIds = {} as TResourceIds;
 
-    try {
-      // ── Step 1: Authenticate if required ──────────────────────────────
-      let session: Session | null = null;
+		try {
+			// ── Step 1: Authenticate if required ──────────────────────────────
+			let session: Session | null = null;
 
-      if (requireAuth) {
-        session = await getSession();
+			if (requireAuth) {
+				session = await getSession();
 
-        if (!session?.user) {
-          return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
+				if (!session?.user) {
+					return NextResponse.json({error: "Unauthorized"}, {status: 401});
+				}
 
-        // ── Step 2: Check role if specified ────────────────────────────
-        if (config.requireRole) {
-          const userRole = (session.user as Record<string, unknown>).role;
+				// ── Step 2: Check role if specified ────────────────────────────
+				if (config.requireRole) {
+					const userRole = (session.user as Record<string, unknown>).role;
 
-          if (userRole !== config.requireRole) {
-            return NextResponse.json(
-              { error: "Forbidden: insufficient permissions" },
-              { status: 403 },
-            );
-          }
-        }
-      }
+					if (userRole !== config.requireRole) {
+						return NextResponse.json({error: "Forbidden: insufficient permissions"}, {status: 403});
+					}
+				}
+			}
 
-      // ── Step 3: Validate route params when schema is provided ─────────
-      if (config.paramsSchema) {
-        const paramsResult = config.paramsSchema.safeParse(resolvedParams);
+			// ── Step 3: Validate route params when schema is provided ─────────
+			if (config.paramsSchema) {
+				const paramsResult = config.paramsSchema.safeParse(resolvedParams);
 
-        if (!paramsResult.success) {
-          return NextResponse.json(
-            {
-              error: "Validation failed",
-              details: formatZodErrors(paramsResult.error),
-            },
-            { status: 400 },
-          );
-        }
+				if (!paramsResult.success) {
+					return NextResponse.json(
+						{
+							error: "Validation failed",
+							details: formatZodErrors(paramsResult.error),
+						},
+						{status: 400},
+					);
+				}
 
-        resourceIds = paramsResult.data;
-      }
+				resourceIds = paramsResult.data;
+			}
 
-      // ── Step 4: Execute the route handler ─────────────────────────────
-      const result = await handler(request, {
-        session,
-        params: resolvedParams,
-        resourceIds,
-      });
+			// ── Step 4: Execute the route handler ─────────────────────────────
+			const result = await handler(request, {
+				session,
+				params: resolvedParams,
+				resourceIds,
+			});
 
-      // ── Step 5: Normalize the response ────────────────────────────────
-      if (result instanceof NextResponse) {
-        return result;
-      }
+			// ── Step 5: Normalize the response ────────────────────────────────
+			if (result instanceof NextResponse) {
+				return result;
+			}
 
-      return NextResponse.json(result.data, {
-        status: result.status ?? 200,
-      });
-    } catch (error) {
-      // ── Catch-all error handler ───────────────────────────────────────
-      log.error(
-        `${config.method} ${config.endpoint}`,
-        error instanceof Error ? error.message : error,
-      );
+			return NextResponse.json(result.data, {
+				status: result.status ?? 200,
+			});
+		} catch (error) {
+			// ── Catch-all error handler ───────────────────────────────────────
+			log.error(`${config.method} ${config.endpoint}`, error instanceof Error ? error.message : error);
 
-      return NextResponse.json(
-        { error: "Internal server error" },
-        { status: 500 },
-      );
-    }
-  };
+			return NextResponse.json({error: "Internal server error"}, {status: 500});
+		}
+	};
 }
 
 /**
@@ -226,35 +203,32 @@ export function withApiHandler<
  * const { title, price } = result.data;
  * ```
  */
-export async function parseAndValidateBody<T>(
-  request: Request,
-  schema: ZodSchema<T>,
-): Promise<{ data: T } | { error: NextResponse }> {
-  let body: unknown;
+export async function parseAndValidateBody<T>(request: Request, schema: ZodSchema<T>): Promise<{data: T} | {error: NextResponse}> {
+	let body: unknown;
 
-  try {
-    body = await request.json();
-  } catch {
-    return {
-      error: NextResponse.json({ error: "Invalid JSON body" }, { status: 400 }),
-    };
-  }
+	try {
+		body = await request.json();
+	} catch {
+		return {
+			error: NextResponse.json({error: "Invalid JSON body"}, {status: 400}),
+		};
+	}
 
-  const result = schema.safeParse(body);
+	const result = schema.safeParse(body);
 
-  if (!result.success) {
-    return {
-      error: NextResponse.json(
-        {
-          error: "Validation failed",
-          details: formatZodErrors(result.error),
-        },
-        { status: 400 },
-      ),
-    };
-  }
+	if (!result.success) {
+		return {
+			error: NextResponse.json(
+				{
+					error: "Validation failed",
+					details: formatZodErrors(result.error),
+				},
+				{status: 400},
+			),
+		};
+	}
 
-  return { data: result.data };
+	return {data: result.data};
 }
 
 /**
@@ -266,12 +240,12 @@ export async function parseAndValidateBody<T>(
  * // Output: { email: "Invalid email address" }
  */
 function formatZodErrors(error: ZodError): Record<string, string> {
-  const formatted: Record<string, string> = {};
+	const formatted: Record<string, string> = {};
 
-  for (const issue of error.issues) {
-    const path = issue.path.join(".");
-    formatted[path] ??= issue.message;
-  }
+	for (const issue of error.issues) {
+		const path = issue.path.join(".");
+		formatted[path] ??= issue.message;
+	}
 
-  return formatted;
+	return formatted;
 }

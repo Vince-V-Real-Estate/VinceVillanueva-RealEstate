@@ -10,7 +10,4 @@
  *   3. Re-export it here
  */
 
-export {
-  buildLeadNotificationHtml,
-  buildLeadNotificationSubject,
-} from "./lead-notification";
+export {buildLeadNotificationHtml, buildLeadNotificationSubject} from "./lead-notification";

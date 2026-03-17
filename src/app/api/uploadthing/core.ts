@@ -1,32 +1,32 @@
-import { createUploadthing, type FileRouter } from "uploadthing/next";
-import { UploadThingError } from "uploadthing/server";
+import {createUploadthing, type FileRouter} from "uploadthing/next";
+import {UploadThingError} from "uploadthing/server";
 
-import { getSession } from "@/server/better-auth/server";
-import { createLogger } from "@/lib/logger";
+import {getSession} from "@/server/better-auth/server";
+import {createLogger} from "@/lib/logger";
 
 const f = createUploadthing();
 const log = createLogger("uploadthing");
 
 function createUploadThingForbiddenError(message: string): Error {
-  return new UploadThingError({
-    code: "FORBIDDEN",
-    message,
-  }) as unknown as Error;
+	return new UploadThingError({
+		code: "FORBIDDEN",
+		message,
+	}) as unknown as Error;
 }
 
 const adminOnlyMiddleware = async () => {
-  const session = await getSession();
+	const session = await getSession();
 
-  if (!session?.user) {
-    throw createUploadThingForbiddenError("Unauthorized");
-  }
+	if (!session?.user) {
+		throw createUploadThingForbiddenError("Unauthorized");
+	}
 
-  const user = session.user as { id: string; role?: unknown };
-  if (user.role !== "admin") {
-    throw createUploadThingForbiddenError("Forbidden: admin access required");
-  }
+	const user = session.user as {id: string; role?: unknown};
+	if (user.role !== "admin") {
+		throw createUploadThingForbiddenError("Forbidden: admin access required");
+	}
 
-  return { userId: user.id };
+	return {userId: user.id};
 };
 
 /**
@@ -37,47 +37,47 @@ const adminOnlyMiddleware = async () => {
  * a single use-case so permissions stay granular.
  */
 export const uploadRouter = {
-  /**
-   * Featured listing images (hero / gallery).
-   * Admin-only. Accepts jpg, png, webp up to 8 MB, one file per request.
-   */
-  featuredListingImage: f({
-    image: {
-      maxFileSize: "8MB",
-      maxFileCount: 1,
-    },
-  })
-    .middleware(adminOnlyMiddleware)
-    .onUploadComplete(async ({ metadata, file }) => {
-      log.info("Featured listing image uploaded", {
-        userId: metadata.userId,
-        fileName: file.name,
-        url: file.ufsUrl,
-      });
+	/**
+	 * Featured listing images (hero / gallery).
+	 * Admin-only. Accepts jpg, png, webp up to 8 MB, one file per request.
+	 */
+	featuredListingImage: f({
+		image: {
+			maxFileSize: "8MB",
+			maxFileCount: 1,
+		},
+	})
+		.middleware(adminOnlyMiddleware)
+		.onUploadComplete(async ({metadata, file}) => {
+			log.info("Featured listing image uploaded", {
+				userId: metadata.userId,
+				fileName: file.name,
+				url: file.ufsUrl,
+			});
 
-      return { uploadedBy: metadata.userId, url: file.ufsUrl };
-    }),
+			return {uploadedBy: metadata.userId, url: file.ufsUrl};
+		}),
 
-  /**
-   * Downloadable PDF documents (floor plans, brochures, disclosure docs).
-   * Admin-only. Accepts PDF up to 16 MB, max 5 files per request.
-   */
-  listingDocument: f({
-    pdf: {
-      maxFileSize: "16MB",
-      maxFileCount: 5,
-    },
-  })
-    .middleware(adminOnlyMiddleware)
-    .onUploadComplete(async ({ metadata, file }) => {
-      log.info("Listing document uploaded", {
-        userId: metadata.userId,
-        fileName: file.name,
-        url: file.ufsUrl,
-      });
+	/**
+	 * Downloadable PDF documents (floor plans, brochures, disclosure docs).
+	 * Admin-only. Accepts PDF up to 16 MB, max 5 files per request.
+	 */
+	listingDocument: f({
+		pdf: {
+			maxFileSize: "16MB",
+			maxFileCount: 5,
+		},
+	})
+		.middleware(adminOnlyMiddleware)
+		.onUploadComplete(async ({metadata, file}) => {
+			log.info("Listing document uploaded", {
+				userId: metadata.userId,
+				fileName: file.name,
+				url: file.ufsUrl,
+			});
 
-      return { uploadedBy: metadata.userId, url: file.ufsUrl };
-    }),
+			return {uploadedBy: metadata.userId, url: file.ufsUrl};
+		}),
 } satisfies FileRouter;
 
 export type UploadRouter = typeof uploadRouter;

@@ -14,16 +14,16 @@
 
 /** Payload accepted by every email provider. */
 export interface EmailMessage {
-  /** Recipient address(es). */
-  to: string | string[];
-  /** RFC 5322 "From" header, e.g. `"VV Realty <noreply@example.com>"`. */
-  from: string;
-  /** Email subject line. */
-  subject: string;
-  /** Full HTML body (inline-styled for cross-client compat). */
-  html: string;
-  /** Optional reply-to address. */
-  replyTo?: string;
+	/** Recipient address(es). */
+	to: string | string[];
+	/** RFC 5322 "From" header, e.g. `"VV Realty <noreply@example.com>"`. */
+	from: string;
+	/** Email subject line. */
+	subject: string;
+	/** Full HTML body (inline-styled for cross-client compat). */
+	html: string;
+	/** Optional reply-to address. */
+	replyTo?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -32,12 +32,12 @@ export interface EmailMessage {
 
 /** Normalised result returned by every provider after a send attempt. */
 export interface EmailResult {
-  /** Whether the provider accepted the message for delivery. */
-  success: boolean;
-  /** Provider-assigned message ID (useful for debugging / logs). */
-  messageId?: string;
-  /** Human-readable error description when `success` is `false`. */
-  error?: string;
+	/** Whether the provider accepted the message for delivery. */
+	success: boolean;
+	/** Provider-assigned message ID (useful for debugging / logs). */
+	messageId?: string;
+	/** Human-readable error description when `success` is `false`. */
+	error?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -53,14 +53,14 @@ export interface EmailResult {
  * 3. Register it in `src/server/email/providers/index.ts`
  */
 export interface EmailProvider {
-  /** Human-readable provider name (for logging). */
-  readonly name: string;
+	/** Human-readable provider name (for logging). */
+	readonly name: string;
 
-  /**
-   * Send a single email.
-   *
-   * Implementations MUST NOT throw — they should catch errors internally
-   * and return `{ success: false, error: "..." }` instead.
-   */
-  send(message: EmailMessage): Promise<EmailResult>;
+	/**
+	 * Send a single email.
+	 *
+	 * Implementations MUST NOT throw — they should catch errors internally
+	 * and return `{ success: false, error: "..." }` instead.
+	 */
+	send(message: EmailMessage): Promise<EmailResult>;
 }
