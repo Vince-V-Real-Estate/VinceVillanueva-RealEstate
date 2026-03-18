@@ -54,13 +54,9 @@ function getIpAddressHeaders() {
 
 	if (platform === "vercel") {
 		return [...VERCEL_IP_ADDRESS_HEADERS];
-	}
-
-	if (platform === "cloudflare") {
+	} else {
 		return [...CLOUDFLARE_IP_ADDRESS_HEADERS];
 	}
-
-	return [];
 }
 
 function getAuthOptions(): BetterAuthOptions {
