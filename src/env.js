@@ -9,6 +9,8 @@ export const env = createEnv({
 	server: {
 		BETTER_AUTH_API_KEY: z.string().optional(),
 		BETTER_AUTH_URL: z.string(),
+		TRUSTED_PROXY_ENV: z.enum(["vercel", "cloudflare"]).optional(),
+		IP_ADDRESS_HEADERS: z.string().optional(),
 		BETTER_AUTH_SECRET: process.env.NODE_ENV === "production" ? z.string() : z.string().optional(),
 		BETTER_AUTH_GITHUB_CLIENT_ID: z.string().optional(),
 		BETTER_AUTH_GITHUB_CLIENT_SECRET: z.string().optional(),
@@ -41,6 +43,8 @@ export const env = createEnv({
 	runtimeEnv: {
 		BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
 		BETTER_AUTH_API_KEY: process.env.BETTER_AUTH_API_KEY,
+		TRUSTED_PROXY_ENV: process.env.TRUSTED_PROXY_ENV,
+		IP_ADDRESS_HEADERS: process.env.IP_ADDRESS_HEADERS,
 		BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
 		BETTER_AUTH_GITHUB_CLIENT_ID: process.env.BETTER_AUTH_GITHUB_CLIENT_ID,
 		BETTER_AUTH_GITHUB_CLIENT_SECRET: process.env.BETTER_AUTH_GITHUB_CLIENT_SECRET,
