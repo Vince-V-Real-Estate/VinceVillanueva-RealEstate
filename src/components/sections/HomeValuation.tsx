@@ -1,10 +1,7 @@
 "use client";
 
-import {Button} from "../ui/button";
 import Link from "next/link";
 import {NotebookPen, ArrowRight} from "lucide-react";
-import {buttonVariants} from "../ui/button";
-import {cn} from "@/lib/utils";
 
 export function HomeValuation() {
 	return (
