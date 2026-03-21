@@ -16,7 +16,7 @@ export function CuratedListingCTA() {
 							<p className="max-w-md text-lg leading-relaxed text-gray-500">Don&apos;t miss out on new opportunities. Get customized alerts for properties that match your specific criteria before they hit the general market.</p>
 						</div>
 					</div>
-					<div className="w-[70%]">
+					<div className="w-full max-w-lg lg:w-1/2">
 						<LeadCaptureForm type="listings" />
 					</div>
 				</div>
