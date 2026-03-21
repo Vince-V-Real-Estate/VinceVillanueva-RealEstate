@@ -1,7 +1,6 @@
 "use client";
 import {useEffect, useState} from "react";
 
-import {LeadCaptureForm} from "@/components/forms/lead-capture";
 import Carousel, {type SlideData} from "@/components/ui/carousel";
 import {fetchFeaturedListings} from "@/lib/featured-listings/client";
 import {mapFeaturedListingToCarouselSlide} from "@/lib/featured-listings/mappers";
