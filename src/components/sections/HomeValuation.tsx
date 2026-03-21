@@ -1,6 +1,7 @@
 "use client";
 
-import {LeadCaptureForm} from "@/components/forms/lead-capture";
+import Link from "next/link";
+import {NotebookPen, ArrowRight} from "lucide-react";
 
 export function HomeValuation() {
 	return (
@@ -34,16 +35,25 @@ export function HomeValuation() {
 						</div>
 					</div>
 
-					<div className="flex items-center justify-center">
-						<div className="relative w-full max-w-md">
-							<div className="absolute -inset-1 rounded-2xl bg-linear-to-r from-gray-200 to-gray-100 opacity-30 blur" />
-							<div className="relative rounded-2xl border border-gray-100 bg-white p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-								<div className="mb-8 space-y-1 text-center">
-									<h3 className="text-xl font-semibold text-gray-900">Get Your Report</h3>
-									<p className="text-sm text-gray-500">Enter details below to start</p>
+					<div className="flex w-full items-center justify-end justify-self-end">
+						<div className="relative mx-auto w-full max-w-md">
+							<Link
+								href="/sell"
+								className="group flex w-full items-center justify-between rounded-3xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-300 hover:border-black hover:shadow-lg hover:shadow-black/5"
+							>
+								<div className="flex items-center gap-5">
+									<div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gray-50 transition-colors duration-300 group-hover:bg-black group-hover:text-white">
+										<NotebookPen className="h-6 w-6" />
+									</div>
+									<div className="flex flex-col">
+										<span className="text-xl font-semibold text-gray-900">Get Your Free Evaluation</span>
+										<span className="mt-1 text-sm text-gray-500 transition-colors group-hover:text-gray-700">Find out what your home is worth today</span>
+									</div>
 								</div>
-								<LeadCaptureForm type="valuation" />
-							</div>
+								<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-gray-100 bg-gray-50 text-gray-400 transition-all duration-300 group-hover:border-black group-hover:bg-black group-hover:text-white">
+									<ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+								</div>
+							</Link>
 						</div>
 					</div>
 				</div>
