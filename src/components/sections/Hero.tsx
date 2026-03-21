@@ -65,7 +65,7 @@ export function Hero() {
 							<Button
 								type="submit"
 								disabled={isPending}
-								className={cn(isPending && "opacity-50")}
+								className={cn("bg-white text-black hover:bg-gray-200", isPending && "opacity-50")}
 							>
 								<Search className="mr-2 h-4 w-4" />
 								{isPending ? "Searching..." : "Search"}
