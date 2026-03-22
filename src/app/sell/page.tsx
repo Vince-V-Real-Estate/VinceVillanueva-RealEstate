@@ -1,6 +1,5 @@
 import {LeadCaptureForm} from "@/components/forms/lead-capture";
 import {SellerResources} from "@/components/sections/SellerResources";
-
 export default function SellPage() {
 	return (
 		<>
@@ -11,6 +10,12 @@ export default function SellPage() {
 				</div>
 				<div className="flex w-full flex-col justify-center">
 					<SellerResources />
+				</div>
+				<div className="flex w-full flex-col">
+					<div className="my-2 md:my-5 md:justify-center">
+						<h2 className="mb-2 text-center text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Home Evaluation</h2>
+						<p className="mx-auto max-w-md text-center text-gray-500">Receive a detailed market analysis with accurate home valuations based on current market trends, comparable sales, and your property's unique features.</p>
+					</div>
 					<div className="bg-card text-card-foreground mx-auto w-full max-w-lg rounded-xl border p-6 shadow-sm sm:p-8">
 						<LeadCaptureForm type="valuation" />
 					</div>
