@@ -12,7 +12,7 @@ export default function SellPage() {
 					<SellerResources />
 				</div>
 				<div className="flex w-full flex-col">
-					<div className="my-2 md:my-5 md:justify-center">
+					<div className="my-2 md:my-5">
 						<h2 className="mb-2 text-center text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Home Evaluation</h2>
 						<p className="mx-auto max-w-md text-center text-gray-500">Receive a detailed market analysis with accurate home valuations based on current market trends, comparable sales, and your property's unique features.</p>
 					</div>
