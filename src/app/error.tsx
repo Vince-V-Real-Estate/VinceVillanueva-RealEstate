@@ -20,7 +20,7 @@ export default function Error({error, reset}: {error: Error & {digest?: string};
 	}, [error]);
 
 	return (
-		<div className="m-auto flex min-h-[70vh] flex-col items-center justify-start px-4 pt-14 text-center">
+		<div className="m-auto flex min-h-[70vh] flex-col items-center justify-center px-4 pt-14 text-center">
 			<div className="max-w-lg space-y-6">
 				<div className="bg-destructive/10 mx-auto flex h-20 w-20 items-center justify-center rounded-full">
 					<AlertTriangle className="text-destructive h-10 w-10" />
