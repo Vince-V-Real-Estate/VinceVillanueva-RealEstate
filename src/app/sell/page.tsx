@@ -1,9 +1,11 @@
 import {LeadCaptureForm} from "@/components/forms/lead-capture";
 import {SellerResources} from "@/components/sections/SellerResources";
+import HashReset from "@/utils/HashReset";
 
 export default function SellPage() {
 	return (
 		<>
+			<HashReset />
 			<main className="container mx-auto px-4 py-12 md:py-24">
 				<div className="mb-12 text-center">
 					<h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">Selling your home?</h1>
