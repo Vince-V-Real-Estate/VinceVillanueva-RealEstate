@@ -1,6 +1,5 @@
 import {LeadCaptureForm} from "@/components/forms/lead-capture";
 import {SellerResources} from "@/components/sections/SellerResources";
-import Link from "next/link";
 
 export default function SellPage() {
 	return (
@@ -10,12 +9,12 @@ export default function SellPage() {
 					<h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">Selling your home?</h1>
 					<p className="text-muted-foreground mt-4 md:text-xl">
 						Find out what your home is worth. Enter your{" "}
-						<Link
+						<a
 							className="text-black underline"
 							href="#valuation-form"
 						>
 							details below
-						</Link>{" "}
+						</a>{" "}
 						for a free evaluation.
 					</p>
 				</div>
@@ -26,6 +25,7 @@ export default function SellPage() {
 					<div className="my-2 md:my-5">
 						<h2
 							id="valuation-form"
+							tabIndex={-1}
 							className="mb-2 text-center text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl"
 						>
 							Home Evaluation
