@@ -1,8 +1,8 @@
 import HashReset from "@/utils/HashReset";
 
 export const metadata = {
-	title: "Privacy Policy, Terms & Conditions - Vince Villanueva Real Estate",
-	description: "Privacy Policy, Terms and Conditions, and Disclaimer for Vince Villanueva Real Estate.",
+	title: "Privacy Policy & Disclaimer - Vince Villanueva Real Estate",
+	description: "Privacy Policy and Disclaimer for Vince Villanueva Real Estate.",
 };
 
 export default function PrivacyPage() {
