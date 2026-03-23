@@ -1,5 +1,7 @@
 import Link from "next/link";
 import {Home, Search, Mail} from "lucide-react";
+import {buttonVariants} from "@/components/ui/button-variants";
+import {cn} from "@/lib/utils";
 
 export default function NotFound() {
 	return (
@@ -14,21 +16,39 @@ export default function NotFound() {
 				<div className="flex flex-col items-center justify-center gap-4 pt-6 sm:flex-row">
 					<Link
 						href="/"
-						className="ring-offset-background focus-visible:ring-ring bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-10 w-full items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 sm:w-auto"
+						className={cn(
+							buttonVariants({
+								variant: "default",
+								size: "lg",
+							}),
+							"w-full sm:w-auto",
+						)}
 					>
 						<Home className="h-4 w-4" />
 						Back to Home
 					</Link>
 					<Link
 						href="/listings"
-						className="ring-offset-background focus-visible:ring-ring border-input bg-background hover:bg-accent hover:text-accent-foreground inline-flex h-10 w-full items-center justify-center gap-2 rounded-md border px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 sm:w-auto"
+						className={cn(
+							buttonVariants({
+								variant: "outline",
+								size: "lg",
+							}),
+							"w-full sm:w-auto",
+						)}
 					>
 						<Search className="h-4 w-4" />
 						Search Listings
 					</Link>
 					<Link
 						href="/contact"
-						className="ring-offset-background focus-visible:ring-ring hover:bg-accent hover:text-accent-foreground inline-flex h-10 w-full items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 sm:w-auto"
+						className={cn(
+							buttonVariants({
+								variant: "ghost",
+								size: "lg",
+							}),
+							"w-full sm:w-auto",
+						)}
 					>
 						<Mail className="h-4 w-4" />
 						Contact Support

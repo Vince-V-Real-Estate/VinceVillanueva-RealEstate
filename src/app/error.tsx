@@ -3,7 +3,10 @@
 import {useEffect} from "react";
 import Link from "next/link";
 import {RotateCcw, Mail, AlertTriangle} from "lucide-react";
+import {Button} from "@/components/ui/button";
+import {buttonVariants} from "@/components/ui/button-variants";
 import {createLogger} from "@/lib/logger";
+import {cn} from "@/lib/utils";
 
 const log = createLogger("error-page");
 
@@ -25,16 +28,23 @@ export default function Error({error, reset}: {error: Error & {digest?: string};
 				</div>
 
 				<div className="flex flex-col items-center justify-center gap-4 pt-6 sm:flex-row">
-					<button
-						onClick={() => reset()}
-						className="ring-offset-background focus-visible:ring-ring bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-10 w-full items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 sm:w-auto"
+					<Button
+						onClick={reset}
+						size="lg"
+						className="w-full sm:w-auto"
 					>
 						<RotateCcw className="h-4 w-4" />
 						Try again
-					</button>
+					</Button>
 					<Link
 						href="/contact"
-						className="ring-offset-background focus-visible:ring-ring border-input bg-background hover:bg-accent hover:text-accent-foreground inline-flex h-10 w-full items-center justify-center gap-2 rounded-md border px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 sm:w-auto"
+						className={cn(
+							buttonVariants({
+								variant: "outline",
+								size: "lg",
+							}),
+							"w-full sm:w-auto",
+						)}
 					>
 						<Mail className="h-4 w-4" />
 						Contact Support
