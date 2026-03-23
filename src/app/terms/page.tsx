@@ -1,3 +1,10 @@
+import type {Metadata} from "next";
+
+export const metadata: Metadata = {
+	title: "Terms & Conditions - Vince Villanueva Real Estate",
+	description: "Terms and Conditions for Vince Villanueva Real Estate.",
+};
+
 export default function TermsAndConditionsPage() {
 	return (
 		<>
