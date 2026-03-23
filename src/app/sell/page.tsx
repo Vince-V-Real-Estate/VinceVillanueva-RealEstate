@@ -31,7 +31,7 @@ export default function SellPage() {
 						>
 							Home Evaluation
 						</h2>
-						<p className="mx-auto max-w-md text-center text-gray-500">Receive a detailed market analysis with accurate home valuations based on current market trends, comparable sales, and your property's unique features.</p>
+						<p className="mx-auto max-w-md text-center text-gray-500">Receive a detailed market analysis with accurate home valuations based on current market trends, comparable sales, and your property&apos;s unique features.</p>
 					</div>
 					<div className="bg-card text-card-foreground mx-auto w-full max-w-lg rounded-xl border p-6 shadow-sm sm:p-8">
 						<LeadCaptureForm type="valuation" />
