@@ -12,7 +12,7 @@ export function HomeValuation() {
 				<div className="mx-auto grid max-w-6xl items-center gap-8 lg:grid-cols-2 lg:gap-12">
 					<div className="flex flex-col justify-center space-y-6">
 						<div className="space-y-4">
-							<span className="text-sm font-semibold tracking-wider text-gray-500 uppercase">Market Insights</span>
+							<span className="text-sm font-semibold tracking-wider text-gray-500 uppercase">Trying to sell your home?</span>
 							<h2 className="text-4xl font-light tracking-tight text-gray-900 sm:text-6xl">
 								What is your <br />
 								<span className="font-serif text-black italic">home worth?</span>
