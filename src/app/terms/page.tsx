@@ -52,8 +52,8 @@ export default function TermsAndConditionsPage() {
 						<li>Unauthorized use of this website may give rise to a claim for damages and/or be a criminal offence.</li>
 						<li>
 							From time to time, this website may also include links to other website(s) or post(s). These links are provided for your convenience to provide further information. They do not signify that we endorse the website(s) or
-							post(s). We have no responsibility for the content of the linked website(s) or post(s). We the right to add, modify, remove all material of the website in its sole and absolute discretion including, without limitation,
-							links and posts.
+							post(s). We have no responsibility for the content of the linked website(s) or post(s). We reserve the right to add, modify, or remove all material of the website in its sole and absolute discretion including, without
+							limitation, links and posts.
 						</li>
 						<li>
 							This website uses YouTube API services to automatically generate YouTube videos of our listings on the YouTube channel. By using those API, we are agreeing to be bound by the YouTube Terms of Service and Google Privacy
