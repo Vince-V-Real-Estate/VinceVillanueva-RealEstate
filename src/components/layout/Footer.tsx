@@ -198,7 +198,7 @@ export function Footer() {
 							href="/terms"
 							className="hover:text-foreground"
 						>
-							Terms of Service
+							Terms & Conditions
 						</Link>
 						<Link
 							href="/cookies"
