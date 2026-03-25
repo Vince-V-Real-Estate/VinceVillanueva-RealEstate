@@ -1,6 +1,7 @@
 import HashReset from "@/utils/HashReset";
+import type {Metadata} from "next";
 
-export const metadata = {
+export const metadata: Metadata = {
 	title: "Privacy Policy & Disclaimer - Vince Villanueva Real Estate",
 	description: "Privacy Policy and Disclaimer for Vince Villanueva Real Estate.",
 };
