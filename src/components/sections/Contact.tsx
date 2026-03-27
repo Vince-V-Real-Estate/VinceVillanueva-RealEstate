@@ -1,16 +1,16 @@
 import {PHONE_NUMBER, EMAIL_CONTACT, SUNDAY_HOURS, MONDAY_HOURS, TUESDAY_HOURS, WEDNESDAY_HOURS, THURSDAY_HOURS, FRIDAY_HOURS, SATURDAY_HOURS} from "@/lib/constants/contact";
 
-export default function Contact() {
-	const hours = [
-		{day: "Sunday", time: SUNDAY_HOURS},
-		{day: "Monday", time: MONDAY_HOURS},
-		{day: "Tuesday", time: TUESDAY_HOURS},
-		{day: "Wednesday", time: WEDNESDAY_HOURS},
-		{day: "Thursday", time: THURSDAY_HOURS},
-		{day: "Friday", time: FRIDAY_HOURS},
-		{day: "Saturday", time: SATURDAY_HOURS},
-	];
+const officeHours = [
+	{day: "Sunday", time: SUNDAY_HOURS},
+	{day: "Monday", time: MONDAY_HOURS},
+	{day: "Tuesday", time: TUESDAY_HOURS},
+	{day: "Wednesday", time: WEDNESDAY_HOURS},
+	{day: "Thursday", time: THURSDAY_HOURS},
+	{day: "Friday", time: FRIDAY_HOURS},
+	{day: "Saturday", time: SATURDAY_HOURS},
+];
 
+export default function Contact() {
 	return (
 		<section
 			id="contact"
@@ -90,9 +90,9 @@ export default function Contact() {
 					<div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
 						<h3 className="mb-8 text-2xl font-semibold text-gray-900">Office Hours</h3>
 						<div className="space-y-4">
-							{hours.map((item, index) => (
+							{officeHours.map((item) => (
 								<div
-									key={index}
+									key={item.day}
 									className="flex items-center justify-between border-b border-gray-100 pb-4 last:border-0 last:pb-0"
 								>
 									<span className="font-medium text-gray-600">{item.day}</span>
