@@ -4,6 +4,7 @@ import {HomeValuation} from "@/components/sections/HomeValuation";
 import {CuratedListingCTA} from "@/components/sections/CuratedListingsCTA";
 import {CallCTA} from "@/components/sections/CallCTA";
 import FeaturedListings from "@/components/sections/FeaturedListingsCarousel";
+import Contact from "@/components/sections/Contact";
 
 const Hero = dynamic(() => import("@/components/sections/Hero").then((m) => m.Hero), {
 	ssr: true,
@@ -15,6 +16,7 @@ export default function HomePage() {
 			<Hero />
 			<FeaturedListings />
 			<CuratedListingCTA />
+			<Contact />
 			<MortgageCTA />
 			<HomeValuation />
 			<CallCTA />
