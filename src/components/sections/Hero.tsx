@@ -69,7 +69,7 @@ export function Hero() {
 					<div className="w-full space-y-2 rounded-md bg-neutral-300 p-3 shadow-md sm:bg-neutral-400 md:bg-transparent md:shadow-none lg:w-[66%] xl:my-5">
 						<form
 							action={formAction}
-							className="flex w-full flex-col items-center justify-center gap-2 rounded-md sm:flex-row sm:gap-4 md:gap-4"
+							className="flex w-full flex-col gap-2 rounded-md sm:flex-row sm:items-center sm:justify-center sm:gap-4 md:gap-4"
 						>
 							<MLSSearchBar />
 							<Button
