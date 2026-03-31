@@ -15,7 +15,7 @@ export default function Contact() {
 	return (
 		<section
 			id="contact"
-			className="bg-neutral-100 py-20"
+			className="scroll-mt-16 bg-neutral-100 py-20"
 		>
 			<div className="container mx-auto max-w-6xl px-4">
 				<div className="mb-16 text-center">
@@ -30,9 +30,9 @@ export default function Contact() {
 
 						<div className="space-y-6">
 							<div className="flex items-center space-x-4">
-								<div className="bg-primary/10 rounded-full bg-neutral-100 p-3">
+								<div className="bg-primary/10 rounded-full p-3">
 									<svg
-										className="text-primary h-6 w-6 text-neutral-800"
+										className="text-primary h-6 w-6"
 										fill="none"
 										stroke="currentColor"
 										viewBox="0 0 24 24"
@@ -58,9 +58,9 @@ export default function Contact() {
 							</div>
 
 							<div className="flex items-center space-x-4">
-								<div className="bg-primary/10 rounded-full bg-neutral-100 p-3">
+								<div className="bg-primary/10 rounded-full p-3">
 									<svg
-										className="text-primary h-6 w-6 text-neutral-800"
+										className="text-primary h-6 w-6"
 										fill="none"
 										stroke="currentColor"
 										viewBox="0 0 24 24"

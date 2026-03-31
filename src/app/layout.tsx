@@ -27,7 +27,7 @@ export default function RootLayout({children}: Readonly<{children: React.ReactNo
 	return (
 		<html
 			lang="en"
-			className={cn(geist.variable, "font-sans", inter.variable)}
+			className={cn(geist.variable, "scroll-smooth font-sans", inter.variable)}
 		>
 			<body className="flex min-h-screen flex-col">
 				<NextSSRPlugin routerConfig={extractRouterConfig(uploadRouter)} />

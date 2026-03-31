@@ -60,7 +60,7 @@ export function NavigationBar() {
 							</NavigationMenuItem>
 							<NavigationMenuItem>
 								<Link
-									href="/about"
+									href="/#about"
 									className={navigationMenuTriggerStyleTransparent()}
 								>
 									About
@@ -68,7 +68,7 @@ export function NavigationBar() {
 							</NavigationMenuItem>
 							<NavigationMenuItem>
 								<Link
-									href="/contact"
+									href="/#contact"
 									className={navigationMenuTriggerStyleTransparent()}
 								>
 									Contact
@@ -133,14 +133,14 @@ export function NavigationBar() {
 									Sell
 								</Link>
 								<Link
-									href="/about"
+									href="/#about"
 									onClick={() => setIsOpen(false)}
 									className="py-2 text-lg font-medium"
 								>
 									About
 								</Link>
 								<Link
-									href="/contact"
+									href="/#contact"
 									onClick={() => setIsOpen(false)}
 									className="py-2 text-lg font-medium"
 								>

@@ -24,16 +24,19 @@ const PARAGRAPHS = [
 
 export default function Credibility() {
 	return (
-		<section className="w-full bg-white py-12 md:py-24">
+		<section
+			id="about"
+			className="w-full scroll-mt-16 bg-white py-12 md:py-24"
+		>
 			<div className="container mx-auto px-4 md:px-6">
 				<div className="flex flex-col items-center justify-between gap-8 md:flex-row">
 					<div className="flex w-full flex-col justify-center space-y-100 md:w-1/2">
 						<div className="space-y-2">
-							<h2 className="mb-5 text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">About Vince</h2>
+							<h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">About Vince</h2>
 							{PARAGRAPHS.map((item, index) => (
 								<p
 									key={index}
-									className="mb-4 max-w-150 text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed dark:text-gray-400"
+									className="my-4 max-w-150 text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed dark:text-gray-400"
 								>
 									{item.paragraph}
 								</p>
