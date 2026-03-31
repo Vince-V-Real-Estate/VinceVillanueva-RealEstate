@@ -1,12 +1,13 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import {Search} from "lucide-react";
 import {searchSchema} from "@/lib/zod/search-validation";
 import {createLogger} from "@/lib/logger";
 import {cn} from "@/lib/utils";
 import {Button} from "@/components/ui/button";
-import {Input} from "@/components/ui/input";
+import MLSSearchBar from "../forms/MLSSearchBar";
 
 const log = createLogger("search");
 
@@ -42,38 +43,48 @@ export function Hero() {
 	return (
 		<section
 			id="hero-cta"
-			className="relative w-full py-12 md:py-24 lg:py-32 xl:mx-auto xl:w-[90%] xl:py-65"
+			className="relative flex min-h-[60vh] w-full flex-col justify-end overflow-hidden bg-white md:min-h-[85vh] xl:mx-auto xl:w-[90%]"
 		>
-			<div className="container mx-auto px-4 md:px-6">
+			<div className="absolute inset-0 z-0 hidden md:block">
+				<Image
+					src="/vv-asset-2-desktop.png"
+					alt="Vince Villanueva Real Estate Background"
+					fill
+					className="object-contain object-bottom"
+					priority
+				/>
+			</div>
+			<div className="absolute inset-0 z-0 block md:hidden">
+				<Image
+					src="/vv-asset-2-mobile.png"
+					alt="Vince Villanueva Real Estate Background"
+					fill
+					className="object-contain object-top"
+					priority
+				/>
+			</div>
+
+			<div className="relative z-10 container mx-auto px-4 pb-12 md:px-6 md:pb-24">
 				<div className="flex flex-col items-center space-y-4 text-center">
-					<div className="space-y-2">
-						<h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
-							Vince Villanueva <span className="block text-white">Realtor</span>
-						</h1>
-					</div>
-					<div className="w-full max-w-3xl space-y-2 xl:my-5">
+					<div className="w-full space-y-2 rounded-xl bg-neutral-300 p-5 shadow-md sm:bg-neutral-600 xl:my-5">
 						<form
 							action={formAction}
-							className="flex w-full flex-col gap-2 sm:flex-row sm:items-center"
+							className="flex w-full flex-col gap-2 rounded-md sm:flex-row sm:items-center"
 						>
-							<Input
-								name="location"
-								type="text"
-								placeholder="City, Neighborhood, Address or MLS® Number"
-								className="w-full flex-1 bg-white"
-							/>
+							<MLSSearchBar />
 							<Button
 								type="submit"
 								disabled={isPending}
-								className={cn("bg-white text-black hover:bg-gray-200", isPending && "opacity-50")}
+								className={cn("group h-10 bg-black px-8 text-white hover:bg-gray-800 sm:h-12 sm:px-12", isPending && "opacity-50")}
 							>
+								<span className="absolute -top-[150%] left-0 inline-flex w-80 rounded-md bg-neutral-400 opacity-50 shadow-[0_0_10px_10px_rgba(0,0,0,0.3)] shadow-neutral-400 duration-500 group-hover:top-[150%]"></span>
 								<Search className="mr-2 h-4 w-4" />
 								{isPending ? "Searching..." : "Search"}
 							</Button>
 						</form>
 						{actionState.errors.location && (
-							<div className="rounded-md bg-white/90 p-2">
-								<p className="text-sm text-red-500">{actionState.errors.location}</p>
+							<div className="rounded-md bg-white/5 p-2">
+								<p className="text-md text-red-500">{actionState.errors.location}</p>
 							</div>
 						)}
 					</div>
