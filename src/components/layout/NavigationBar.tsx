@@ -60,7 +60,7 @@ export function NavigationBar() {
 							</NavigationMenuItem>
 							<NavigationMenuItem>
 								<Link
-									href="/about"
+									href="/#about"
 									className={navigationMenuTriggerStyleTransparent()}
 								>
 									About
@@ -68,7 +68,7 @@ export function NavigationBar() {
 							</NavigationMenuItem>
 							<NavigationMenuItem>
 								<Link
-									href="/contact"
+									href="/#contact"
 									className={navigationMenuTriggerStyleTransparent()}
 								>
 									Contact
@@ -85,6 +85,14 @@ export function NavigationBar() {
 						<Menu className="h-6 w-6" />
 						<span className="sr-only">Toggle Menu</span>
 					</SheetTrigger>
+
+					<Image
+						src={"/vv-logo.svg"}
+						width={150}
+						height={34}
+						alt="Vince Villanueva Realtor"
+						className="block md:hidden"
+					/>
 					<SheetContent
 						side="left"
 						className="pr-0"
@@ -125,14 +133,14 @@ export function NavigationBar() {
 									Sell
 								</Link>
 								<Link
-									href="/about"
+									href="/#about"
 									onClick={() => setIsOpen(false)}
 									className="py-2 text-lg font-medium"
 								>
 									About
 								</Link>
 								<Link
-									href="/contact"
+									href="/#contact"
 									onClick={() => setIsOpen(false)}
 									className="py-2 text-lg font-medium"
 								>
