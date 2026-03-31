@@ -44,7 +44,7 @@ export default function Credibility() {
 						</div>
 					</div>
 					<div className="relative flex w-full justify-center md:w-1/2">
-						<div className="relative h-[500px] w-full max-w-[500px] md:h-[600px] md:max-w-[500px] lg:h-[750px] lg:max-w-[650px]">
+						<div className="md:-[600px] relative h-125 w-full max-w-125 md:max-w-125 lg:h-187.5 lg:max-w-162.5">
 							<Image
 								src="/vv-asset-1.png"
 								alt="Vince Villanueva"
