@@ -64,8 +64,8 @@ export function Hero() {
 				/>
 			</div>
 
-			<div className="relative z-10 container mx-auto px-4 py-4 md:px-6 lg:pt-0 lg:pb-24">
-				<div className="flex flex-col items-center space-y-4 text-center">
+			<div className="relative z-10 container mx-auto px-4 py-4 md:px-6 lg:pb-24">
+				<div className="flex flex-col items-center space-y-4 text-center md:relative md:bottom-30">
 					<div className="w-full space-y-2 rounded-md bg-neutral-300 p-3 shadow-md sm:bg-neutral-400 md:bg-transparent md:shadow-none lg:w-[66%] xl:my-5">
 						<form
 							action={formAction}
