@@ -10,6 +10,7 @@ import {Sheet, SheetContent, SheetTrigger} from "@/components/ui/sheet";
 import {cn} from "@/lib/utils";
 import {AccountControls} from "@/components/layout/AccountControls";
 import {authClient} from "@/server/better-auth/client";
+import Image from "next/image";
 
 export function NavigationBar() {
 	const [isOpen, setIsOpen] = React.useState(false);
@@ -24,7 +25,12 @@ export function NavigationBar() {
 						href="/"
 						className="mr-6 flex items-center space-x-2"
 					>
-						<span className="hidden text-xl font-bold sm:inline-block">Vince Villanueva</span>
+						<Image
+							src={"/vv-logo.svg"}
+							alt="Vince Villanueva Realtor"
+							width={150}
+							height={34}
+						/>
 					</Link>
 					<NavigationMenu>
 						<NavigationMenuList>
@@ -54,7 +60,7 @@ export function NavigationBar() {
 							</NavigationMenuItem>
 							<NavigationMenuItem>
 								<Link
-									href="/about"
+									href="/#about"
 									className={navigationMenuTriggerStyleTransparent()}
 								>
 									About
@@ -62,7 +68,7 @@ export function NavigationBar() {
 							</NavigationMenuItem>
 							<NavigationMenuItem>
 								<Link
-									href="/contact"
+									href="/#contact"
 									className={navigationMenuTriggerStyleTransparent()}
 								>
 									Contact
@@ -79,6 +85,14 @@ export function NavigationBar() {
 						<Menu className="h-6 w-6" />
 						<span className="sr-only">Toggle Menu</span>
 					</SheetTrigger>
+
+					<Image
+						src={"/vv-logo.svg"}
+						width={150}
+						height={34}
+						alt="Vince Villanueva Realtor"
+						className="block md:hidden"
+					/>
 					<SheetContent
 						side="left"
 						className="pr-0"
@@ -88,9 +102,12 @@ export function NavigationBar() {
 							className="flex items-center"
 							onClick={() => setIsOpen(false)}
 						>
-							<span className="p-4 text-xl font-bold">
-								Vince <span className="">Villanueva</span>
-							</span>
+							<Image
+								src={"/vv-logo.svg"}
+								alt="Vince Villanueva Realtor"
+								width={150}
+								height={34}
+							/>
 						</Link>
 						<div className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
 							<div className="flex flex-col space-y-3">
@@ -116,14 +133,14 @@ export function NavigationBar() {
 									Sell
 								</Link>
 								<Link
-									href="/about"
+									href="/#about"
 									onClick={() => setIsOpen(false)}
 									className="py-2 text-lg font-medium"
 								>
 									About
 								</Link>
 								<Link
-									href="/contact"
+									href="/#contact"
 									onClick={() => setIsOpen(false)}
 									className="py-2 text-lg font-medium"
 								>

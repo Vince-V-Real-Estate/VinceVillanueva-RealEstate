@@ -34,7 +34,7 @@ export function CallCTA() {
 					</div>
 
 					<div className="relative">
-						<div className="absolute -inset-1 rounded-[2rem] bg-gradient-to-tr from-purple-500/20 via-blue-500/20 to-pink-500/20 opacity-50 blur-xl" />
+						<div className="absolute -inset-1 rounded-[2rem] bg-linear-to-tr from-purple-500/20 via-blue-500/20 to-pink-500/20 opacity-50 blur-xl" />
 						<div className="relative rounded-[2rem] border border-white/10 bg-zinc-900/80 p-8 shadow-2xl backdrop-blur-xl md:p-10">
 							<div className="mb-8">
 								<h3 className="mb-2 text-2xl font-light text-white">Schedule Consultation</h3>

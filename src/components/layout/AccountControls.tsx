@@ -5,6 +5,7 @@ import {CircleUserRound} from "lucide-react";
 
 import {buttonVariants} from "@/components/ui/button";
 import {authClient} from "@/server/better-auth/client";
+import {cn} from "@/lib/utils";
 
 interface AccountControlsProps {
 	variant: "desktop" | "mobile";
@@ -61,13 +62,15 @@ function AccountSessionControls({variant, onNavigate}: AccountControlsProps) {
 
 	if (variant === "mobile") {
 		return (
-			<Link
-				href="/auth/sign-in"
-				onClick={onNavigate}
-				className={buttonVariants({variant: "default"})}
-			>
-				Sign In
-			</Link>
+			<div className="flex w-full justify-start pt-4 pr-6">
+				<Link
+					href="/auth/sign-in"
+					onClick={onNavigate}
+					className={cn(buttonVariants({variant: "default"}), "w-[80%] max-w-60")}
+				>
+					Sign In
+				</Link>
+			</div>
 		);
 	}
 

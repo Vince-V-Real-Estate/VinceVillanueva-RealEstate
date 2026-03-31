@@ -1,4 +1,5 @@
 import {PHONE_NUMBER, EMAIL_CONTACT, SUNDAY_HOURS, MONDAY_HOURS, TUESDAY_HOURS, WEDNESDAY_HOURS, THURSDAY_HOURS, FRIDAY_HOURS, SATURDAY_HOURS} from "@/lib/constants/contact";
+import Image from "next/image";
 
 const officeHours = [
 	{day: "Sunday", time: SUNDAY_HOURS},
@@ -14,7 +15,7 @@ export default function Contact() {
 	return (
 		<section
 			id="contact"
-			className="bg-gray-50 py-20"
+			className="scroll-mt-16 bg-neutral-100 py-20"
 		>
 			<div className="container mx-auto max-w-6xl px-4">
 				<div className="mb-16 text-center">
@@ -28,7 +29,7 @@ export default function Contact() {
 						<h3 className="mb-8 text-2xl font-semibold text-gray-900">Get In Touch</h3>
 
 						<div className="space-y-6">
-							<div className="flex items-start space-x-4">
+							<div className="flex items-center space-x-4">
 								<div className="bg-primary/10 rounded-full p-3">
 									<svg
 										className="text-primary h-6 w-6"
@@ -45,7 +46,7 @@ export default function Contact() {
 										/>
 									</svg>
 								</div>
-								<div>
+								<div className="flex flex-col">
 									<p className="text-sm font-medium text-gray-500">Phone</p>
 									<a
 										href={`tel:${PHONE_NUMBER}`}
@@ -56,7 +57,7 @@ export default function Contact() {
 								</div>
 							</div>
 
-							<div className="flex items-start space-x-4">
+							<div className="flex items-center space-x-4">
 								<div className="bg-primary/10 rounded-full p-3">
 									<svg
 										className="text-primary h-6 w-6"
@@ -73,11 +74,11 @@ export default function Contact() {
 										/>
 									</svg>
 								</div>
-								<div>
+								<div className="flex flex-col">
 									<p className="text-sm font-medium text-gray-500">Email</p>
 									<a
 										href={`mailto:${EMAIL_CONTACT}`}
-										className="hover:text-primary text-lg font-semibold text-gray-900 transition-colors"
+										className="hover:text-primary text-lg font-semibold break-all text-gray-900 transition-colors"
 									>
 										{EMAIL_CONTACT}
 									</a>
@@ -100,6 +101,21 @@ export default function Contact() {
 								</div>
 							))}
 						</div>
+					</div>
+					<div className="m-auto w-full">
+						<Image
+							src={"/vv-business-card.png"}
+							alt="Vince Villanueva Real Estate Business Card"
+							width={1500}
+							height={1500}
+						/>
+					</div>
+					<div className="m-auto w-full">
+						<h2 className="text-xl font-bold text-black">My Mission</h2>
+						<p className="text-gray-500">
+							My mission is to provide exceptional real estate services to home buyers, sellers, and investors throughout the Greater Vancouver and Fraser Valley regions. I am committed to understanding your needs and delivering
+							personalized solutions that not only meet but exceed your expectations.{" "}
+						</p>
 					</div>
 				</div>
 			</div>
