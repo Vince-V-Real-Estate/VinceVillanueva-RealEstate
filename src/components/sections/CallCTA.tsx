@@ -7,7 +7,7 @@ import {PhoneCall} from "lucide-react";
 export function CallCTA() {
 	return (
 		<section className="relative w-full overflow-hidden bg-black py-24 text-white md:py-32">
-			<div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[24px_24px] opacity-20" />
+			<div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] opacity-20" />
 
 			<div className="relative z-10 container mx-auto px-4 md:px-6">
 				<div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-24">

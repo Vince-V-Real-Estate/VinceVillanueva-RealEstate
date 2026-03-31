@@ -7,8 +7,7 @@ import {searchSchema} from "@/lib/zod/search-validation";
 import {createLogger} from "@/lib/logger";
 import {cn} from "@/lib/utils";
 import {Button} from "@/components/ui/button";
-import {Input} from "@/components/ui/input";
-import MLSSearchBar from "../forms/MLSSeachBar";
+import MLSSearchBar from "../forms/MLSSearchBar";
 
 const log = createLogger("search");
 
@@ -76,10 +75,10 @@ export function Hero() {
 							<Button
 								type="submit"
 								disabled={isPending}
-								className={cn("h-10 bg-black px-8 text-white hover:bg-gray-800 sm:h-12 sm:px-12", isPending && "opacity-50")}
+								className={cn("group h-10 bg-black px-8 text-white hover:bg-gray-800 sm:h-12 sm:px-12", isPending && "opacity-50")}
 							>
 								<span className="absolute -top-[150%] left-0 inline-flex w-80 rounded-md bg-neutral-400 opacity-50 shadow-[0_0_10px_10px_rgba(0,0,0,0.3)] shadow-neutral-400 duration-500 group-hover:top-[150%]"></span>
-								<Search className="mr-2 h-2 w-4" />
+								<Search className="mr-2 h-4 w-4" />
 								{isPending ? "Searching..." : "Search"}
 							</Button>
 						</form>

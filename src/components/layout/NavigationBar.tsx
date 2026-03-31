@@ -29,7 +29,7 @@ export function NavigationBar() {
 							src={"/vv-logo.svg"}
 							alt="Vince Villanueva Realtor"
 							width={150}
-							height={150}
+							height={34}
 						/>
 					</Link>
 					<NavigationMenu>
@@ -98,7 +98,7 @@ export function NavigationBar() {
 								src={"/vv-logo.svg"}
 								alt="Vince Villanueva Realtor"
 								width={150}
-								height={150}
+								height={34}
 							/>
 						</Link>
 						<div className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
