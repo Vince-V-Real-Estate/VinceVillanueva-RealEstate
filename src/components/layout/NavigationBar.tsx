@@ -85,6 +85,14 @@ export function NavigationBar() {
 						<Menu className="h-6 w-6" />
 						<span className="sr-only">Toggle Menu</span>
 					</SheetTrigger>
+
+					<Image
+						src={"/vv-logo.svg"}
+						width={150}
+						height={34}
+						alt="Vince Villanueva Realtor"
+						className="block md:hidden"
+					/>
 					<SheetContent
 						side="left"
 						className="pr-0"

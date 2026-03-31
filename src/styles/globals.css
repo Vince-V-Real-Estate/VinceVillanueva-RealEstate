@@ -130,9 +130,3 @@
 		@apply font-sans;
 	}
 }
-
-#hero-cta {
-	background-size: cover;
-	background-repeat: no-repeat;
-	background-position: center;
-}

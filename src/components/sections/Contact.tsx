@@ -29,10 +29,10 @@ export default function Contact() {
 						<h3 className="mb-8 text-2xl font-semibold text-gray-900">Get In Touch</h3>
 
 						<div className="space-y-6">
-							<div className="flex items-start space-x-4">
-								<div className="bg-primary/10 rounded-full p-3">
+							<div className="flex items-center space-x-4">
+								<div className="bg-primary/10 rounded-full bg-neutral-100 p-3">
 									<svg
-										className="text-primary h-6 w-6"
+										className="text-primary h-6 w-6 text-neutral-800"
 										fill="none"
 										stroke="currentColor"
 										viewBox="0 0 24 24"
@@ -46,7 +46,7 @@ export default function Contact() {
 										/>
 									</svg>
 								</div>
-								<div>
+								<div className="flex flex-col">
 									<p className="text-sm font-medium text-gray-500">Phone</p>
 									<a
 										href={`tel:${PHONE_NUMBER}`}
@@ -57,10 +57,10 @@ export default function Contact() {
 								</div>
 							</div>
 
-							<div className="flex items-start space-x-4">
-								<div className="bg-primary/10 rounded-full p-3">
+							<div className="flex items-center space-x-4">
+								<div className="bg-primary/10 rounded-full bg-neutral-100 p-3">
 									<svg
-										className="text-primary h-6 w-6"
+										className="text-primary h-6 w-6 text-neutral-800"
 										fill="none"
 										stroke="currentColor"
 										viewBox="0 0 24 24"
@@ -74,11 +74,11 @@ export default function Contact() {
 										/>
 									</svg>
 								</div>
-								<div>
+								<div className="flex flex-col">
 									<p className="text-sm font-medium text-gray-500">Email</p>
 									<a
 										href={`mailto:${EMAIL_CONTACT}`}
-										className="hover:text-primary text-lg font-semibold text-gray-900 transition-colors"
+										className="hover:text-primary text-lg font-semibold break-all text-gray-900 transition-colors"
 									>
 										{EMAIL_CONTACT}
 									</a>
