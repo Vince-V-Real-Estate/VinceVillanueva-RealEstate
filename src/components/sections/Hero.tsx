@@ -43,7 +43,7 @@ export function Hero() {
 	return (
 		<section
 			id="hero-cta"
-			className="relative flex w-full flex-col justify-end bg-white lg:min-h-[85vh] xl:mx-auto xl:w-[90%]"
+			className="relative flex w-full flex-col justify-end bg-white lg:min-h-[85vh] xl:mx-auto xl:w-[90%] 2xl:mt-5"
 		>
 			<div className="absolute inset-0 z-0 hidden overflow-hidden lg:block">
 				<Image
@@ -66,10 +66,10 @@ export function Hero() {
 
 			<div className="relative z-10 container mx-auto px-4 py-4 md:px-6 lg:pb-24">
 				<div className="flex flex-col items-center space-y-4 text-center md:relative md:bottom-30">
-					<div className="w-full space-y-2 rounded-md bg-neutral-300 p-3 shadow-md sm:bg-neutral-400 md:bg-transparent md:shadow-none lg:w-[66%] xl:my-5">
+					<div className="w-full space-y-2 rounded-md bg-neutral-300 p-3 shadow-md sm:bg-neutral-400 md:bg-transparent md:shadow-none lg:w-[66%] xl:my-5 2xl:mb-20">
 						<form
 							action={formAction}
-							className="flex w-full flex-col gap-2 rounded-md sm:flex-row sm:items-center sm:justify-center sm:gap-4"
+							className="flex w-full flex-col gap-2 rounded-md sm:flex-row sm:items-center sm:justify-center sm:gap-4 xl:mb-0"
 						>
 							<MLSSearchBar />
 							<Button
