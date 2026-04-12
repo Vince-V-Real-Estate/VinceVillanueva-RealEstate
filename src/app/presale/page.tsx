@@ -135,24 +135,20 @@ export default function PresalePage() {
 					</div>
 					<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 						{filteredListings.map((listing) => (
-							<div
+							<ListingCard
 								key={listing.id}
-								className="group relative"
-							>
-								<ListingCard
-									id={listing.id}
-									title={listing.title}
-									price={listing.price}
-									address={listing.address}
-									beds={listing.beds}
-									baths={listing.baths}
-									sqft={listing.sqft}
-									imageUrl={listing.imageUrl}
-									status={listing.status}
-									type={listing.type}
-								/>
-								<div className="bg-primary text-primary-foreground absolute -top-3 -right-3 z-20 rotate-3 transform rounded-full px-3 py-1 text-xs font-bold shadow-md">Est. {listing.completion}</div>
-							</div>
+								id={listing.id}
+								title={listing.title}
+								price={listing.price}
+								address={listing.address}
+								beds={listing.beds}
+								baths={listing.baths}
+								sqft={listing.sqft}
+								imageUrl={listing.imageUrl}
+								status={listing.status}
+								type={listing.type}
+								completion={listing.completion}
+							/>
 						))}
 						{filteredListings.length === 0 && <div className="text-muted-foreground col-span-full py-12 text-center">No presale properties found matching your criteria.</div>}
 					</div>
