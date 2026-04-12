@@ -1,6 +1,6 @@
 "use client";
 
-import {useState} from "react";
+import {useMemo, useState} from "react";
 import {Search, Building2} from "lucide-react";
 
 import {Button} from "@/components/ui/button";
@@ -64,17 +64,29 @@ const PRESALE_LISTINGS = [
 	},
 ];
 
+const COMPLETION_YEAR_REGEX = /\b\d{4}\b/;
+
 export default function PresalePage() {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [completionFilter, setCompletionFilter] = useState("all");
 
-	const filteredListings = PRESALE_LISTINGS.filter((listing) => {
-		const matchesSearch = listing.title.toLowerCase().includes(searchTerm.toLowerCase()) || listing.address.toLowerCase().includes(searchTerm.toLowerCase());
+	const completionYears = useMemo(() => {
+		const years = new Set(PRESALE_LISTINGS.map(({completion}) => COMPLETION_YEAR_REGEX.exec(completion)?.[0]).filter((year): year is string => Boolean(year)));
 
-		const matchesCompletion = completionFilter === "all" || listing.completion.includes(completionFilter);
+		return Array.from(years).sort((a, b) => Number(a) - Number(b));
+	}, []);
 
-		return matchesSearch && matchesCompletion;
-	});
+	const filteredListings = useMemo(() => {
+		const normalizedSearchTerm = searchTerm.toLowerCase();
+
+		return PRESALE_LISTINGS.filter((listing) => {
+			const matchesSearch = listing.title.toLowerCase().includes(normalizedSearchTerm) || listing.address.toLowerCase().includes(normalizedSearchTerm);
+
+			const matchesCompletion = completionFilter === "all" || listing.completion.includes(completionFilter);
+
+			return matchesSearch && matchesCompletion;
+		});
+	}, [searchTerm, completionFilter]);
 
 	return (
 		<div className="container mx-auto px-4 py-8 md:px-6 md:py-12">
@@ -105,19 +117,24 @@ export default function PresalePage() {
 									</div>
 								</div>
 								<div className="space-y-2">
-									<Label>Estimated Completion</Label>
+									<Label htmlFor="completion-filter">Estimated Completion</Label>
 									<Select
 										value={completionFilter}
 										onValueChange={(val) => setCompletionFilter(val ?? "all")}
 									>
-										<SelectTrigger>
+										<SelectTrigger id="completion-filter">
 											<SelectValue placeholder="Select year" />
 										</SelectTrigger>
 										<SelectContent>
 											<SelectItem value="all">All Dates</SelectItem>
-											<SelectItem value="2025">2025</SelectItem>
-											<SelectItem value="2026">2026</SelectItem>
-											<SelectItem value="2027">2027</SelectItem>
+											{completionYears.map((year) => (
+												<SelectItem
+													key={year}
+													value={year}
+												>
+													{year}
+												</SelectItem>
+											))}
 										</SelectContent>
 									</Select>
 								</div>
