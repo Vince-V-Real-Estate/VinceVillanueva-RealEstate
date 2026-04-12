@@ -44,6 +44,14 @@ export function NavigationBar() {
 							</NavigationMenuItem>
 							<NavigationMenuItem>
 								<Link
+									href="/presale"
+									className={navigationMenuTriggerStyleTransparent()}
+								>
+									Presale
+								</Link>
+							</NavigationMenuItem>
+							<NavigationMenuItem>
+								<Link
 									href="/buy"
 									className={navigationMenuTriggerStyleTransparent()}
 								>
@@ -117,6 +125,13 @@ export function NavigationBar() {
 									className="py-2 text-lg font-medium"
 								>
 									Listings
+								</Link>
+								<Link
+									href="/presale"
+									onClick={() => setIsOpen(false)}
+									className="py-2 text-lg font-medium"
+								>
+									Presale
 								</Link>
 								<Link
 									href="/buy"
