@@ -50,6 +50,13 @@
       "when": 1773618645248,
       "tag": "0006_jazzy_bruce_banner",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1776240203728,
+      "tag": "0007_parched_malice",
+      "breakpoints": true
     }
   ]
 }
