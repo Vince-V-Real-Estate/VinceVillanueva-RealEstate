@@ -1,6 +1,6 @@
 "use client";
 
-import {useActionState, useEffect, useRef, useState} from "react";
+import {useActionState, useEffect, useState} from "react";
 import {Loader2} from "lucide-react";
 
 import {Button} from "@/components/ui/button";
@@ -193,8 +193,6 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const [fieldErrors, setFieldErrors] = useState<Record<string, string> | null>(null);
 	const [statusMessage, setStatusMessage] = useState<string | null>(null);
-	const formStateRef = useRef<PreSaleFormState>(EMPTY_FORM);
-	const editingIdRef = useRef<string | null>(null);
 
 	/**
 	 * Resets all form fields and local UI state to initial values.
@@ -202,17 +200,15 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 	const resetFormFields = () => {
 		setFormState(EMPTY_FORM);
 		setEditingId(null);
-		formStateRef.current = EMPTY_FORM;
-		editingIdRef.current = null;
 		setIsUploadingImage(false);
 		setFieldErrors(null);
 	};
 
 	const [actionState, formAction, isPending] = useActionState(async (_previousState: PreSaleSubmitState, _formData: FormData): Promise<PreSaleSubmitState> => {
 		try {
-			const activeEditingId = editingIdRef.current;
+			const activeEditingId = editingId;
 			const isEditing = Boolean(activeEditingId);
-			const currentForm = formStateRef.current;
+			const currentForm = formState;
 
 			if (isEditing && activeEditingId) {
 				const parsed = parseFormForUpdate(currentForm);
@@ -259,8 +255,6 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 		if (!selectedListing) {
 			setFormState(EMPTY_FORM);
 			setEditingId(null);
-			formStateRef.current = EMPTY_FORM;
-			editingIdRef.current = null;
 			setIsUploadingImage(false);
 			setErrorMessage(null);
 			setFieldErrors(null);
@@ -271,8 +265,6 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 		const nextFormState = toFormState(selectedListing);
 		setFormState(nextFormState);
 		setEditingId(selectedListing.id);
-		formStateRef.current = nextFormState;
-		editingIdRef.current = selectedListing.id;
 		setIsUploadingImage(false);
 		setErrorMessage(null);
 		setFieldErrors(null);
@@ -280,16 +272,12 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 	}, [selectedListing]);
 
 	/**
-	 * Updates a single text field in the form and keeps the mutable ref in sync.
+	 * Updates a single text field in the form state.
 	 * @param field - The form field to update.
 	 * @param value - The new field value.
 	 */
 	const onFieldChange = (field: keyof Omit<PreSaleFormState, "imageUrls">, value: string) => {
-		setFormState((current) => {
-			const nextState = {...current, [field]: value};
-			formStateRef.current = nextState;
-			return nextState;
-		});
+		setFormState((current) => ({...current, [field]: value}));
 		// Clear field-specific error on change
 		if (fieldErrors?.[field]) {
 			setFieldErrors((prev) => {
@@ -321,12 +309,10 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 			return;
 		}
 
-		setFormState((current) => {
-			const combined = [...current.imageUrls, ...newUrls].slice(0, MAX_PRESALE_IMAGES);
-			const nextState = {...current, imageUrls: combined};
-			formStateRef.current = nextState;
-			return nextState;
-		});
+		setFormState((current) => ({
+			...current,
+			imageUrls: [...current.imageUrls, ...newUrls].slice(0, MAX_PRESALE_IMAGES),
+		}));
 
 		setStatusMessage(`${newUrls.length} image${newUrls.length > 1 ? "s" : ""} uploaded.`);
 		setErrorMessage(null);
@@ -347,12 +333,10 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 	 * @param index - The index of the image to remove.
 	 */
 	const handleRemoveImage = (index: number) => {
-		setFormState((current) => {
-			const nextUrls = current.imageUrls.filter((_, i) => i !== index);
-			const nextState = {...current, imageUrls: nextUrls};
-			formStateRef.current = nextState;
-			return nextState;
-		});
+		setFormState((current) => ({
+			...current,
+			imageUrls: current.imageUrls.filter((_, i) => i !== index),
+		}));
 		setStatusMessage("Image removed. Save listing to persist the change.");
 	};
 

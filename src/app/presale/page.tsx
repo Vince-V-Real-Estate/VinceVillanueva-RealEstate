@@ -3,56 +3,18 @@
 import {useEffect, useMemo, useState} from "react";
 import {Building2, Search} from "lucide-react";
 
-import {ListingCard, type ListingCardProps} from "@/components/ListingCard";
+import {ListingCard} from "@/components/ListingCard";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {createLogger} from "@/lib/logger";
-import {type PresaleListing, type PresaleListingsListResponse} from "@/lib/presales/types";
+import {fetchPresaleListings} from "@/lib/presales/client";
+import {type PresaleListing} from "@/lib/presales/types";
 
 const COMPLETION_YEAR_REGEX = /\b\d{4}\b/;
 const PRESALE_IMAGE_FALLBACK = "/vv-asset-2-desktop.png";
 const log = createLogger("presale-page");
-
-interface ApiErrorShape {
-	error?: string;
-}
-
-/**
- * Converts free-form presale status values into ListingCard-supported statuses.
- * @param status - Status value stored on a presale listing.
- * @returns Supported listing card status, or undefined when unsupported.
- */
-function toListingCardStatus(status: string | null): ListingCardProps["status"] {
-	if (status === "new" || status === "featured" || status === "sold") {
-		return status;
-	}
-
-	return undefined;
-}
-
-/**
- * Loads public presale listings from the API.
- * @async
- * @param signal - Abort signal used to cancel the request.
- * @returns Array of presale listings from the API response.
- * @throws Throws when the API request fails.
- */
-async function fetchPresaleListings(signal: AbortSignal): Promise<PresaleListing[]> {
-	const response = await fetch("/api/presales", {
-		method: "GET",
-		signal,
-	});
-
-	const body = (await response.json().catch(() => null)) as (PresaleListingsListResponse & ApiErrorShape) | null;
-
-	if (!response.ok) {
-		throw new Error(body?.error ?? "Failed to load presale listings");
-	}
-
-	return body?.listings ?? [];
-}
 
 /**
  * Renders the public presale listing page backed by database data.
@@ -70,7 +32,7 @@ export default function PresalePage() {
 
 		const loadPresaleListings = async () => {
 			try {
-				const loadedListings = await fetchPresaleListings(controller.signal);
+				const {listings: loadedListings} = await fetchPresaleListings({signal: controller.signal});
 				setListings(loadedListings);
 				setLoadError(null);
 			} catch (error) {
@@ -191,7 +153,7 @@ export default function PresalePage() {
 										baths={listing.bathrooms}
 										sqft={listing.squareFeet}
 										imageUrl={imageUrl}
-										status={toListingCardStatus(listing.status)}
+										status={listing.status ?? undefined}
 										type="sale"
 										href={`/presale/${listing.id}`}
 									/>

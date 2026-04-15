@@ -3,7 +3,7 @@ import {NextResponse} from "next/server";
 import {MAX_PRESALE_LISTINGS} from "@/lib/presales/types";
 import {presaleInputSchema} from "@/lib/zod/presale";
 import {createLogger} from "@/lib/logger";
-import {countPresaleListings, createPresaleListing, listPresaleListings} from "@/server/presales/service";
+import {createPresaleListingWithLimit, listPresaleListings, parsePresaleListingsLimit} from "@/server/presales/service";
 import {deleteUploadThingFileByUrl} from "@/server/uploadthing/cleanup";
 import {parseAndValidateBody, withApiHandler} from "@/utils/api/route-helpers";
 
@@ -20,8 +20,21 @@ export const GET = withApiHandler(
 		method: "GET",
 		requireAuth: false,
 	},
-	async () => {
-		const listings = await listPresaleListings();
+	async (request) => {
+		const requestUrl = new URL(request.url);
+		const limitParam = requestUrl.searchParams.get("limit");
+		const limit = parsePresaleListingsLimit(limitParam);
+
+		if (limit === null) {
+			return NextResponse.json(
+				{
+					error: `Invalid limit. Use a value between 1 and ${MAX_PRESALE_LISTINGS}.`,
+				},
+				{status: 400},
+			);
+		}
+
+		const listings = await listPresaleListings({limit});
 
 		return {
 			data: {
@@ -51,21 +64,20 @@ export const POST = withApiHandler(
 			return result.error;
 		}
 
-		const currentCount = await countPresaleListings();
-		if (currentCount >= MAX_PRESALE_LISTINGS) {
-			return NextResponse.json(
-				{
-					error: `Maximum of ${MAX_PRESALE_LISTINGS} presale listings allowed.`,
-				},
-				{status: 400},
-			);
-		}
-
 		const realtorId = session!.user.id;
 		let listing;
 
 		try {
-			listing = await createPresaleListing(realtorId, result.data);
+			listing = await createPresaleListingWithLimit(realtorId, result.data, MAX_PRESALE_LISTINGS);
+
+			if (!listing) {
+				return NextResponse.json(
+					{
+						error: `Maximum of ${MAX_PRESALE_LISTINGS} presale listings allowed.`,
+					},
+					{status: 400},
+				);
+			}
 		} catch (error) {
 			// Attempt to clean up uploaded images independently of DB failure
 			for (const imageUrl of result.data.imageUrls) {

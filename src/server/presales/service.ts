@@ -7,6 +7,9 @@ import {presaleListing} from "@/server/db/schema";
 /** Type alias for the Drizzle model row type */
 type PresaleListingRow = InferSelectModel<typeof presaleListing>;
 
+/** Advisory lock key used to serialize presale create-limit checks across requests. */
+const PRESALE_CREATE_LIMIT_LOCK_KEY = 62_007;
+
 /**
  * Converts a database row to a PresaleListing API response object.
  * Handles conversion of Date objects to ISO date strings.
@@ -33,14 +36,19 @@ function toPresaleListing(row: PresaleListingRow): PresaleListing {
 	};
 }
 
+interface ListPresaleListingsOptions {
+	limit?: number;
+}
+
 /**
- * Retrieves all presale listings from the database, ordered by creation date (newest first).
- * @async
+ * Retrieves presale listings from the database, ordered by creation date (newest first).
+ * @param options - Optional filters (e.g., limit)
  * @returns Array of presale listings
  */
-export async function listPresaleListings(): Promise<PresaleListing[]> {
+export async function listPresaleListings(options: ListPresaleListingsOptions = {}): Promise<PresaleListing[]> {
 	const rows = await db.query.presaleListing.findMany({
 		orderBy: (table, helpers) => [helpers.desc(table.createdAt)],
+		limit: options.limit,
 	});
 
 	return rows.map(toPresaleListing);
@@ -102,6 +110,45 @@ export async function createPresaleListing(realtorId: string, input: PresaleList
 	}
 
 	return toPresaleListing(createdListing);
+}
+
+/**
+ * Creates a presale listing while atomically enforcing the global max-listings limit.
+ * Uses a transaction-scoped advisory lock to prevent race conditions under concurrent
+ * create requests.
+ * @param realtorId - The ID of the admin creating the listing
+ * @param input - Presale listing data
+ * @param maxPresaleListings - Maximum allowed presale listings in the system
+ * @returns The created listing, or null if the max limit has already been reached
+ */
+export async function createPresaleListingWithLimit(realtorId: string, input: PresaleListingMutationInput, maxPresaleListings: number): Promise<PresaleListing | null> {
+	return db.transaction(async (tx) => {
+		await tx.execute(sql`SELECT pg_advisory_xact_lock(${PRESALE_CREATE_LIMIT_LOCK_KEY})`);
+
+		const countResult = await tx.select({count: sql<number>`count(*)`}).from(presaleListing);
+		const currentCount = Number(countResult[0]?.count ?? 0);
+
+		if (currentCount >= maxPresaleListings) {
+			return null;
+		}
+
+		const now = new Date();
+		const [createdListing] = await tx
+			.insert(presaleListing)
+			.values({
+				...input,
+				realtorId,
+				createdAt: now,
+				updatedAt: now,
+			})
+			.returning();
+
+		if (!createdListing) {
+			throw new Error("Failed to create presale listing");
+		}
+
+		return toPresaleListing(createdListing);
+	});
 }
 
 /**
