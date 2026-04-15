@@ -99,7 +99,7 @@ export default function PresalePage() {
 					</div>
 					<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 						{filteredListings.map((listing) => (
-							<ListingCard
+							<div
 								key={listing.id}
 								className="group relative"
 							>
