@@ -2,12 +2,14 @@ import {relations} from "drizzle-orm";
 
 import {account} from "./account-schema";
 import {featuredListing} from "./featured-listing-schema";
+import {presaleListing} from "./presale-schema";
 import {session} from "./session-schema";
 import {user} from "./user-schema";
 
 export const userRelations = relations(user, ({many}) => ({
 	account: many(account),
 	featuredListings: many(featuredListing),
+	presaleListings: many(presaleListing),
 	session: many(session),
 }));
 
@@ -22,6 +24,13 @@ export const sessionRelations = relations(session, ({one}) => ({
 export const featuredListingRelations = relations(featuredListing, ({one}) => ({
 	realtor: one(user, {
 		fields: [featuredListing.realtorId],
+		references: [user.id],
+	}),
+}));
+
+export const presaleListingRelations = relations(presaleListing, ({one}) => ({
+	realtor: one(user, {
+		fields: [presaleListing.realtorId],
 		references: [user.id],
 	}),
 }));

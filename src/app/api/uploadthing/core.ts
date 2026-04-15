@@ -2,6 +2,7 @@ import {createUploadthing, type FileRouter} from "uploadthing/next";
 import {UploadThingError} from "uploadthing/server";
 
 import {getSession} from "@/server/better-auth/server";
+import {MAX_PRESALE_IMAGES} from "@/lib/presales/types";
 import {createLogger} from "@/lib/logger";
 
 const f = createUploadthing();
@@ -50,6 +51,28 @@ export const uploadRouter = {
 		.middleware(adminOnlyMiddleware)
 		.onUploadComplete(async ({metadata, file}) => {
 			log.info("Featured listing image uploaded", {
+				userId: metadata.userId,
+				fileName: file.name,
+				url: file.ufsUrl,
+			});
+
+			return {uploadedBy: metadata.userId, url: file.ufsUrl};
+		}),
+
+	/**
+	 * Presale listing images (hero + gallery).
+	 * Admin-only. Accepts jpg, png, webp up to 8 MB.
+	 * Max file count is driven by MAX_PRESALE_IMAGES.
+	 */
+	presaleImage: f({
+		image: {
+			maxFileSize: "8MB",
+			maxFileCount: MAX_PRESALE_IMAGES,
+		},
+	})
+		.middleware(adminOnlyMiddleware)
+		.onUploadComplete(async ({metadata, file}) => {
+			log.info("Presale image uploaded", {
 				userId: metadata.userId,
 				fileName: file.name,
 				url: file.ufsUrl,
