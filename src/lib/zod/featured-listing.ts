@@ -1,5 +1,5 @@
 import {z} from "zod";
-import {countWords} from "@/lib/utils/string";
+import {countWords} from "@/utils/string";
 
 const BATHROOM_INCREMENT = 0.5;
 const DESCRIPTION_MAX_WORDS = 50;

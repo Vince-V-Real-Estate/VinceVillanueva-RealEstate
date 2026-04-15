@@ -7,7 +7,7 @@ import {Label} from "@/components/ui/label";
 import {Textarea} from "@/components/ui/textarea";
 import type {UploadedUploadThingFile} from "@/components/ui/file-upload";
 import {createLogger} from "@/lib/logger";
-import {countWords} from "@/lib/utils/string";
+import {countWords} from "@/utils/string";
 import {parseFeaturedListingFormInput} from "@/lib/zod/featured-listing-form";
 import {type FeaturedListing, type FeaturedListingMutationInput} from "@/lib/featured-listings/types";
 import {FeaturedListingsApiError, createFeaturedListing, updateFeaturedListing} from "@/lib/featured-listings/client";

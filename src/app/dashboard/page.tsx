@@ -5,6 +5,7 @@ import {useRouter} from "next/navigation";
 import {authClient} from "@/server/better-auth/client";
 import {LeadsManager} from "@/components/dashboard/LeadsManager";
 import {FeaturedListingsManager} from "@/components/dashboard/FeaturedListingsManager";
+import PreSaleManager from "@/components/dashboard/PreSaleManager";
 import {NavigationMenu, NavigationMenuItem, NavigationMenuList, navigationMenuTriggerStyle} from "@/components/ui/navigation-menu";
 import {cn} from "@/lib/utils";
 
@@ -15,7 +16,7 @@ import {cn} from "@/lib/utils";
 export default function DashboardPage() {
 	const router = useRouter();
 	const {data: session, isPending: sessionLoading} = authClient.useSession();
-	const [activeTab, setActiveTab] = useState<"leads" | "listings">("leads");
+	const [activeTab, setActiveTab] = useState<"leads" | "listings" | "presales">("leads");
 
 	useEffect(() => {
 		// Wait for session to load
@@ -91,13 +92,21 @@ export default function DashboardPage() {
 										Featured Listings
 									</button>
 								</NavigationMenuItem>
+								<NavigationMenuItem>
+									<button
+										onClick={() => setActiveTab("presales")}
+										className={cn(navigationMenuTriggerStyle(), "cursor-pointer bg-transparent shadow-none hover:bg-gray-100 data-[state=open]:bg-transparent", activeTab === "presales" && "bg-gray-100 font-semibold")}
+									>
+										Pre-Sales
+									</button>
+								</NavigationMenuItem>
 							</NavigationMenuList>
 						</NavigationMenu>
 					</div>
 				</div>
 			</header>
 
-			<main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">{activeTab === "leads" ? <LeadsManager /> : <FeaturedListingsManager />}</main>
+			<main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">{activeTab === "leads" ? <LeadsManager /> : activeTab === "listings" ? <FeaturedListingsManager /> : <PreSaleManager />}</main>
 		</div>
 	);
 }

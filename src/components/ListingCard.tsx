@@ -14,12 +14,15 @@ export interface ListingCardProps {
 	baths: number;
 	sqft: number;
 	imageUrl: string;
-	status?: "new" | "featured" | "sold";
+	status?: string;
 	type?: "sale" | "rent";
 	href?: string;
 }
 
 export function ListingCard({id, title, price, address, beds, baths, sqft, imageUrl, status, type = "sale", href}: ListingCardProps) {
+	const normalizedStatus = status?.trim().toLowerCase();
+	const badgeVariant = normalizedStatus === "sold" ? "secondary" : "default";
+
 	return (
 		<Link
 			href={href ?? `/listings/${id}`}
@@ -38,7 +41,7 @@ export function ListingCard({id, title, price, address, beds, baths, sqft, image
 					{status && (
 						<Badge
 							className="absolute top-3 left-3 z-10 text-[10px] font-medium tracking-wider uppercase shadow-sm"
-							variant={status === "sold" ? "secondary" : "default"}
+							variant={badgeVariant}
 						>
 							{status}
 						</Badge>
