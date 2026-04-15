@@ -27,7 +27,7 @@ export default async function PresaleDetailPage({params}: PresaleDetailPageProps
 	return (
 		<div className="bg-zinc-50 pb-20">
 			{/* Hero Image Section */}
-			<div className="relative h-[50vh] min-h-100 w-full lg:h-[70vh]">
+			<div className="relative h-[50vh] min-h-[400px] w-full lg:h-[70vh]">
 				<Image
 					src={images[0] ?? listing.imageUrl}
 					alt={listing.title}
@@ -35,7 +35,7 @@ export default async function PresaleDetailPage({params}: PresaleDetailPageProps
 					className="object-cover"
 					priority
 				/>
-				<div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent" />
+				<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
 				<div className="absolute top-6 left-6 z-10 md:top-10 md:left-10">
 					<Link
