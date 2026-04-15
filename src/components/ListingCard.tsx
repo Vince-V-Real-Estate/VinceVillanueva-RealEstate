@@ -25,7 +25,7 @@ export function ListingCard({id, title, price, address, beds, baths, sqft, image
 			href={href ?? `/listings/${id}`}
 			className="group block h-full"
 		>
-			<Card className="border-border/50 bg-background hover:border-primary/30 flex h-full flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+			<Card className="border-border/50 bg-background hover:border-primary/30 flex h-full flex-col gap-0 overflow-hidden py-0 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
 				<div className="relative aspect-[4/3] overflow-hidden">
 					<Image
 						src={imageUrl}
@@ -92,6 +92,7 @@ export function ListingCard({id, title, price, address, beds, baths, sqft, image
 					</div>
 				</div>
 			</Card>
+			{completion && <div className="bg-primary text-primary-foreground absolute -top-3 -right-3 z-20 rotate-3 transform rounded-full px-3 py-1 text-xs font-bold shadow-md">Est. {completion}</div>}
 		</Link>
 	);
 }
