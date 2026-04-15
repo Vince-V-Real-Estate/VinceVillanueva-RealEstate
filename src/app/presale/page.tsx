@@ -9,60 +9,7 @@ import {Label} from "@/components/ui/label";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {ListingCard} from "@/components/ListingCard";
 
-// Mock data for presale homes
-const PRESALE_LISTINGS = [
-	{
-		id: "ps-1",
-		title: "Oasis Tower",
-		price: 850000,
-		address: "Downtown Vancouver, BC",
-		beds: 2,
-		baths: 2,
-		sqft: 950,
-		imageUrl: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=2940&auto=format&fit=crop",
-		status: "new" as const,
-		type: "sale" as const,
-		completion: "Fall 2026",
-	},
-	{
-		id: "ps-2",
-		title: "Lumina Residences",
-		price: 1250000,
-		address: "Burnaby Heights, BC",
-		beds: 3,
-		baths: 2,
-		sqft: 1200,
-		imageUrl: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2953&auto=format&fit=crop",
-		status: "featured" as const,
-		type: "sale" as const,
-		completion: "Spring 2025",
-	},
-	{
-		id: "ps-3",
-		title: "Apex Lofts",
-		price: 620000,
-		address: "Surrey Central, BC",
-		beds: 1,
-		baths: 1,
-		sqft: 650,
-		imageUrl: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2940&auto=format&fit=crop",
-		type: "sale" as const,
-		completion: "Winter 2025",
-	},
-	{
-		id: "ps-4",
-		title: "The Horizon",
-		price: 2100000,
-		address: "West Vancouver, BC",
-		beds: 4,
-		baths: 3,
-		sqft: 2200,
-		imageUrl: "https://images.unsplash.com/photo-1600596542815-22b5dbf1529e?q=80&w=2938&auto=format&fit=crop",
-		status: "new" as const,
-		type: "sale" as const,
-		completion: "Summer 2027",
-	},
-];
+import {PRESALE_LISTINGS} from "@/lib/mock-data/presale";
 
 export default function PresalePage() {
 	const [searchTerm, setSearchTerm] = useState("");
@@ -150,6 +97,7 @@ export default function PresalePage() {
 									imageUrl={listing.imageUrl}
 									status={listing.status}
 									type={listing.type}
+									href={`/presale/${listing.id}`}
 								/>
 								<div className="bg-primary text-primary-foreground absolute -top-3 -right-3 z-20 rotate-3 transform rounded-full px-3 py-1 text-xs font-bold shadow-md">Est. {listing.completion}</div>
 							</div>

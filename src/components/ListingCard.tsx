@@ -16,12 +16,13 @@ export interface ListingCardProps {
 	imageUrl: string;
 	status?: "new" | "featured" | "sold";
 	type?: "sale" | "rent";
+	href?: string;
 }
 
-export function ListingCard({id, title, price, address, beds, baths, sqft, imageUrl, status, type = "sale"}: ListingCardProps) {
+export function ListingCard({id, title, price, address, beds, baths, sqft, imageUrl, status, type = "sale", href}: ListingCardProps) {
 	return (
 		<Link
-			href={`/listings/${id}`}
+			href={href ?? `/listings/${id}`}
 			className="group block h-full"
 		>
 			<Card className="border-border/50 bg-background hover:border-primary/30 flex h-full flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
