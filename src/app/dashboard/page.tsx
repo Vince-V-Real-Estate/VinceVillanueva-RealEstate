@@ -51,6 +51,12 @@ export default function DashboardPage() {
 		return null;
 	}
 
+	const tabContentByTab = {
+		leads: <LeadsManager />,
+		listings: <FeaturedListingsManager />,
+		presales: <PreSaleManager />,
+	} as const;
+
 	return (
 		<div className="min-h-screen bg-gray-50">
 			{/* Header */}
@@ -106,7 +112,7 @@ export default function DashboardPage() {
 				</div>
 			</header>
 
-			<main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">{activeTab === "leads" ? <LeadsManager /> : activeTab === "listings" ? <FeaturedListingsManager /> : <PreSaleManager />}</main>
+			<main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">{tabContentByTab[activeTab]}</main>
 		</div>
 	);
 }

@@ -65,12 +65,14 @@ export const PATCH = withApiHandler(
 		}
 
 		// Clean up removed images independently of the DB update
-		for (const removedUrl of updateResult.removedImageUrls) {
-			await deleteUploadThingFileByUrl(removedUrl, {
-				reason: "presale-image-replace",
-				listingId,
-			});
-		}
+		await Promise.all(
+			updateResult.removedImageUrls.map((removedUrl) =>
+				deleteUploadThingFileByUrl(removedUrl, {
+					reason: "presale-image-replace",
+					listingId,
+				}),
+			),
+		);
 
 		log.info("Presale listing updated", {
 			listingId,
@@ -104,12 +106,14 @@ export const DELETE = withApiHandler(
 		}
 
 		// Clean up all image files from UploadThing independently
-		for (const imageUrl of deleteResult.imageUrls) {
-			await deleteUploadThingFileByUrl(imageUrl, {
-				reason: "presale-delete",
-				listingId,
-			});
-		}
+		await Promise.all(
+			deleteResult.imageUrls.map((imageUrl) =>
+				deleteUploadThingFileByUrl(imageUrl, {
+					reason: "presale-delete",
+					listingId,
+				}),
+			),
+		);
 
 		log.info("Presale listing deleted", {
 			listingId,
