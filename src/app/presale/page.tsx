@@ -1,92 +1,77 @@
 "use client";
 
-import {useMemo, useState} from "react";
-import {Search, Building2} from "lucide-react";
+import {useEffect, useMemo, useState} from "react";
+import {Building2, Search} from "lucide-react";
 
+import {ListingCard} from "@/components/ListingCard";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import {ListingCard} from "@/components/ListingCard";
-
-// Mock data for presale homes
-const PRESALE_LISTINGS = [
-	{
-		id: "ps-1",
-		title: "Oasis Tower",
-		price: 850000,
-		address: "Downtown Vancouver, BC",
-		beds: 2,
-		baths: 2,
-		sqft: 950,
-		imageUrl: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=2940&auto=format&fit=crop",
-		status: "new" as const,
-		type: "sale" as const,
-		completion: "Fall 2026",
-	},
-	{
-		id: "ps-2",
-		title: "Lumina Residences",
-		price: 1250000,
-		address: "Burnaby Heights, BC",
-		beds: 3,
-		baths: 2,
-		sqft: 1200,
-		imageUrl: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2953&auto=format&fit=crop",
-		status: "featured" as const,
-		type: "sale" as const,
-		completion: "Spring 2025",
-	},
-	{
-		id: "ps-3",
-		title: "Apex Lofts",
-		price: 620000,
-		address: "Surrey Central, BC",
-		beds: 1,
-		baths: 1,
-		sqft: 650,
-		imageUrl: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2940&auto=format&fit=crop",
-		type: "sale" as const,
-		completion: "Winter 2025",
-	},
-	{
-		id: "ps-4",
-		title: "The Horizon",
-		price: 2100000,
-		address: "West Vancouver, BC",
-		beds: 4,
-		baths: 3,
-		sqft: 2200,
-		imageUrl: "https://images.unsplash.com/photo-1600596542815-22b5dbf1529e?q=80&w=2938&auto=format&fit=crop",
-		status: "new" as const,
-		type: "sale" as const,
-		completion: "Summer 2027",
-	},
-];
+import {createLogger} from "@/lib/logger";
+import {fetchPresaleListings} from "@/lib/presales/client";
+import {type PresaleListing} from "@/lib/presales/types";
 
 const COMPLETION_YEAR_REGEX = /\b\d{4}\b/;
+const PRESALE_IMAGE_FALLBACK = "/vv-asset-2-desktop.png";
+const log = createLogger("presale-page");
 
+/**
+ * Renders the public presale listing page backed by database data.
+ * @returns The interactive presale listings experience with filters and cards.
+ */
 export default function PresalePage() {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [completionFilter, setCompletionFilter] = useState("all");
+	const [listings, setListings] = useState<PresaleListing[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
+	const [loadError, setLoadError] = useState<string | null>(null);
+
+	useEffect(() => {
+		const controller = new AbortController();
+
+		const loadPresaleListings = async () => {
+			try {
+				const {listings: loadedListings} = await fetchPresaleListings({signal: controller.signal});
+				setListings(loadedListings);
+				setLoadError(null);
+			} catch (error) {
+				if (error instanceof DOMException && error.name === "AbortError") {
+					return;
+				}
+
+				log.error("Failed to load presale listings", error);
+				setListings([]);
+				setLoadError("Presale listings are temporarily unavailable.");
+			} finally {
+				setIsLoading(false);
+			}
+		};
+
+		void loadPresaleListings();
+
+		return () => {
+			controller.abort();
+		};
+	}, []);
 
 	const completionYears = useMemo(() => {
-		const years = new Set(PRESALE_LISTINGS.map(({completion}) => COMPLETION_YEAR_REGEX.exec(completion)?.[0]).filter((year): year is string => Boolean(year)));
+		const years = new Set(listings.map(({completion}) => COMPLETION_YEAR_REGEX.exec(completion)?.[0]).filter((year): year is string => Boolean(year)));
 
 		return Array.from(years).sort((a, b) => Number(a) - Number(b));
-	}, []);
+	}, [listings]);
 
 	const filteredListings = useMemo(() => {
 		const normalizedSearchTerm = searchTerm.toLowerCase();
 
-		return PRESALE_LISTINGS.filter((listing) => {
+		return listings.filter((listing) => {
 			const matchesSearch = listing.title.toLowerCase().includes(normalizedSearchTerm) || listing.address.toLowerCase().includes(normalizedSearchTerm);
 
 			const matchesCompletion = completionFilter === "all" || listing.completion.includes(completionFilter);
 
 			return matchesSearch && matchesCompletion;
 		});
-	}, [searchTerm, completionFilter]);
+	}, [listings, searchTerm, completionFilter]);
 
 	return (
 		<div className="container mx-auto px-4 py-8 md:px-6 md:py-12">
@@ -151,23 +136,33 @@ export default function PresalePage() {
 						</div>
 					</div>
 					<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-						{filteredListings.map((listing) => (
-							<ListingCard
-								key={listing.id}
-								id={listing.id}
-								title={listing.title}
-								price={listing.price}
-								address={listing.address}
-								beds={listing.beds}
-								baths={listing.baths}
-								sqft={listing.sqft}
-								imageUrl={listing.imageUrl}
-								status={listing.status}
-								type={listing.type}
-								completion={listing.completion}
-							/>
-						))}
-						{filteredListings.length === 0 && <div className="text-muted-foreground col-span-full py-12 text-center">No presale properties found matching your criteria.</div>}
+						{filteredListings.map((listing) => {
+							const imageUrl = listing.imageUrls[0] ?? PRESALE_IMAGE_FALLBACK;
+
+							return (
+								<div
+									key={listing.id}
+									className="group relative"
+								>
+									<ListingCard
+										id={listing.id}
+										title={listing.title}
+										price={listing.price}
+										address={listing.address}
+										beds={listing.bedrooms}
+										baths={listing.bathrooms}
+										sqft={listing.squareFeet}
+										imageUrl={imageUrl}
+										status={listing.status ?? undefined}
+										type="sale"
+										href={`/presale/${listing.id}`}
+									/>
+									<div className="bg-primary text-primary-foreground absolute -top-3 -right-3 z-20 rotate-3 transform rounded-full px-3 py-1 text-xs font-bold shadow-md">Est. {listing.completion}</div>
+								</div>
+							);
+						})}
+						{isLoading && <div className="text-muted-foreground col-span-full py-12 text-center">Loading presale properties...</div>}
+						{!isLoading && filteredListings.length === 0 && <div className="text-muted-foreground col-span-full py-12 text-center">{loadError ?? "No presale properties found matching your criteria."}</div>}
 					</div>
 				</div>
 			</div>

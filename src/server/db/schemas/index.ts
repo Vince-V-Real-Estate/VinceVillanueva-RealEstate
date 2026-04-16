@@ -3,6 +3,7 @@ export * from "./core-schema";
 export * from "./featured-listing-schema";
 export * from "./lead-schema";
 export * from "./post-schema";
+export * from "./presale-schema";
 export * from "./relations-schema";
 export * from "./session-schema";
 export * from "./user-schema";

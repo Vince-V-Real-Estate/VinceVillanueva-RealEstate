@@ -14,17 +14,19 @@ export interface ListingCardProps {
 	baths: number;
 	sqft: number;
 	imageUrl: string;
-	status?: "new" | "featured" | "sold";
+	status?: string;
 	type?: "sale" | "rent";
-	completion?: string;
 	href?: string;
 }
 
-export function ListingCard({id, title, price, address, beds, baths, sqft, imageUrl, status, type = "sale", completion, href}: ListingCardProps) {
+export function ListingCard({id, title, price, address, beds, baths, sqft, imageUrl, status, type = "sale", href}: ListingCardProps) {
+	const normalizedStatus = status?.trim().toLowerCase();
+	const badgeVariant = normalizedStatus === "sold" ? "secondary" : "default";
+
 	return (
 		<Link
 			href={href ?? `/listings/${id}`}
-			className="group relative block h-full"
+			className="group block h-full"
 		>
 			<Card className="border-border/50 bg-background hover:border-primary/30 flex h-full flex-col gap-0 overflow-hidden py-0 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
 				<div className="relative aspect-[4/3] overflow-hidden">
@@ -39,7 +41,7 @@ export function ListingCard({id, title, price, address, beds, baths, sqft, image
 					{status && (
 						<Badge
 							className="absolute top-3 left-3 z-10 text-[10px] font-medium tracking-wider uppercase shadow-sm"
-							variant={status === "sold" ? "secondary" : "default"}
+							variant={badgeVariant}
 						>
 							{status}
 						</Badge>
@@ -93,7 +95,6 @@ export function ListingCard({id, title, price, address, beds, baths, sqft, image
 					</div>
 				</div>
 			</Card>
-			{completion && <div className="bg-primary text-primary-foreground absolute -top-3 -right-3 z-20 rotate-3 transform rounded-full px-3 py-1 text-xs font-bold shadow-md">Est. {completion}</div>}
 		</Link>
 	);
 }
