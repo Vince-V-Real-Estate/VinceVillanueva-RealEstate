@@ -28,13 +28,13 @@ export default async function PresaleDetailPage({params}: PresaleDetailPageProps
 		notFound();
 	}
 
-	const images = listing.imageUrls.length > 0 ? listing.imageUrls : [PRESALE_IMAGE_FALLBACK];
+	const images: [string, ...string[]] = listing.imageUrls.length > 0 ? (listing.imageUrls as [string, ...string[]]) : [PRESALE_IMAGE_FALLBACK];
 
 	return (
 		<div className="bg-zinc-50 pb-20">
 			<div className="relative h-[50vh] min-h-[400px] w-full lg:h-[70vh]">
 				<Image
-					src={images[0] ?? PRESALE_IMAGE_FALLBACK}
+					src={images[0]}
 					alt={listing.title}
 					fill
 					className="object-cover"
@@ -131,7 +131,7 @@ export default async function PresaleDetailPage({params}: PresaleDetailPageProps
 								<div className="grid grid-cols-2 gap-4 md:grid-cols-3">
 									{images.slice(1, 4).map((img, idx) => (
 										<div
-											key={idx}
+											key={img}
 											className={`relative aspect-square overflow-hidden rounded-2xl ${idx === 2 ? "col-span-2 md:col-span-1" : ""}`}
 										>
 											<Image

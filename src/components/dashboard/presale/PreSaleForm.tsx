@@ -94,12 +94,12 @@ function toFormState(listing: PresaleListing): PreSaleFormState {
 }
 
 /**
- * Parses the form state into a validated create mutation payload using Zod.
+ * Builds the presale mutation payload from current form values.
  * @param form - The current form state.
- * @returns Validated payload or an object with field errors.
+ * @returns Normalized payload ready for schema validation.
  */
-function parseFormForCreate(form: PreSaleFormState): {data: PresaleListingMutationInput} | {errors: Record<string, string>} {
-	const raw = {
+function buildMutationInputFromForm(form: PreSaleFormState): PresaleListingMutationInput {
+	return {
 		title: form.title,
 		description: form.description,
 		price: Number(form.price) || 0,
@@ -113,9 +113,18 @@ function parseFormForCreate(form: PreSaleFormState): {data: PresaleListingMutati
 		developer: form.developer,
 		amenities: form.amenities
 			.split(",")
-			.map((a) => a.trim())
+			.map((amenity) => amenity.trim())
 			.filter(Boolean),
 	};
+}
+
+/**
+ * Parses the form state into a validated create mutation payload using Zod.
+ * @param form - The current form state.
+ * @returns Validated payload or an object with field errors.
+ */
+function parseFormForCreate(form: PreSaleFormState): {data: PresaleListingMutationInput} | {errors: Record<string, string>} {
+	const raw = buildMutationInputFromForm(form);
 
 	const result = presaleInputSchema.safeParse(raw);
 	if (!result.success) {
@@ -136,23 +145,7 @@ function parseFormForCreate(form: PreSaleFormState): {data: PresaleListingMutati
  * @returns Validated partial payload or an object with field errors.
  */
 function parseFormForUpdate(form: PreSaleFormState): {data: Partial<PresaleListingMutationInput>} | {errors: Record<string, string>} {
-	const raw = {
-		title: form.title,
-		description: form.description,
-		price: Number(form.price) || 0,
-		address: form.address,
-		bedrooms: Number(form.bedrooms) || 0,
-		bathrooms: Number(form.bathrooms) || 0,
-		squareFeet: Number(form.squareFeet) || 0,
-		imageUrls: form.imageUrls,
-		status: form.status.trim() || null,
-		completion: form.completion,
-		developer: form.developer,
-		amenities: form.amenities
-			.split(",")
-			.map((a) => a.trim())
-			.filter(Boolean),
-	};
+	const raw = buildMutationInputFromForm(form);
 
 	const result = updatePresaleInputSchema.safeParse(raw);
 	if (!result.success) {

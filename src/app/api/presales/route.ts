@@ -80,12 +80,14 @@ export const POST = withApiHandler(
 			}
 		} catch (error) {
 			// Attempt to clean up uploaded images independently of DB failure
-			for (const imageUrl of result.data.imageUrls) {
-				await deleteUploadThingFileByUrl(imageUrl, {
-					reason: "presale-create-failure",
-					realtorId,
-				});
-			}
+			await Promise.all(
+				result.data.imageUrls.map((imageUrl) =>
+					deleteUploadThingFileByUrl(imageUrl, {
+						reason: "presale-create-failure",
+						realtorId,
+					}),
+				),
+			);
 
 			log.error("Presale listing create failed; image cleanup attempted", error, {
 				realtorId,
