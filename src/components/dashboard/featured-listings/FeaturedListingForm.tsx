@@ -130,7 +130,6 @@ export function FeaturedListingForm({selectedListing, listingsCount, canCreateMo
 	const clearPendingCreateImage = useCallback(() => {
 		setPendingCreateImage((current) => {
 			revokePendingPreview(current);
-			pendingCreateImageRef.current = null;
 			return null;
 		});
 	}, []);
@@ -324,7 +323,6 @@ export function FeaturedListingForm({selectedListing, listingsCount, canCreateMo
 		revokePendingPreview(previousPendingImage);
 
 		setPendingCreateImage(nextPendingImage);
-		pendingCreateImageRef.current = nextPendingImage;
 		onFieldChange("imageUrl", nextPendingImage.previewUrl);
 		setErrorMessage(null);
 		setStatusMessage("Image selected. It will upload when you create the listing.");

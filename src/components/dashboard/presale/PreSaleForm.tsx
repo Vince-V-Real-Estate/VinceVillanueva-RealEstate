@@ -228,7 +228,6 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 	const clearPendingCreateImages = useCallback(() => {
 		setPendingCreateImages((current) => {
 			revokePendingImagePreviews(current);
-			pendingCreateImagesRef.current = [];
 			return [];
 		});
 	}, []);
@@ -443,7 +442,6 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 
 		const nextPendingImages = [...existingImages, ...pendingImagesToAdd].slice(0, MAX_PRESALE_IMAGES);
 		setPendingCreateImages(nextPendingImages);
-		pendingCreateImagesRef.current = nextPendingImages;
 		setFormState((current) => ({
 			...current,
 			imageUrls: nextPendingImages.map((image) => image.previewUrl),
