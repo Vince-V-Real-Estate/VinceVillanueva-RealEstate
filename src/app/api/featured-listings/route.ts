@@ -66,6 +66,11 @@ export const POST = withApiHandler(
 		const realtorId = session!.user.id;
 		const currentCount = await countFeaturedListingsForRealtor(realtorId);
 		if (currentCount >= MAX_FEATURED_LISTINGS) {
+			await deleteUploadThingFileByUrl(result.data.imageUrl, {
+				reason: "listing-create-failure",
+				realtorId,
+			});
+
 			return NextResponse.json(
 				{
 					error: `You can only feature up to ${MAX_FEATURED_LISTINGS} listings.`,

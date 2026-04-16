@@ -1,4 +1,4 @@
-import {useActionState, useEffect, useRef, useState, type JSX} from "react";
+import {useActionState, useCallback, useEffect, useRef, useState, type JSX} from "react";
 import {Loader2} from "lucide-react";
 
 import {Button} from "@/components/ui/button";
@@ -11,6 +11,7 @@ import {countWords} from "@/utils/string";
 import {parseFeaturedListingFormInput} from "@/lib/zod/featured-listing-form";
 import {type FeaturedListing, type FeaturedListingMutationInput} from "@/lib/featured-listings/types";
 import {FeaturedListingsApiError, createFeaturedListing, updateFeaturedListing} from "@/lib/featured-listings/client";
+import {uploadFiles} from "@/lib/uploadthing";
 
 import {FeaturedListingImageUpload} from "./FeaturedListingImageUpload";
 import type {FeaturedListingFormState, FeaturedListingSubmitState} from "./types";
@@ -33,6 +34,27 @@ const INITIAL_SUBMIT_STATE: FeaturedListingSubmitState = {
 	errorMessage: null,
 	statusMessage: null,
 };
+
+interface PendingFeaturedImage {
+	file: File;
+	previewUrl: string;
+}
+
+function getUploadedFileUrl(file: {serverData?: {url?: string} | null; ufsUrl?: string; url?: string} | undefined): string | null {
+	if (!file) {
+		return null;
+	}
+
+	return file.serverData?.url ?? file.ufsUrl ?? file.url ?? null;
+}
+
+function revokePendingPreview(image: PendingFeaturedImage | null): void {
+	if (!image) {
+		return;
+	}
+
+	URL.revokeObjectURL(image.previewUrl);
+}
 
 interface FeaturedListingFormProps {
 	selectedListing: FeaturedListing | null;
@@ -97,17 +119,28 @@ export function FeaturedListingForm({selectedListing, listingsCount, canCreateMo
 	const [formState, setFormState] = useState<FeaturedListingFormState>(EMPTY_FORM);
 	const [editingId, setEditingId] = useState<string | null>(null);
 	const [originalEditImageUrl, setOriginalEditImageUrl] = useState<string | null>(null);
+	const [pendingCreateImage, setPendingCreateImage] = useState<PendingFeaturedImage | null>(null);
 	const [isUploadingImage, setIsUploadingImage] = useState(false);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const [statusMessage, setStatusMessage] = useState<string | null>(null);
 	const formStateRef = useRef<FeaturedListingFormState>(EMPTY_FORM);
 	const editingIdRef = useRef<string | null>(null);
+	const pendingCreateImageRef = useRef<PendingFeaturedImage | null>(null);
+
+	const clearPendingCreateImage = useCallback(() => {
+		setPendingCreateImage((current) => {
+			revokePendingPreview(current);
+			pendingCreateImageRef.current = null;
+			return null;
+		});
+	}, []);
 
 	/**
 	 * Resets all editable fields and local form-only UI state.
 	 * @returns {void}
 	 */
 	const resetFormFields = () => {
+		clearPendingCreateImage();
 		setFormState(EMPTY_FORM);
 		setEditingId(null);
 		setOriginalEditImageUrl(null);
@@ -118,14 +151,36 @@ export function FeaturedListingForm({selectedListing, listingsCount, canCreateMo
 
 	const [actionState, formAction, isPending] = useActionState(async (_previousState: FeaturedListingSubmitState, _formData: FormData): Promise<FeaturedListingSubmitState> => {
 		try {
-			const payload = buildMutationInput(formStateRef.current);
 			const activeEditingId = editingIdRef.current;
 			const isEditing = Boolean(activeEditingId);
 
-			if (isEditing && activeEditingId) {
+			if (!isEditing) {
+				const pendingImage = pendingCreateImageRef.current;
+				if (!pendingImage) {
+					return {
+						errorMessage: "Please select an image.",
+						statusMessage: null,
+					};
+				}
+
+				const createPayload = buildMutationInput(formStateRef.current);
+
+				setIsUploadingImage(true);
+				setStatusMessage("Uploading image...");
+
+				const uploadedFiles = await uploadFiles("featuredListingImage", {
+					files: [pendingImage.file],
+				});
+
+				const uploadedImageUrl = getUploadedFileUrl(uploadedFiles[0]);
+				if (!uploadedImageUrl) {
+					throw new Error("Uploaded image URL was not returned. Please retry.");
+				}
+
+				await createFeaturedListing({...createPayload, imageUrl: uploadedImageUrl});
+			} else if (activeEditingId) {
+				const payload = buildMutationInput(formStateRef.current);
 				await updateFeaturedListing(activeEditingId, payload);
-			} else {
-				await createFeaturedListing(payload);
 			}
 
 			resetFormFields();
@@ -137,6 +192,7 @@ export function FeaturedListingForm({selectedListing, listingsCount, canCreateMo
 				statusMessage: isEditing ? "Featured listing updated" : "Featured listing created",
 			};
 		} catch (error) {
+			setIsUploadingImage(false);
 			const message = getErrorMessage(error);
 			log.error("Failed to save featured listing", error);
 			return {
@@ -162,7 +218,18 @@ export function FeaturedListingForm({selectedListing, listingsCount, canCreateMo
 	}, [actionState]);
 
 	useEffect(() => {
+		pendingCreateImageRef.current = pendingCreateImage;
+	}, [pendingCreateImage]);
+
+	useEffect(() => {
+		return () => {
+			revokePendingPreview(pendingCreateImageRef.current);
+		};
+	}, []);
+
+	useEffect(() => {
 		if (!selectedListing) {
+			clearPendingCreateImage();
 			setFormState(EMPTY_FORM);
 			setEditingId(null);
 			setOriginalEditImageUrl(null);
@@ -172,6 +239,7 @@ export function FeaturedListingForm({selectedListing, listingsCount, canCreateMo
 			return;
 		}
 
+		clearPendingCreateImage();
 		const nextFormState = toFormState(selectedListing);
 		setFormState(nextFormState);
 		setEditingId(selectedListing.id);
@@ -181,7 +249,7 @@ export function FeaturedListingForm({selectedListing, listingsCount, canCreateMo
 		setIsUploadingImage(false);
 		setErrorMessage(null);
 		setStatusMessage(null);
-	}, [selectedListing]);
+	}, [clearPendingCreateImage, selectedListing]);
 
 	/**
 	 * Updates a single field in the form and keeps the mutable snapshot in sync.
@@ -224,6 +292,42 @@ export function FeaturedListingForm({selectedListing, listingsCount, canCreateMo
 		onFieldChange("imageUrl", uploadedImageUrl);
 		setStatusMessage(isEditing ? "Replacement image uploaded. Save listing to apply the change." : "Image uploaded. Each listing supports one image only.");
 		setErrorMessage(null);
+	};
+
+	const handleSelectCreateImage = (files: File[]) => {
+		if (isEditing) {
+			return;
+		}
+
+		const selectedFile = files[0];
+		if (!selectedFile) {
+			return;
+		}
+
+		const allowedMimeTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+		if (!allowedMimeTypes.has(selectedFile.type)) {
+			setErrorMessage("Only JPG, PNG, and WebP images are supported.");
+			return;
+		}
+
+		if (selectedFile.size > 8 * 1024 * 1024) {
+			setErrorMessage("Image size must be 8 MB or smaller.");
+			return;
+		}
+
+		const nextPendingImage: PendingFeaturedImage = {
+			file: selectedFile,
+			previewUrl: URL.createObjectURL(selectedFile),
+		};
+
+		const previousPendingImage = pendingCreateImageRef.current;
+		revokePendingPreview(previousPendingImage);
+
+		setPendingCreateImage(nextPendingImage);
+		pendingCreateImageRef.current = nextPendingImage;
+		onFieldChange("imageUrl", nextPendingImage.previewUrl);
+		setErrorMessage(null);
+		setStatusMessage("Image selected. It will upload when you create the listing.");
 	};
 
 	/**
@@ -348,24 +452,42 @@ export function FeaturedListingForm({selectedListing, listingsCount, canCreateMo
 					hasUnsavedReplacementImage={hasUnsavedReplacementImage}
 					originalEditImageUrl={originalEditImageUrl}
 					isEditingWithCurrentSavedImage={isEditingWithCurrentSavedImage}
-					onUploadBegin={() => {
-						setIsUploadingImage(true);
-						setErrorMessage(null);
-						setStatusMessage("Uploading image...");
-					}}
-					onUploadComplete={handleUploadComplete}
-					onUploadError={(error) => {
-						setIsUploadingImage(false);
-						log.error("Featured image upload failed", error);
-						setErrorMessage(error.message);
-					}}
+					deferUpload={!isEditing}
+					onSelectFiles={isEditing ? undefined : handleSelectCreateImage}
+					onUploadBegin={
+						isEditing
+							? () => {
+									setIsUploadingImage(true);
+									setErrorMessage(null);
+									setStatusMessage("Uploading image...");
+								}
+							: undefined
+					}
+					onUploadComplete={isEditing ? handleUploadComplete : undefined}
+					onUploadError={
+						isEditing
+							? (error) => {
+									setIsUploadingImage(false);
+									log.error("Featured image upload failed", error);
+									setErrorMessage(error.message);
+								}
+							: undefined
+					}
 					onClearImage={() => {
+						if (!isEditing) {
+							clearPendingCreateImage();
+						}
 						onFieldChange("imageUrl", "");
 						setErrorMessage(null);
-						setStatusMessage("Current image cleared. Upload one replacement image.");
+						setStatusMessage(isEditing ? "Current image cleared. Upload one replacement image." : "Selected image cleared.");
 						setIsUploadingImage(false);
 					}}
 					onRevertImage={() => {
+						if (!isEditing) {
+							clearPendingCreateImage();
+							return;
+						}
+
 						if (originalEditImageUrl) {
 							onFieldChange("imageUrl", originalEditImageUrl);
 							setErrorMessage(null);

@@ -71,6 +71,15 @@ export const POST = withApiHandler(
 			listing = await createPresaleListingWithLimit(realtorId, result.data, MAX_PRESALE_LISTINGS);
 
 			if (!listing) {
+				await Promise.all(
+					result.data.imageUrls.map((imageUrl) =>
+						deleteUploadThingFileByUrl(imageUrl, {
+							reason: "presale-create-failure",
+							realtorId,
+						}),
+					),
+				);
+
 				return NextResponse.json(
 					{
 						error: `Maximum of ${MAX_PRESALE_LISTINGS} presale listings allowed.`,
