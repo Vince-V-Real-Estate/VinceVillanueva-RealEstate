@@ -1,18 +1,19 @@
 "use client";
 
-import {useActionState, useEffect, useState} from "react";
+import {useActionState, useCallback, useEffect, useRef, useState} from "react";
 import {Loader2} from "lucide-react";
 
 import {Button} from "@/components/ui/button";
+import type {UploadedUploadThingFile} from "@/components/ui/file-upload";
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {Textarea} from "@/components/ui/textarea";
-import type {UploadedUploadThingFile} from "@/components/ui/file-upload";
 import {createLogger} from "@/lib/logger";
 import {countWords} from "@/utils/string";
 import {presaleInputSchema, updatePresaleInputSchema} from "@/lib/zod/presale";
 import {MAX_PRESALE_IMAGES, type PresaleListing, type PresaleListingMutationInput} from "@/lib/presales/types";
 import {PresalesApiError, createPresaleListing, updatePresaleListing} from "@/lib/presales/client";
+import {uploadFiles} from "@/lib/uploadthing";
 
 import {PreSaleImageUpload} from "./PreSaleImageUpload";
 
@@ -61,6 +62,25 @@ const INITIAL_SUBMIT_STATE: PreSaleSubmitState = {
 	fieldErrors: null,
 	statusMessage: null,
 };
+
+interface PendingPresaleImage {
+	file: File;
+	previewUrl: string;
+}
+
+function getUploadedFileUrl(file: {serverData?: {url?: string} | null; ufsUrl?: string; url?: string} | undefined): string | null {
+	if (!file) {
+		return null;
+	}
+
+	return file.serverData?.url ?? file.ufsUrl ?? file.url ?? null;
+}
+
+function revokePendingImagePreviews(images: PendingPresaleImage[]): void {
+	for (const image of images) {
+		URL.revokeObjectURL(image.previewUrl);
+	}
+}
 
 interface PreSaleFormProps {
 	selectedListing: PresaleListing | null;
@@ -182,15 +202,41 @@ function getErrorMessage(error: unknown): string {
 export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDeletePending, onListingsChange, onCancelEditSelection}: PreSaleFormProps) {
 	const [formState, setFormState] = useState<PreSaleFormState>(EMPTY_FORM);
 	const [editingId, setEditingId] = useState<string | null>(null);
+	const [pendingCreateImages, setPendingCreateImages] = useState<PendingPresaleImage[]>([]);
 	const [isUploadingImage, setIsUploadingImage] = useState(false);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const [fieldErrors, setFieldErrors] = useState<Record<string, string> | null>(null);
 	const [statusMessage, setStatusMessage] = useState<string | null>(null);
+	const pendingCreateImagesRef = useRef<PendingPresaleImage[]>([]);
+
+	const clearImageUrlsFieldError = useCallback(() => {
+		if (!fieldErrors?.imageUrls) {
+			return;
+		}
+
+		setFieldErrors((prev) => {
+			if (!prev) {
+				return null;
+			}
+
+			const next = {...prev};
+			delete next.imageUrls;
+			return Object.keys(next).length > 0 ? next : null;
+		});
+	}, [fieldErrors]);
+
+	const clearPendingCreateImages = useCallback(() => {
+		setPendingCreateImages((current) => {
+			revokePendingImagePreviews(current);
+			return [];
+		});
+	}, []);
 
 	/**
 	 * Resets all form fields and local UI state to initial values.
 	 */
 	const resetFormFields = () => {
+		clearPendingCreateImages();
 		setFormState(EMPTY_FORM);
 		setEditingId(null);
 		setIsUploadingImage(false);
@@ -214,7 +260,30 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 				if ("errors" in parsed) {
 					return {errorMessage: "Please fix the validation errors below.", fieldErrors: parsed.errors, statusMessage: null};
 				}
-				await createPresaleListing(parsed.data);
+
+				const imagesToUpload = pendingCreateImagesRef.current;
+				if (imagesToUpload.length === 0) {
+					return {
+						errorMessage: "Please select at least one image.",
+						fieldErrors: {imageUrls: "At least one image is required"},
+						statusMessage: null,
+					};
+				}
+
+				setIsUploadingImage(true);
+				setStatusMessage(`Uploading ${imagesToUpload.length} image${imagesToUpload.length > 1 ? "s" : ""}...`);
+
+				const uploadedFiles = await uploadFiles("presaleImage", {
+					files: imagesToUpload.map((image) => image.file),
+				});
+
+				const uploadedUrls = uploadedFiles.map((file) => getUploadedFileUrl(file)).filter((url): url is string => Boolean(url));
+
+				if (uploadedUrls.length !== imagesToUpload.length) {
+					throw new Error("Some image uploads did not return URLs. Please retry.");
+				}
+
+				await createPresaleListing({...parsed.data, imageUrls: uploadedUrls});
 			}
 
 			resetFormFields();
@@ -227,6 +296,7 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 				statusMessage: isEditing ? "Pre-sale listing updated" : "Pre-sale listing created",
 			};
 		} catch (error) {
+			setIsUploadingImage(false);
 			const message = getErrorMessage(error);
 			log.error("Failed to save presale listing", error);
 			return {errorMessage: message, fieldErrors: null, statusMessage: null};
@@ -245,7 +315,18 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 	}, [actionState]);
 
 	useEffect(() => {
+		pendingCreateImagesRef.current = pendingCreateImages;
+	}, [pendingCreateImages]);
+
+	useEffect(() => {
+		return () => {
+			revokePendingImagePreviews(pendingCreateImagesRef.current);
+		};
+	}, []);
+
+	useEffect(() => {
 		if (!selectedListing) {
+			clearPendingCreateImages();
 			setFormState(EMPTY_FORM);
 			setEditingId(null);
 			setIsUploadingImage(false);
@@ -255,6 +336,7 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 			return;
 		}
 
+		clearPendingCreateImages();
 		const nextFormState = toFormState(selectedListing);
 		setFormState(nextFormState);
 		setEditingId(selectedListing.id);
@@ -262,7 +344,7 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 		setErrorMessage(null);
 		setFieldErrors(null);
 		setStatusMessage(null);
-	}, [selectedListing]);
+	}, [clearPendingCreateImages, selectedListing]);
 
 	/**
 	 * Updates a single text field in the form state.
@@ -309,16 +391,70 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 
 		setStatusMessage(`${newUrls.length} image${newUrls.length > 1 ? "s" : ""} uploaded.`);
 		setErrorMessage(null);
+		clearImageUrlsFieldError();
+	};
 
-		// Clear imageUrls field error
-		if (fieldErrors?.imageUrls) {
-			setFieldErrors((prev) => {
-				if (!prev) return null;
-				const next = {...prev};
-				delete next.imageUrls;
-				return Object.keys(next).length > 0 ? next : null;
-			});
+	const handleSelectCreateFiles = (files: File[]) => {
+		if (isEditing) {
+			return;
 		}
+
+		const allowedMimeTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+		const existingImages = pendingCreateImagesRef.current;
+		const remainingSlots = MAX_PRESALE_IMAGES - existingImages.length;
+		if (remainingSlots <= 0) {
+			setErrorMessage(`You can upload a maximum of ${MAX_PRESALE_IMAGES} images.`);
+			return;
+		}
+
+		const validFiles: File[] = [];
+		let invalidTypeCount = 0;
+		let oversizeCount = 0;
+
+		for (const file of files) {
+			if (!allowedMimeTypes.has(file.type)) {
+				invalidTypeCount += 1;
+				continue;
+			}
+
+			if (file.size > 8 * 1024 * 1024) {
+				oversizeCount += 1;
+				continue;
+			}
+
+			validFiles.push(file);
+		}
+
+		const filesForSelection = validFiles.slice(0, remainingSlots);
+		const skippedByLimitCount = validFiles.length - filesForSelection.length;
+
+		if (filesForSelection.length === 0) {
+			if (invalidTypeCount > 0 || oversizeCount > 0) {
+				setErrorMessage("Only JPG, PNG, and WebP images up to 8 MB are supported.");
+			}
+			return;
+		}
+
+		const pendingImagesToAdd = filesForSelection.map((file) => ({
+			file,
+			previewUrl: URL.createObjectURL(file),
+		}));
+
+		const nextPendingImages = [...existingImages, ...pendingImagesToAdd].slice(0, MAX_PRESALE_IMAGES);
+		setPendingCreateImages(nextPendingImages);
+		setFormState((current) => ({
+			...current,
+			imageUrls: nextPendingImages.map((image) => image.previewUrl),
+		}));
+
+		const selectedCount = pendingImagesToAdd.length;
+		setStatusMessage(`${selectedCount} image${selectedCount > 1 ? "s" : ""} selected. Images upload when you create the listing.`);
+		if (invalidTypeCount > 0 || oversizeCount > 0 || skippedByLimitCount > 0) {
+			setErrorMessage("Some selected files were skipped due to format, size, or image limit.");
+		} else {
+			setErrorMessage(null);
+		}
+		clearImageUrlsFieldError();
 	};
 
 	/**
@@ -326,6 +462,26 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 	 * @param index - The index of the image to remove.
 	 */
 	const handleRemoveImage = (index: number) => {
+		if (!isEditing) {
+			const currentPendingImages = pendingCreateImagesRef.current;
+			const removedImage = currentPendingImages[index];
+			if (!removedImage) {
+				return;
+			}
+
+			URL.revokeObjectURL(removedImage.previewUrl);
+			const nextPendingImages = currentPendingImages.filter((_, i) => i !== index);
+			setPendingCreateImages(nextPendingImages);
+			pendingCreateImagesRef.current = nextPendingImages;
+			setFormState((current) => ({
+				...current,
+				imageUrls: nextPendingImages.map((image) => image.previewUrl),
+			}));
+			setStatusMessage("Image removed. Images upload when you create the listing.");
+			setErrorMessage(null);
+			return;
+		}
+
 		setFormState((current) => ({
 			...current,
 			imageUrls: current.imageUrls.filter((_, i) => i !== index),
@@ -538,17 +694,27 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 					imageUrls={formState.imageUrls}
 					disabled={isMutating}
 					isUploading={isUploadingImage}
-					onUploadBegin={() => {
-						setIsUploadingImage(true);
-						setErrorMessage(null);
-						setStatusMessage("Uploading image...");
-					}}
-					onUploadComplete={handleUploadComplete}
-					onUploadError={(error) => {
-						setIsUploadingImage(false);
-						log.error("Presale image upload failed", error);
-						setErrorMessage(error.message);
-					}}
+					deferUpload={!isEditing}
+					onSelectFiles={isEditing ? undefined : handleSelectCreateFiles}
+					onUploadBegin={
+						isEditing
+							? () => {
+									setIsUploadingImage(true);
+									setErrorMessage(null);
+									setStatusMessage("Uploading image...");
+								}
+							: undefined
+					}
+					onUploadComplete={isEditing ? handleUploadComplete : undefined}
+					onUploadError={
+						isEditing
+							? (error: Error) => {
+									setIsUploadingImage(false);
+									log.error("Presale image upload failed", error);
+									setErrorMessage(error.message);
+								}
+							: undefined
+					}
 					onRemoveImage={handleRemoveImage}
 				/>
 				{renderFieldError("imageUrls")}

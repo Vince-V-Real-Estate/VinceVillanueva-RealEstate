@@ -1,11 +1,12 @@
 "use client";
 
+import {type ChangeEvent, useRef} from "react";
 import Image from "next/image";
 import {X} from "lucide-react";
 
+import {Button} from "@/components/ui/button";
 import {FileUpload} from "@/components/ui/file-upload";
 import type {UploadedUploadThingFile} from "@/components/ui/file-upload";
-import {Button} from "@/components/ui/button";
 import {Label} from "@/components/ui/label";
 import {MAX_PRESALE_IMAGES} from "@/lib/presales/types";
 
@@ -13,9 +14,11 @@ interface PreSaleImageUploadProps {
 	imageUrls: string[];
 	disabled: boolean;
 	isUploading: boolean;
-	onUploadBegin: () => void;
-	onUploadComplete: (files: UploadedUploadThingFile[]) => void;
-	onUploadError: (error: Error) => void;
+	deferUpload: boolean;
+	onSelectFiles?: (files: File[]) => void;
+	onUploadBegin?: () => void;
+	onUploadComplete?: (files: UploadedUploadThingFile[]) => void;
+	onUploadError?: (error: Error) => void;
 	onRemoveImage: (index: number) => void;
 }
 
@@ -24,9 +27,20 @@ interface PreSaleImageUploadProps {
  * Supports 1-3 images with individual preview and removal.
  * Mobile-first layout with responsive grid for thumbnails.
  */
-export function PreSaleImageUpload({imageUrls, disabled, isUploading, onUploadBegin, onUploadComplete, onUploadError, onRemoveImage}: PreSaleImageUploadProps) {
+export function PreSaleImageUpload({imageUrls, disabled, isUploading, deferUpload, onSelectFiles, onUploadBegin, onUploadComplete, onUploadError, onRemoveImage}: PreSaleImageUploadProps) {
+	const fileInputRef = useRef<HTMLInputElement | null>(null);
 	const canUploadMore = imageUrls.length < MAX_PRESALE_IMAGES && !disabled && !isUploading;
 	const remainingSlots = MAX_PRESALE_IMAGES - imageUrls.length;
+
+	const handleSelectFiles = (event: ChangeEvent<HTMLInputElement>) => {
+		const selectedFiles = event.target.files ? Array.from(event.target.files) : [];
+		if (selectedFiles.length === 0) {
+			return;
+		}
+
+		onSelectFiles?.(selectedFiles);
+		event.currentTarget.value = "";
+	};
 
 	return (
 		<div className="space-y-3">
@@ -39,7 +53,7 @@ export function PreSaleImageUpload({imageUrls, disabled, isUploading, onUploadBe
 				<div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
 					{imageUrls.map((url, index) => (
 						<div
-							key={url}
+							key={`${url}-${index}`}
 							className="group relative overflow-hidden rounded-lg border border-gray-200 bg-gray-100"
 						>
 							<div className="relative aspect-[4/3] w-full">
@@ -49,6 +63,7 @@ export function PreSaleImageUpload({imageUrls, disabled, isUploading, onUploadBe
 									fill
 									className="object-cover"
 									sizes="(max-width: 640px) 100vw, 33vw"
+									unoptimized={url.startsWith("blob:")}
 								/>
 							</div>
 							<Button
@@ -71,14 +86,35 @@ export function PreSaleImageUpload({imageUrls, disabled, isUploading, onUploadBe
 			)}
 
 			{/* Upload area - only shown when slots are available */}
-			{canUploadMore ? (
+			{canUploadMore && deferUpload ? (
+				<>
+					<input
+						ref={fileInputRef}
+						type="file"
+						accept="image/jpeg,image/png,image/webp"
+						multiple
+						onChange={handleSelectFiles}
+						disabled={!canUploadMore}
+						className="hidden"
+					/>
+					<Button
+						type="button"
+						variant="outline"
+						onClick={() => fileInputRef.current?.click()}
+						disabled={!canUploadMore}
+					>
+						{isUploading ? "Uploading..." : imageUrls.length === 0 ? "Select images" : `Select more (${remainingSlots} left)`}
+					</Button>
+					<p className="text-xs text-gray-500">Images upload only when you save this listing. Max {MAX_PRESALE_IMAGES} images, up to 8 MB each.</p>
+				</>
+			) : canUploadMore ? (
 				<FileUpload
 					className="mx-auto w-full sm:w-auto"
 					endpoint="presaleImage"
 					disabled={!canUploadMore}
 					onUploadBegin={onUploadBegin}
-					onUploadComplete={onUploadComplete}
-					onUploadError={onUploadError}
+					onUploadComplete={(files) => onUploadComplete?.(files)}
+					onUploadError={(error) => onUploadError?.(error)}
 					uploadLabel={imageUrls.length === 0 ? "Upload images for this listing" : `Upload ${remainingSlots} more image${remainingSlots > 1 ? "s" : ""}`}
 					uploadHelpText={`${imageUrls.length === 0 ? "At least 1 image required." : ""} Max ${MAX_PRESALE_IMAGES} images, up to 8 MB each.`}
 					mobileButtonText={isUploading ? "Uploading..." : imageUrls.length === 0 ? "Upload images" : `Upload more (${remainingSlots} left)`}
