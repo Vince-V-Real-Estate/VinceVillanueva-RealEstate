@@ -82,6 +82,29 @@ export const uploadRouter = {
 		}),
 
 	/**
+	 * Hero section background image.
+	 * Admin-only. Accepts jpg, png, webp up to 8 MB, one file per request.
+	 * Used by the `hero_image` singleton table; one upload per variant
+	 * (desktop / mobile) replaces the currently stored URL.
+	 */
+	heroImage: f({
+		image: {
+			maxFileSize: "8MB",
+			maxFileCount: 1,
+		},
+	})
+		.middleware(adminOnlyMiddleware)
+		.onUploadComplete(async ({metadata, file}) => {
+			log.info("Hero image uploaded", {
+				userId: metadata.userId,
+				fileName: file.name,
+				url: file.ufsUrl,
+			});
+
+			return {uploadedBy: metadata.userId, url: file.ufsUrl};
+		}),
+
+	/**
 	 * Downloadable PDF documents (floor plans, brochures, disclosure docs).
 	 * Admin-only. Accepts PDF up to 16 MB, max 5 files per request.
 	 */

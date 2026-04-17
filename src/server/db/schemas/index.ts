@@ -1,6 +1,7 @@
 export * from "./account-schema";
 export * from "./core-schema";
 export * from "./featured-listing-schema";
+export * from "./hero-image-schema";
 export * from "./lead-schema";
 export * from "./post-schema";
 export * from "./presale-schema";
