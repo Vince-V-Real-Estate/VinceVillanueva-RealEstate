@@ -67,7 +67,16 @@ async function requestHeroImage(init?: RequestInit): Promise<HeroImageResponse> 
 	});
 
 	const text = await response.text();
-	const body = (text ? JSON.parse(text) : null) as (HeroImageResponse & ApiErrorShape) | null;
+	let body: (HeroImageResponse & ApiErrorShape) | null = null;
+	if (text) {
+		try {
+			body = JSON.parse(text) as HeroImageResponse & ApiErrorShape;
+		} catch {
+			// Non-JSON body (e.g. HTML error page from a proxy/CDN). Surface a
+			// clear error rather than letting JSON.parse crash execution.
+			throw new HeroImageApiError("Invalid JSON response from server", response.status);
+		}
+	}
 
 	if (!response.ok) {
 		throw new HeroImageApiError(getApiErrorMessage(body), response.status, body?.details);
