@@ -17,9 +17,17 @@ export interface HeroImage {
 	updatedAt: string;
 }
 
-export interface HeroImageResponse {
-	heroImage: HeroImage;
-}
+export type HeroImageResponse =
+	| {
+			/** Payload returned by withApiHandler routes. */
+			heroImage: HeroImage;
+	  }
+	| {
+			/** Compatibility payload shape returned by some wrappers. */
+			data: {
+				heroImage: HeroImage;
+			};
+	  };
 
 /**
  * Returns the effective URL to render for a given viewport variant,

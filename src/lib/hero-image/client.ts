@@ -24,6 +24,20 @@ interface ApiErrorShape {
 }
 
 /**
+ * Extracts the hero image payload from either supported API response
+ * envelope shape.
+ * @param {HeroImageResponse} body - Parsed response payload.
+ * @returns {HeroImage} Normalized hero image record.
+ */
+function unwrapHeroImage(body: HeroImageResponse): HeroImage {
+	if ("heroImage" in body) {
+		return body.heroImage;
+	}
+
+	return body.data.heroImage;
+}
+
+/**
  * Normalizes the JSON error body returned by the hero image API into a
  * flat user-facing message.
  * @param {ApiErrorShape | null} body - Parsed error body or null.
@@ -73,7 +87,7 @@ async function requestHeroImage(init?: RequestInit): Promise<HeroImageResponse> 
  */
 export async function fetchHeroImage(options: {signal?: AbortSignal} = {}): Promise<HeroImage> {
 	const body = await requestHeroImage({method: "GET", signal: options.signal});
-	return body.heroImage;
+	return unwrapHeroImage(body);
 }
 
 /**
@@ -83,5 +97,5 @@ export async function fetchHeroImage(options: {signal?: AbortSignal} = {}): Prom
  */
 export async function updateHeroImage(input: HeroImageUpdateInput): Promise<HeroImage> {
 	const body = await requestHeroImage({method: "PUT", body: JSON.stringify(input)});
-	return body.heroImage;
+	return unwrapHeroImage(body);
 }

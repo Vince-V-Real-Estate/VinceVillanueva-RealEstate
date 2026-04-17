@@ -7,29 +7,18 @@ import {searchSchema} from "@/lib/zod/search-validation";
 import {createLogger} from "@/lib/logger";
 import {cn} from "@/lib/utils";
 import {Button} from "@/components/ui/button";
-import {fetchHeroImage} from "@/lib/hero-image/client";
-import {DEFAULT_HERO_DESKTOP_IMAGE_URL, DEFAULT_HERO_MOBILE_IMAGE_URL, resolveHeroImageUrl} from "@/lib/hero-image/types";
+import {resolveHeroImageUrl} from "@/lib/hero-image/types";
 import MLSSearchBar from "../forms/MLSSearchBar";
 
 const log = createLogger("search");
 
-export function Hero() {
-	const [desktopImageUrl, setDesktopImageUrl] = React.useState<string>(DEFAULT_HERO_DESKTOP_IMAGE_URL);
-	const [mobileImageUrl, setMobileImageUrl] = React.useState<string>(DEFAULT_HERO_MOBILE_IMAGE_URL);
+interface HeroProps {
+	initialImageUrl: string | null;
+}
 
-	React.useEffect(() => {
-		const controller = new AbortController();
-		void fetchHeroImage({signal: controller.signal})
-			.then((hero) => {
-				setDesktopImageUrl(resolveHeroImageUrl(hero.imageUrl, "desktop"));
-				setMobileImageUrl(resolveHeroImageUrl(hero.imageUrl, "mobile"));
-			})
-			.catch((error: unknown) => {
-				if (error instanceof DOMException && error.name === "AbortError") return;
-				log.warn("Failed to load hero image, using defaults", {error});
-			});
-		return () => controller.abort();
-	}, []);
+export function Hero({initialImageUrl}: HeroProps) {
+	const desktopImageUrl = resolveHeroImageUrl(initialImageUrl, "desktop");
+	const mobileImageUrl = resolveHeroImageUrl(initialImageUrl, "mobile");
 
 	const initialState = {
 		errors: {} as {
