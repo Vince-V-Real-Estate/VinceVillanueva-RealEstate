@@ -7,11 +7,19 @@ import {searchSchema} from "@/lib/zod/search-validation";
 import {createLogger} from "@/lib/logger";
 import {cn} from "@/lib/utils";
 import {Button} from "@/components/ui/button";
+import {resolveHeroImageUrl} from "@/lib/hero-image/types";
 import MLSSearchBar from "../forms/MLSSearchBar";
 
 const log = createLogger("search");
 
-export function Hero() {
+interface HeroProps {
+	initialImageUrl: string | null;
+}
+
+export function Hero({initialImageUrl}: HeroProps) {
+	const desktopImageUrl = resolveHeroImageUrl(initialImageUrl, "desktop");
+	const mobileImageUrl = resolveHeroImageUrl(initialImageUrl, "mobile");
+
 	const initialState = {
 		errors: {} as {
 			location?: string;
@@ -43,51 +51,54 @@ export function Hero() {
 	return (
 		<section
 			id="hero-cta"
-			className="relative flex w-full flex-col justify-end bg-white lg:min-h-[85vh] xl:mx-auto xl:w-[90%] 2xl:mt-5"
+			className="relative flex w-full flex-col bg-neutral-50 xl:mx-auto xl:w-[90%] 2xl:mt-5"
 		>
-			<div className="absolute inset-0 z-0 hidden overflow-hidden lg:block">
+			<div className="relative h-[65vh] min-h-[400px] w-full overflow-hidden md:h-[75vh] lg:min-h-[80vh]">
+				{/* Desktop Image */}
 				<Image
-					src="/vv-asset-2-desktop.png"
+					src={desktopImageUrl}
 					alt="Vince Villanueva Real Estate Background"
 					fill
-					className="object-cover object-center"
+					className="hidden object-cover object-center md:block"
 					priority
+					unoptimized={desktopImageUrl.startsWith("blob:")}
 				/>
-			</div>
-			<div className="relative z-0 block h-[60vh] w-full overflow-hidden md:h-[60vh] lg:hidden">
+				{/* Mobile Image */}
 				<Image
-					src="/vv-asset-2-mobile.png"
+					src={mobileImageUrl}
 					alt="Vince Villanueva Real Estate Background"
 					fill
-					className="object-cover object-center"
+					className="block object-cover object-center md:hidden"
 					priority
+					unoptimized={mobileImageUrl.startsWith("blob:")}
 				/>
 			</div>
 
-			<div className="relative z-10 container mx-auto px-4 py-4 md:px-6 lg:pb-24">
-				<div className="flex flex-col items-center space-y-4 text-center md:relative md:bottom-30">
-					<div className="w-full space-y-2 rounded-md bg-neutral-300 p-3 shadow-md sm:bg-neutral-400 md:bg-transparent md:shadow-none lg:w-[66%] xl:my-5 2xl:mb-20">
-						<form
-							action={formAction}
-							className="flex w-full flex-col gap-2 rounded-md sm:flex-row sm:items-center sm:justify-center sm:gap-4"
-						>
+			{/* Container for Search Bar (Below Image) */}
+			<div className="relative z-10 -mt-6 flex w-full justify-center rounded-t-3xl bg-white px-4 py-8 shadow-sm md:-mt-10 md:py-12">
+				<div className="w-full max-w-4xl space-y-2">
+					<form
+						action={formAction}
+						className="flex w-full flex-col gap-3 sm:flex-row sm:items-center"
+					>
+						<div className="flex-1">
 							<MLSSearchBar />
-							<Button
-								type="submit"
-								disabled={isPending}
-								className={cn("group relative h-10 overflow-hidden bg-black px-8 text-white hover:bg-gray-800 sm:h-12 sm:px-12", isPending && "opacity-50")}
-							>
-								<span className="absolute -top-[150%] left-0 inline-flex w-80 rounded-md bg-neutral-400 opacity-50 shadow-[0_0_10px_10px_rgba(0,0,0,0.3)] shadow-neutral-400 duration-500 group-hover:top-[150%]"></span>
-								<Search className="mr-2 h-4 w-4" />
-								{isPending ? <span className="text-lg">Searching...</span> : <span className="text-lg">Search</span>}
-							</Button>
-						</form>
-						{actionState.errors.location && (
-							<div className="rounded-md bg-white/5 p-2">
-								<p className="text-sm text-red-500">{actionState.errors.location}</p>
-							</div>
-						)}
-					</div>
+						</div>
+						<Button
+							type="submit"
+							disabled={isPending}
+							className={cn("group relative h-12 w-full overflow-hidden bg-black px-8 text-white transition-colors hover:bg-gray-800 sm:w-auto", isPending && "opacity-50")}
+						>
+							<span className="absolute -top-[150%] left-0 inline-flex w-80 rounded-md bg-neutral-400 opacity-20 shadow-[0_0_10px_10px_rgba(0,0,0,0.3)] shadow-neutral-400 duration-500 group-hover:top-[150%]"></span>
+							<Search className="relative z-10 mr-2 h-5 w-5" />
+							{isPending ? <span className="relative z-10 text-base font-semibold">Searching...</span> : <span className="relative z-10 text-base font-semibold">Search MLS®</span>}
+						</Button>
+					</form>
+					{actionState.errors.location && (
+						<div className="mt-2 rounded-md border border-red-200 bg-red-50 p-2">
+							<p className="text-sm text-red-600">{actionState.errors.location}</p>
+						</div>
+					)}
 				</div>
 			</div>
 		</section>
