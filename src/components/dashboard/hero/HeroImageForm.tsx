@@ -16,6 +16,7 @@ interface HeroImageFormProps {
 	isSaving: boolean;
 	onReplace: (url: string) => Promise<void>;
 	onRevertToDefault: () => Promise<void>;
+	onError: (message: string) => void;
 }
 
 /**
@@ -25,7 +26,7 @@ interface HeroImageFormProps {
  * @param {HeroImageFormProps} props - Component props.
  * @returns {JSX.Element} The rendered form panel.
  */
-export function HeroImageForm({heroImage, isSaving, onReplace, onRevertToDefault}: HeroImageFormProps) {
+export function HeroImageForm({heroImage, isSaving, onReplace, onRevertToDefault, onError}: HeroImageFormProps) {
 	const [isUploading, setIsUploading] = useState(false);
 	const storedUrl = heroImage.imageUrl;
 	const usingDefault = !storedUrl;
@@ -44,7 +45,7 @@ export function HeroImageForm({heroImage, isSaving, onReplace, onRevertToDefault
 	const handleUploadError = (error: Error) => {
 		setIsUploading(false);
 		log.error("Hero image upload failed", error);
-		alert(`Upload failed: ${error.message}`);
+		onError(`Upload failed: ${error.message}`);
 	};
 
 	return (

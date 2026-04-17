@@ -101,7 +101,7 @@ export default function HeroManager() {
 					<h2 className="text-xl font-semibold text-gray-900">Hero Image</h2>
 					<p className="mt-1 text-sm text-gray-500">Upload a single image used as the homepage hero background for both desktop and mobile. When no image is uploaded, the bundled default assets are used.</p>
 				</div>
-				{heroImage && <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">Last updated {new Date(heroImage.updatedAt).toLocaleString()}</span>}
+				{heroImage && new Date(heroImage.updatedAt).getTime() > 0 && <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">Last updated {new Date(heroImage.updatedAt).toLocaleString()}</span>}
 			</div>
 
 			{errorMessage && <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-600">{errorMessage}</p>}
@@ -114,6 +114,7 @@ export default function HeroManager() {
 					isSaving={isSaving}
 					onReplace={handleReplace}
 					onRevertToDefault={handleRevertToDefault}
+					onError={setErrorMessage}
 				/>
 			)}
 		</section>
