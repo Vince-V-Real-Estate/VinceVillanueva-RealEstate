@@ -97,7 +97,7 @@ export function extractUploadThingFileKey(fileUrl: string): string | null {
 /** Options for the delete operation, including context for logging */
 interface DeleteUploadThingFileByUrlOptions {
 	/** Reason for deletion - used for logging and debugging */
-	reason: "listing-delete" | "listing-image-replace" | "listing-create-failure" | "presale-delete" | "presale-image-replace" | "presale-create-failure";
+	reason: "listing-delete" | "listing-image-replace" | "listing-create-failure" | "presale-delete" | "presale-image-replace" | "presale-create-failure" | "hero-image-replace";
 	/** Associated listing ID for correlation in logs (when available) */
 	listingId?: string;
 	/** Realtor ID for correlation in logs (useful when listing ID does not exist yet) */

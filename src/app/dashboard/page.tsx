@@ -6,6 +6,7 @@ import {authClient} from "@/server/better-auth/client";
 import {LeadsManager} from "@/components/dashboard/LeadsManager";
 import {FeaturedListingsManager} from "@/components/dashboard/FeaturedListingsManager";
 import PreSaleManager from "@/components/dashboard/PreSaleManager";
+import HeroManager from "@/components/dashboard/HeroManager";
 import {NavigationMenu, NavigationMenuItem, NavigationMenuList, navigationMenuTriggerStyle} from "@/components/ui/navigation-menu";
 import {cn} from "@/lib/utils";
 
@@ -16,7 +17,7 @@ import {cn} from "@/lib/utils";
 export default function DashboardPage() {
 	const router = useRouter();
 	const {data: session, isPending: sessionLoading} = authClient.useSession();
-	const [activeTab, setActiveTab] = useState<"leads" | "listings" | "presales">("leads");
+	const [activeTab, setActiveTab] = useState<"leads" | "listings" | "presales" | "hero">("leads");
 
 	useEffect(() => {
 		// Wait for session to load
@@ -55,6 +56,7 @@ export default function DashboardPage() {
 		leads: <LeadsManager />,
 		listings: <FeaturedListingsManager />,
 		presales: <PreSaleManager />,
+		hero: <HeroManager />,
 	} as const;
 
 	return (
@@ -79,9 +81,9 @@ export default function DashboardPage() {
 					</div>
 
 					{/* Navigation Tabs */}
-					<div className="border-grey-800 mt-6 flex justify-center rounded-md border border-gray-300 shadow-xs shadow-gray-600 md:justify-start">
-						<NavigationMenu className={"w-full"}>
-							<NavigationMenuList className="flex w-full flex-row">
+					<div className="border-grey-800 mt-6 flex justify-start overflow-x-auto rounded-md border border-gray-300 pb-1 shadow-xs shadow-gray-600 md:pb-0 [&::-webkit-scrollbar]:h-1.5 md:[&::-webkit-scrollbar]:hidden [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-gray-100">
+						<NavigationMenu className="w-full max-w-none justify-start">
+							<NavigationMenuList className="flex w-full min-w-max flex-row">
 								<NavigationMenuItem>
 									<button
 										onClick={() => setActiveTab("leads")}
@@ -104,6 +106,14 @@ export default function DashboardPage() {
 										className={cn(navigationMenuTriggerStyle(), "cursor-pointer bg-transparent shadow-none hover:bg-gray-100 data-[state=open]:bg-transparent", activeTab === "presales" && "bg-gray-100 font-semibold")}
 									>
 										Pre-Sales
+									</button>
+								</NavigationMenuItem>
+								<NavigationMenuItem>
+									<button
+										onClick={() => setActiveTab("hero")}
+										className={cn(navigationMenuTriggerStyle(), "cursor-pointer bg-transparent shadow-none hover:bg-gray-100 data-[state=open]:bg-transparent", activeTab === "hero" && "bg-gray-100 font-semibold")}
+									>
+										Hero Image
 									</button>
 								</NavigationMenuItem>
 							</NavigationMenuList>
