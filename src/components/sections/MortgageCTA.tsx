@@ -3,6 +3,7 @@ import {Calculator} from "lucide-react";
 
 import {buttonVariants} from "@/components/ui/button-variants";
 import {cn} from "@/lib/utils";
+import {LeadCaptureForm} from "../forms/lead-capture";
 
 export function MortgageCTA() {
 	return (
@@ -25,6 +26,16 @@ export function MortgageCTA() {
 								Calculate Now
 							</Link>
 						</div>
+					</div>
+
+					<div className="flex flex-col justify-center">
+						<div className="mb-5">
+							<h3 className="text-2xl font-extrabold">
+								Sign up for my <span className="italic">newsletter</span>
+							</h3>
+							<p>for the most recent market trends</p>
+						</div>
+						<LeadCaptureForm type="newsletter" />
 					</div>
 				</div>
 			</div>
