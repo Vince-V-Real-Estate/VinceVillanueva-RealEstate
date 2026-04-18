@@ -22,7 +22,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 interface LeadCaptureFormProps {
-	type: Exclude<LeadSource, "newsletter">;
+	type: LeadSource;
 	className?: string;
 	onSuccess?: () => void;
 }
