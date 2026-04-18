@@ -28,7 +28,7 @@ export function MortgageCTA() {
 						</div>
 					</div>
 
-					<div>
+					<div className="flex flex-col justify-center">
 						<div className="mb-5">
 							<h3 className="text-2xl font-extrabold">
 								Sign up for my <span className="italic">newsletter</span>
