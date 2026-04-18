@@ -31,7 +31,7 @@ export function MortgageCTA() {
 					<div className="bg-background mx-auto mt-8 flex w-full max-w-lg flex-col justify-center rounded-2xl border p-6 shadow-md sm:p-8 lg:mt-0 lg:max-w-none">
 						<div className="mb-6 space-y-2 text-center lg:text-left">
 							<h3 className="text-2xl font-extrabold tracking-tight">
-								Sign up for<span className="text-primary italic">newsletters</span>
+								Sign up for <span className="text-primary italic">newsletters</span>
 							</h3>
 							<p className="text-muted-foreground">Get the most recent market trends and insights delivered directly to your inbox.</p>
 						</div>
