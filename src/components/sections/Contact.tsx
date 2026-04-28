@@ -88,20 +88,20 @@ export default function Contact() {
 					</div>
 
 					{/* Office Hours */}
-					<div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
-						<h3 className="mb-8 text-2xl font-semibold text-gray-900">Office Hours</h3>
-						<div className="space-y-4">
-							{officeHours.map((item) => (
-								<div
-									key={item.day}
-									className="flex items-center justify-between border-b border-gray-100 pb-4 last:border-0 last:pb-0"
-								>
-									<span className="font-medium text-gray-600">{item.day}</span>
-									<span className="font-semibold text-gray-900">{item.time}</span>
-								</div>
-							))}
-						</div>
-					</div>
+					{/* <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm"> */}
+					{/* 	<h3 className="mb-8 text-2xl font-semibold text-gray-900">Office Hours</h3> */}
+					{/* 	<div className="space-y-4"> */}
+					{/* 		{officeHours.map((item) => ( */}
+					{/* 			<div */}
+					{/* 				key={item.day} */}
+					{/* 				className="flex items-center justify-between border-b border-gray-100 pb-4 last:border-0 last:pb-0" */}
+					{/* 			> */}
+					{/* 				<span className="font-medium text-gray-600">{item.day}</span> */}
+					{/* 				<span className="font-semibold text-gray-900">{item.time}</span> */}
+					{/* 			</div> */}
+					{/* 		))} */}
+					{/* 	</div> */}
+					{/* </div> */}
 					<div className="m-auto w-full">
 						<Image
 							src={"/vv-business-card.png"}
