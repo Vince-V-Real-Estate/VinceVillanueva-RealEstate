@@ -133,7 +133,7 @@ export function FeaturedListingForm({selectedListing, listingsCount, canCreateMo
 		const normalizedImageUrl = imageUrl.trim();
 		const originalImageUrl = originalEditImageUrlRef.current?.trim() ?? "";
 
-		if (!editingIdRef.current || !normalizedImageUrl || !originalImageUrl) {
+		if (!editingIdRef.current || !normalizedImageUrl) {
 			return;
 		}
 
