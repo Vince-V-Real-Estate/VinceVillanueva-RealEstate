@@ -14,6 +14,7 @@ import {presaleInputSchema, updatePresaleInputSchema} from "@/lib/zod/presale";
 import {MAX_PRESALE_IMAGES, type PresaleListing, type PresaleListingMutationInput} from "@/lib/presales/types";
 import {PresalesApiError, createPresaleListing, updatePresaleListing} from "@/lib/presales/client";
 import {uploadFiles} from "@/lib/uploadthing";
+import {requestUploadThingFileDeletion} from "@/lib/uploadthing/cleanup";
 
 import {PreSaleImageUpload} from "./PreSaleImageUpload";
 
@@ -202,6 +203,7 @@ function getErrorMessage(error: unknown): string {
 export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDeletePending, onListingsChange, onCancelEditSelection}: PreSaleFormProps) {
 	const [formState, setFormState] = useState<PreSaleFormState>(EMPTY_FORM);
 	const [editingId, setEditingId] = useState<string | null>(null);
+	const [originalEditImageUrls, setOriginalEditImageUrls] = useState<string[]>([]);
 	const [pendingCreateImages, setPendingCreateImages] = useState<PendingPresaleImage[]>([]);
 	const [isUploadingImage, setIsUploadingImage] = useState(false);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -239,6 +241,7 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 		clearPendingCreateImages();
 		setFormState(EMPTY_FORM);
 		setEditingId(null);
+		setOriginalEditImageUrls([]);
 		setIsUploadingImage(false);
 		setFieldErrors(null);
 	};
@@ -329,6 +332,7 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 			clearPendingCreateImages();
 			setFormState(EMPTY_FORM);
 			setEditingId(null);
+			setOriginalEditImageUrls([]);
 			setIsUploadingImage(false);
 			setErrorMessage(null);
 			setFieldErrors(null);
@@ -340,6 +344,7 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 		const nextFormState = toFormState(selectedListing);
 		setFormState(nextFormState);
 		setEditingId(selectedListing.id);
+		setOriginalEditImageUrls([...selectedListing.imageUrls]);
 		setIsUploadingImage(false);
 		setErrorMessage(null);
 		setFieldErrors(null);
@@ -480,6 +485,11 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 			setStatusMessage("Image removed. Images upload when you create the listing.");
 			setErrorMessage(null);
 			return;
+		}
+
+		const removedUrl = formState.imageUrls[index];
+		if (removedUrl && !removedUrl.startsWith("blob:") && !removedUrl.startsWith("data:") && !originalEditImageUrls.includes(removedUrl)) {
+			void requestUploadThingFileDeletion(removedUrl, "presale-image-replace");
 		}
 
 		setFormState((current) => ({

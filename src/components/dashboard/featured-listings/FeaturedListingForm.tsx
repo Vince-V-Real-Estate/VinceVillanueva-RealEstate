@@ -12,6 +12,7 @@ import {parseFeaturedListingFormInput} from "@/lib/zod/featured-listing-form";
 import {type FeaturedListing, type FeaturedListingMutationInput} from "@/lib/featured-listings/types";
 import {FeaturedListingsApiError, createFeaturedListing, updateFeaturedListing} from "@/lib/featured-listings/client";
 import {uploadFiles} from "@/lib/uploadthing";
+import {requestUploadThingFileDeletion} from "@/lib/uploadthing/cleanup";
 
 import {FeaturedListingImageUpload} from "./FeaturedListingImageUpload";
 import type {FeaturedListingFormState, FeaturedListingSubmitState} from "./types";
@@ -487,6 +488,11 @@ export function FeaturedListingForm({selectedListing, listingsCount, canCreateMo
 						}
 
 						if (originalEditImageUrl) {
+							const replacementUrl = formState.imageUrl.trim();
+							if (replacementUrl && replacementUrl !== originalEditImageUrl) {
+								void requestUploadThingFileDeletion(replacementUrl, "listing-image-replace");
+							}
+
 							onFieldChange("imageUrl", originalEditImageUrl);
 							setErrorMessage(null);
 							setStatusMessage("Reverted to the current saved image.");
