@@ -12,6 +12,7 @@ import {parseFeaturedListingFormInput} from "@/lib/zod/featured-listing-form";
 import {type FeaturedListing, type FeaturedListingMutationInput} from "@/lib/featured-listings/types";
 import {FeaturedListingsApiError, createFeaturedListing, updateFeaturedListing} from "@/lib/featured-listings/client";
 import {uploadFiles} from "@/lib/uploadthing";
+import {requestUploadThingFileDeletion} from "@/lib/uploadthing/cleanup";
 
 import {FeaturedListingImageUpload} from "./FeaturedListingImageUpload";
 import type {FeaturedListingFormState, FeaturedListingSubmitState} from "./types";
@@ -125,7 +126,27 @@ export function FeaturedListingForm({selectedListing, listingsCount, canCreateMo
 	const [statusMessage, setStatusMessage] = useState<string | null>(null);
 	const formStateRef = useRef<FeaturedListingFormState>(EMPTY_FORM);
 	const editingIdRef = useRef<string | null>(null);
+	const originalEditImageUrlRef = useRef<string | null>(null);
 	const pendingCreateImageRef = useRef<PendingFeaturedImage | null>(null);
+
+	const cleanupUnsavedReplacementImage = useCallback((imageUrl: string) => {
+		const normalizedImageUrl = imageUrl.trim();
+		const originalImageUrl = originalEditImageUrlRef.current?.trim() ?? "";
+
+		if (!editingIdRef.current || !normalizedImageUrl) {
+			return;
+		}
+
+		if (normalizedImageUrl.startsWith("blob:") || normalizedImageUrl.startsWith("data:")) {
+			return;
+		}
+
+		if (normalizedImageUrl === originalImageUrl) {
+			return;
+		}
+
+		void requestUploadThingFileDeletion(normalizedImageUrl, "listing-image-replace");
+	}, []);
 
 	const clearPendingCreateImage = useCallback(() => {
 		setPendingCreateImage((current) => {
@@ -145,6 +166,7 @@ export function FeaturedListingForm({selectedListing, listingsCount, canCreateMo
 		setOriginalEditImageUrl(null);
 		formStateRef.current = EMPTY_FORM;
 		editingIdRef.current = null;
+		originalEditImageUrlRef.current = null;
 		setIsUploadingImage(false);
 	};
 
@@ -222,11 +244,14 @@ export function FeaturedListingForm({selectedListing, listingsCount, canCreateMo
 
 	useEffect(() => {
 		return () => {
+			cleanupUnsavedReplacementImage(formStateRef.current.imageUrl);
 			revokePendingPreview(pendingCreateImageRef.current);
 		};
-	}, []);
+	}, [cleanupUnsavedReplacementImage]);
 
 	useEffect(() => {
+		cleanupUnsavedReplacementImage(formStateRef.current.imageUrl);
+
 		if (!selectedListing) {
 			clearPendingCreateImage();
 			setFormState(EMPTY_FORM);
@@ -234,6 +259,7 @@ export function FeaturedListingForm({selectedListing, listingsCount, canCreateMo
 			setOriginalEditImageUrl(null);
 			formStateRef.current = EMPTY_FORM;
 			editingIdRef.current = null;
+			originalEditImageUrlRef.current = null;
 			setIsUploadingImage(false);
 			return;
 		}
@@ -245,10 +271,11 @@ export function FeaturedListingForm({selectedListing, listingsCount, canCreateMo
 		setOriginalEditImageUrl(selectedListing.imageUrl);
 		formStateRef.current = nextFormState;
 		editingIdRef.current = selectedListing.id;
+		originalEditImageUrlRef.current = selectedListing.imageUrl;
 		setIsUploadingImage(false);
 		setErrorMessage(null);
 		setStatusMessage(null);
-	}, [clearPendingCreateImage, selectedListing]);
+	}, [cleanupUnsavedReplacementImage, clearPendingCreateImage, selectedListing]);
 
 	/**
 	 * Updates a single field in the form and keeps the mutable snapshot in sync.
@@ -287,6 +314,8 @@ export function FeaturedListingForm({selectedListing, listingsCount, canCreateMo
 			setErrorMessage("Uploaded image URL was not returned. Please retry.");
 			return;
 		}
+
+		cleanupUnsavedReplacementImage(formStateRef.current.imageUrl);
 
 		onFieldChange("imageUrl", uploadedImageUrl);
 		setStatusMessage(isEditing ? "Replacement image uploaded. Save listing to apply the change." : "Image uploaded. Each listing supports one image only.");
@@ -333,6 +362,7 @@ export function FeaturedListingForm({selectedListing, listingsCount, canCreateMo
 	 * @returns {void}
 	 */
 	const handleCancelEdit = () => {
+		cleanupUnsavedReplacementImage(formStateRef.current.imageUrl);
 		resetFormFields();
 		onCancelEditSelection();
 	};
@@ -474,6 +504,8 @@ export function FeaturedListingForm({selectedListing, listingsCount, canCreateMo
 					onClearImage={() => {
 						if (!isEditing) {
 							clearPendingCreateImage();
+						} else {
+							cleanupUnsavedReplacementImage(formStateRef.current.imageUrl);
 						}
 						onFieldChange("imageUrl", "");
 						setErrorMessage(null);
@@ -487,6 +519,8 @@ export function FeaturedListingForm({selectedListing, listingsCount, canCreateMo
 						}
 
 						if (originalEditImageUrl) {
+							cleanupUnsavedReplacementImage(formStateRef.current.imageUrl);
+
 							onFieldChange("imageUrl", originalEditImageUrl);
 							setErrorMessage(null);
 							setStatusMessage("Reverted to the current saved image.");
