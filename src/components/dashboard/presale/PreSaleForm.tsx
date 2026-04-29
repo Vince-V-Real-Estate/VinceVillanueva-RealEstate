@@ -14,6 +14,7 @@ import {presaleInputSchema, updatePresaleInputSchema} from "@/lib/zod/presale";
 import {MAX_PRESALE_IMAGES, type PresaleListing, type PresaleListingMutationInput} from "@/lib/presales/types";
 import {PresalesApiError, createPresaleListing, updatePresaleListing} from "@/lib/presales/client";
 import {uploadFiles} from "@/lib/uploadthing";
+import {requestUploadThingFileDeletion} from "@/lib/uploadthing/cleanup";
 
 import {PreSaleImageUpload} from "./PreSaleImageUpload";
 
@@ -80,6 +81,32 @@ function revokePendingImagePreviews(images: PendingPresaleImage[]): void {
 	for (const image of images) {
 		URL.revokeObjectURL(image.previewUrl);
 	}
+}
+
+function normalizePersistedImageUrl(imageUrl: string): string | null {
+	const normalizedUrl = imageUrl.trim();
+	if (!normalizedUrl || normalizedUrl.startsWith("blob:") || normalizedUrl.startsWith("data:")) {
+		return null;
+	}
+
+	return normalizedUrl;
+}
+
+function getUnsavedUploadedImageUrls(imageUrls: string[], originalImageUrls: string[]): string[] {
+	const originalImageUrlSet = new Set(originalImageUrls.map((imageUrl) => normalizePersistedImageUrl(imageUrl)).filter((imageUrl): imageUrl is string => Boolean(imageUrl)));
+
+	const unsavedImageUrls: string[] = [];
+
+	for (const imageUrl of imageUrls) {
+		const normalizedImageUrl = normalizePersistedImageUrl(imageUrl);
+		if (!normalizedImageUrl || originalImageUrlSet.has(normalizedImageUrl)) {
+			continue;
+		}
+
+		unsavedImageUrls.push(normalizedImageUrl);
+	}
+
+	return unsavedImageUrls;
 }
 
 interface PreSaleFormProps {
@@ -202,12 +229,27 @@ function getErrorMessage(error: unknown): string {
 export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDeletePending, onListingsChange, onCancelEditSelection}: PreSaleFormProps) {
 	const [formState, setFormState] = useState<PreSaleFormState>(EMPTY_FORM);
 	const [editingId, setEditingId] = useState<string | null>(null);
+	const [originalEditImageUrls, setOriginalEditImageUrls] = useState<string[]>([]);
 	const [pendingCreateImages, setPendingCreateImages] = useState<PendingPresaleImage[]>([]);
 	const [isUploadingImage, setIsUploadingImage] = useState(false);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const [fieldErrors, setFieldErrors] = useState<Record<string, string> | null>(null);
 	const [statusMessage, setStatusMessage] = useState<string | null>(null);
+	const formStateRef = useRef<PreSaleFormState>(EMPTY_FORM);
+	const editingIdRef = useRef<string | null>(null);
+	const originalEditImageUrlsRef = useRef<string[]>([]);
 	const pendingCreateImagesRef = useRef<PendingPresaleImage[]>([]);
+
+	const cleanupUnsavedEditImages = useCallback((imageUrls: string[]) => {
+		if (!editingIdRef.current || imageUrls.length === 0) {
+			return;
+		}
+
+		const unsavedImageUrls = getUnsavedUploadedImageUrls(imageUrls, originalEditImageUrlsRef.current);
+		for (const unsavedImageUrl of unsavedImageUrls) {
+			void requestUploadThingFileDeletion(unsavedImageUrl, "presale-image-replace");
+		}
+	}, []);
 
 	const clearImageUrlsFieldError = useCallback(() => {
 		if (!fieldErrors?.imageUrls) {
@@ -239,6 +281,10 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 		clearPendingCreateImages();
 		setFormState(EMPTY_FORM);
 		setEditingId(null);
+		setOriginalEditImageUrls([]);
+		formStateRef.current = EMPTY_FORM;
+		editingIdRef.current = null;
+		originalEditImageUrlsRef.current = [];
 		setIsUploadingImage(false);
 		setFieldErrors(null);
 	};
@@ -315,20 +361,33 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 	}, [actionState]);
 
 	useEffect(() => {
+		formStateRef.current = formState;
+		editingIdRef.current = editingId;
+		originalEditImageUrlsRef.current = originalEditImageUrls;
+	}, [editingId, formState, originalEditImageUrls]);
+
+	useEffect(() => {
 		pendingCreateImagesRef.current = pendingCreateImages;
 	}, [pendingCreateImages]);
 
 	useEffect(() => {
 		return () => {
+			cleanupUnsavedEditImages(formStateRef.current.imageUrls);
 			revokePendingImagePreviews(pendingCreateImagesRef.current);
 		};
-	}, []);
+	}, [cleanupUnsavedEditImages]);
 
 	useEffect(() => {
+		cleanupUnsavedEditImages(formStateRef.current.imageUrls);
+
 		if (!selectedListing) {
 			clearPendingCreateImages();
 			setFormState(EMPTY_FORM);
 			setEditingId(null);
+			setOriginalEditImageUrls([]);
+			formStateRef.current = EMPTY_FORM;
+			editingIdRef.current = null;
+			originalEditImageUrlsRef.current = [];
 			setIsUploadingImage(false);
 			setErrorMessage(null);
 			setFieldErrors(null);
@@ -340,11 +399,15 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 		const nextFormState = toFormState(selectedListing);
 		setFormState(nextFormState);
 		setEditingId(selectedListing.id);
+		setOriginalEditImageUrls([...selectedListing.imageUrls]);
+		formStateRef.current = nextFormState;
+		editingIdRef.current = selectedListing.id;
+		originalEditImageUrlsRef.current = [...selectedListing.imageUrls];
 		setIsUploadingImage(false);
 		setErrorMessage(null);
 		setFieldErrors(null);
 		setStatusMessage(null);
-	}, [clearPendingCreateImages, selectedListing]);
+	}, [cleanupUnsavedEditImages, clearPendingCreateImages, selectedListing]);
 
 	/**
 	 * Updates a single text field in the form state.
@@ -384,10 +447,20 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 			return;
 		}
 
+		const currentImageUrls = formStateRef.current.imageUrls;
+		const combinedImageUrls = [...currentImageUrls, ...newUrls];
+		const nextImageUrls = combinedImageUrls.slice(0, MAX_PRESALE_IMAGES);
+		const droppedImageUrls = combinedImageUrls.slice(MAX_PRESALE_IMAGES);
+		cleanupUnsavedEditImages(droppedImageUrls);
+
 		setFormState((current) => ({
 			...current,
-			imageUrls: [...current.imageUrls, ...newUrls].slice(0, MAX_PRESALE_IMAGES),
+			imageUrls: nextImageUrls,
 		}));
+		formStateRef.current = {
+			...formStateRef.current,
+			imageUrls: nextImageUrls,
+		};
 
 		setStatusMessage(`${newUrls.length} image${newUrls.length > 1 ? "s" : ""} uploaded.`);
 		setErrorMessage(null);
@@ -482,6 +555,11 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 			return;
 		}
 
+		const removedUrl = formState.imageUrls[index];
+		if (removedUrl) {
+			cleanupUnsavedEditImages([removedUrl]);
+		}
+
 		setFormState((current) => ({
 			...current,
 			imageUrls: current.imageUrls.filter((_, i) => i !== index),
@@ -493,6 +571,7 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 	 * Cancels edit mode, clears form state, and resets manager selection.
 	 */
 	const handleCancelEdit = () => {
+		cleanupUnsavedEditImages(formStateRef.current.imageUrls);
 		resetFormFields();
 		onCancelEditSelection();
 	};
