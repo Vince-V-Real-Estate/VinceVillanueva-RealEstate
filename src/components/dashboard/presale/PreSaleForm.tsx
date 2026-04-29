@@ -229,7 +229,6 @@ function getErrorMessage(error: unknown): string {
 export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDeletePending, onListingsChange, onCancelEditSelection}: PreSaleFormProps) {
 	const [formState, setFormState] = useState<PreSaleFormState>(EMPTY_FORM);
 	const [editingId, setEditingId] = useState<string | null>(null);
-	const [originalEditImageUrls, setOriginalEditImageUrls] = useState<string[]>([]);
 	const [pendingCreateImages, setPendingCreateImages] = useState<PendingPresaleImage[]>([]);
 	const [isUploadingImage, setIsUploadingImage] = useState(false);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -281,7 +280,6 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 		clearPendingCreateImages();
 		setFormState(EMPTY_FORM);
 		setEditingId(null);
-		setOriginalEditImageUrls([]);
 		formStateRef.current = EMPTY_FORM;
 		editingIdRef.current = null;
 		originalEditImageUrlsRef.current = [];
@@ -361,12 +359,6 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 	}, [actionState]);
 
 	useEffect(() => {
-		formStateRef.current = formState;
-		editingIdRef.current = editingId;
-		originalEditImageUrlsRef.current = originalEditImageUrls;
-	}, [editingId, formState, originalEditImageUrls]);
-
-	useEffect(() => {
 		pendingCreateImagesRef.current = pendingCreateImages;
 	}, [pendingCreateImages]);
 
@@ -384,7 +376,6 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 			clearPendingCreateImages();
 			setFormState(EMPTY_FORM);
 			setEditingId(null);
-			setOriginalEditImageUrls([]);
 			formStateRef.current = EMPTY_FORM;
 			editingIdRef.current = null;
 			originalEditImageUrlsRef.current = [];
@@ -399,7 +390,6 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 		const nextFormState = toFormState(selectedListing);
 		setFormState(nextFormState);
 		setEditingId(selectedListing.id);
-		setOriginalEditImageUrls([...selectedListing.imageUrls]);
 		formStateRef.current = nextFormState;
 		editingIdRef.current = selectedListing.id;
 		originalEditImageUrlsRef.current = [...selectedListing.imageUrls];
@@ -415,7 +405,11 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 	 * @param value - The new field value.
 	 */
 	const onFieldChange = (field: keyof Omit<PreSaleFormState, "imageUrls">, value: string) => {
-		setFormState((current) => ({...current, [field]: value}));
+		setFormState((current) => {
+			const nextState = {...current, [field]: value};
+			formStateRef.current = nextState;
+			return nextState;
+		});
 		// Clear field-specific error on change
 		if (fieldErrors?.[field]) {
 			setFieldErrors((prev) => {
@@ -453,14 +447,14 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 		const droppedImageUrls = combinedImageUrls.slice(MAX_PRESALE_IMAGES);
 		cleanupUnsavedEditImages(droppedImageUrls);
 
-		setFormState((current) => ({
-			...current,
-			imageUrls: nextImageUrls,
-		}));
-		formStateRef.current = {
-			...formStateRef.current,
-			imageUrls: nextImageUrls,
-		};
+		setFormState((current) => {
+			const nextState = {
+				...current,
+				imageUrls: nextImageUrls,
+			};
+			formStateRef.current = nextState;
+			return nextState;
+		});
 
 		setStatusMessage(`${newUrls.length} image${newUrls.length > 1 ? "s" : ""} uploaded.`);
 		setErrorMessage(null);
@@ -515,10 +509,15 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 
 		const nextPendingImages = [...existingImages, ...pendingImagesToAdd].slice(0, MAX_PRESALE_IMAGES);
 		setPendingCreateImages(nextPendingImages);
-		setFormState((current) => ({
-			...current,
-			imageUrls: nextPendingImages.map((image) => image.previewUrl),
-		}));
+		const nextImageUrls = nextPendingImages.map((image) => image.previewUrl);
+		setFormState((current) => {
+			const nextState = {
+				...current,
+				imageUrls: nextImageUrls,
+			};
+			formStateRef.current = nextState;
+			return nextState;
+		});
 
 		const selectedCount = pendingImagesToAdd.length;
 		setStatusMessage(`${selectedCount} image${selectedCount > 1 ? "s" : ""} selected. Images upload when you create the listing.`);
@@ -546,24 +545,33 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 			const nextPendingImages = currentPendingImages.filter((_, i) => i !== index);
 			setPendingCreateImages(nextPendingImages);
 			pendingCreateImagesRef.current = nextPendingImages;
-			setFormState((current) => ({
-				...current,
-				imageUrls: nextPendingImages.map((image) => image.previewUrl),
-			}));
+			const nextImageUrls = nextPendingImages.map((image) => image.previewUrl);
+			setFormState((current) => {
+				const nextState = {
+					...current,
+					imageUrls: nextImageUrls,
+				};
+				formStateRef.current = nextState;
+				return nextState;
+			});
 			setStatusMessage("Image removed. Images upload when you create the listing.");
 			setErrorMessage(null);
 			return;
 		}
 
-		const removedUrl = formState.imageUrls[index];
+		const removedUrl = formStateRef.current.imageUrls[index];
 		if (removedUrl) {
 			cleanupUnsavedEditImages([removedUrl]);
 		}
 
-		setFormState((current) => ({
-			...current,
-			imageUrls: current.imageUrls.filter((_, i) => i !== index),
-		}));
+		setFormState((current) => {
+			const nextState = {
+				...current,
+				imageUrls: current.imageUrls.filter((_, i) => i !== index),
+			};
+			formStateRef.current = nextState;
+			return nextState;
+		});
 		setStatusMessage("Image removed. Save listing to persist the change.");
 	};
 
