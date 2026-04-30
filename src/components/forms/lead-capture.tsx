@@ -7,23 +7,21 @@ import {z} from "zod";
 import {cn} from "@/lib/utils";
 import {ArrowRight, Loader2} from "lucide-react";
 import {useState} from "react";
-import type {LeadSource} from "@/utils/leads/types";
+import {LEAD_FIELD_LIMITS, PHONE_NUMBER_REGEX, type LeadSource} from "@/utils/leads/types";
 
 const log = createLogger("lead-capture");
 
-const phoneNumberRegex = /^[+]?[\d\s()-]{10,20}$/;
-
 const formSchema = z
 	.object({
-		name: z.string().min(2, "Name is required"),
+		name: z.string().min(2, "Name is required").max(LEAD_FIELD_LIMITS.NAME_MAX, `Name cannot exceed ${LEAD_FIELD_LIMITS.NAME_MAX} characters`),
 		email: z.string().email("Valid email is required"),
-		phone: z.string().optional(),
-		message: z.string().optional(),
-		address: z.string().optional(),
+		phone: z.string().regex(PHONE_NUMBER_REGEX, "Invalid phone number").optional().or(z.literal("")),
+		message: z.string().max(LEAD_FIELD_LIMITS.MESSAGE_MAX, `Message cannot exceed ${LEAD_FIELD_LIMITS.MESSAGE_MAX} characters`).optional(),
+		address: z.string().max(LEAD_FIELD_LIMITS.ADDRESS_MAX, `Address cannot exceed ${LEAD_FIELD_LIMITS.ADDRESS_MAX} characters`).optional(),
 		source: z.string().optional(),
 	})
 	.superRefine((data, ctx) => {
-		if (data.source === "sellers-guide-request" && (!data.phone || !phoneNumberRegex.test(data.phone))) {
+		if (data.source === "sellers-guide-request" && (!data.phone || !PHONE_NUMBER_REGEX.test(data.phone))) {
 			ctx.addIssue({
 				code: z.ZodIssueCode.custom,
 				path: ["phone"],
