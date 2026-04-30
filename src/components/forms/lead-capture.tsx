@@ -7,17 +7,28 @@ import {z} from "zod";
 import {cn} from "@/lib/utils";
 import {ArrowRight, Loader2} from "lucide-react";
 import {useState} from "react";
-import type {LeadSource} from "@/utils/leads/types";
+import {LEAD_FIELD_LIMITS, PHONE_NUMBER_REGEX, type LeadSource} from "@/utils/leads/types";
 
 const log = createLogger("lead-capture");
 
-const formSchema = z.object({
-	name: z.string().min(2, "Name is required"),
-	email: z.string().email("Valid email is required"),
-	phone: z.string().optional(),
-	message: z.string().optional(),
-	address: z.string().optional(),
-});
+const formSchema = z
+	.object({
+		name: z.string().min(2, "Name is required").max(LEAD_FIELD_LIMITS.NAME_MAX, `Name cannot exceed ${LEAD_FIELD_LIMITS.NAME_MAX} characters`),
+		email: z.string().email("Valid email is required"),
+		phone: z.string().regex(PHONE_NUMBER_REGEX, "Invalid phone number").optional().or(z.literal("")),
+		message: z.string().max(LEAD_FIELD_LIMITS.MESSAGE_MAX, `Message cannot exceed ${LEAD_FIELD_LIMITS.MESSAGE_MAX} characters`).optional(),
+		address: z.string().max(LEAD_FIELD_LIMITS.ADDRESS_MAX, `Address cannot exceed ${LEAD_FIELD_LIMITS.ADDRESS_MAX} characters`).optional(),
+		source: z.string().optional(),
+	})
+	.superRefine((data, ctx) => {
+		if (data.source === "sellers-guide-request" && (!data.phone || !PHONE_NUMBER_REGEX.test(data.phone))) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				path: ["phone"],
+				message: "A valid phone number is required",
+			});
+		}
+	});
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -38,6 +49,7 @@ export function LeadCaptureForm({type, className, onSuccess}: LeadCaptureFormPro
 			phone: "",
 			message: "",
 			address: "",
+			source: type,
 		},
 	});
 
@@ -92,6 +104,8 @@ export function LeadCaptureForm({type, className, onSuccess}: LeadCaptureFormPro
 				return "Get Valuation Report";
 			case "call":
 				return "Book Consultation";
+			case "sellers-guide-request":
+				return "Send Me the Guide";
 			default:
 				return "Submit Request";
 		}
@@ -160,13 +174,13 @@ export function LeadCaptureForm({type, className, onSuccess}: LeadCaptureFormPro
 				</div>
 
 				{/* Optional Phone */}
-				{(type === "listings" || type === "call") && (
+				{(type === "listings" || type === "call" || type === "sellers-guide-request") && (
 					<div className="group relative">
 						<label
 							htmlFor="phone"
 							className={labelClasses("phone")}
 						>
-							Phone Number <span className="tracking-normal text-gray-300 normal-case">(Optional)</span>
+							Phone Number {type !== "sellers-guide-request" && <span className="tracking-normal text-gray-300 normal-case">(Optional)</span>}
 						</label>
 						<input
 							id="phone"
@@ -177,8 +191,9 @@ export function LeadCaptureForm({type, className, onSuccess}: LeadCaptureFormPro
 								await register("phone").onBlur(e);
 								setFocusedField(null);
 							}}
-							className={inputClasses("phone", false)}
+							className={inputClasses("phone", !!errors.phone)}
 						/>
+						{errors.phone && <span className="animate-in fade-in slide-in-from-top-1 absolute -bottom-5 left-0 text-xs font-medium text-red-500">{errors.phone.message}</span>}
 					</div>
 				)}
 
