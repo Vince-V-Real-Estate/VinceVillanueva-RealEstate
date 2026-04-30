@@ -27,6 +27,7 @@ export function LeadsManager() {
 		valuation: true,
 		call: true,
 		newsletter: true,
+		"sellers-guide-request": true,
 	});
 
 	/**
@@ -88,7 +89,7 @@ export function LeadsManager() {
 		);
 	}
 
-	const sources: LeadSource[] = ["listings", "valuation", "call", "newsletter"];
+	const sources: LeadSource[] = ["listings", "valuation", "call", "newsletter", "sellers-guide-request"];
 
 	return (
 		<div className="space-y-8">
