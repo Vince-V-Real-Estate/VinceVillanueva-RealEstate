@@ -1,4 +1,4 @@
-export const LEAD_SOURCES = ["listings", "valuation", "call", "newsletter"] as const;
+export const LEAD_SOURCES = ["listings", "valuation", "call", "newsletter", "sellers-guide-request"] as const;
 export type LeadSource = (typeof LEAD_SOURCES)[number];
 
 export interface ILead {

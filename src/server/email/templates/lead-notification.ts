@@ -14,6 +14,7 @@ const SOURCE_LABELS: Record<ILeadEmailData["source"], string> = {
 	valuation: "Home Valuation Request",
 	call: "Consultation Request",
 	newsletter: "Newsletter Subscription",
+	"sellers-guide-request": "Sellers Guide Request",
 };
 
 /** Accent colour per source so the realtor can triage at a glance. */
@@ -22,6 +23,7 @@ const SOURCE_COLORS: Record<ILeadEmailData["source"], string> = {
 	valuation: "#7c3aed",
 	call: "#059669",
 	newsletter: "#d97706",
+	"sellers-guide-request": "#db2777",
 };
 
 /** Format a Date to a concise, human-readable string. */
