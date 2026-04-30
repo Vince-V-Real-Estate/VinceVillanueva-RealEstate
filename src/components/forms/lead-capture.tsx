@@ -11,6 +11,8 @@ import type {LeadSource} from "@/utils/leads/types";
 
 const log = createLogger("lead-capture");
 
+const phoneNumberRegex = /^[+]?[\d\s()-]{10,20}$/;
+
 const formSchema = z
 	.object({
 		name: z.string().min(2, "Name is required"),
@@ -21,7 +23,7 @@ const formSchema = z
 		source: z.string().optional(),
 	})
 	.superRefine((data, ctx) => {
-		if (data.source === "sellers-guide-request" && (!data.phone || data.phone.trim().length < 10)) {
+		if (data.source === "sellers-guide-request" && (!data.phone || !phoneNumberRegex.test(data.phone))) {
 			ctx.addIssue({
 				code: z.ZodIssueCode.custom,
 				path: ["phone"],
