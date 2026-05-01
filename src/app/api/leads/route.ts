@@ -110,6 +110,7 @@ export const GET = withApiHandler({endpoint: "/api/leads", method: "GET", requir
 		call: [],
 		newsletter: [],
 		"sellers-guide-request": [],
+		"buyers-guide-request": [],
 	};
 
 	for (const l of allLeads) {

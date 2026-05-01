@@ -1,7 +1,7 @@
 import {pgEnum, pgTable, text, timestamp, uuid} from "drizzle-orm/pg-core";
 import {user} from "./user-schema";
 
-export const leadSourceEnum = pgEnum("lead_source", ["listings", "valuation", "call", "newsletter", "sellers-guide-request"]);
+export const leadSourceEnum = pgEnum("lead_source", ["listings", "valuation", "call", "newsletter", "sellers-guide-request", "buyers-guide-request"]);
 
 export const lead = pgTable("lead", {
 	id: uuid("id").primaryKey().defaultRandom(),

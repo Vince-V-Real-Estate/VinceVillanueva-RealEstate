@@ -6,6 +6,7 @@ export const SOURCE_LABELS: Record<LeadSource, string> = {
 	call: "Consultation",
 	newsletter: "Newsletter",
 	"sellers-guide-request": "Sellers Guide",
+	"buyers-guide-request": "Buyers Guide",
 };
 
 export const SOURCE_COLORS: Record<LeadSource, string> = {
@@ -14,6 +15,7 @@ export const SOURCE_COLORS: Record<LeadSource, string> = {
 	call: "bg-amber-500",
 	newsletter: "bg-purple-500",
 	"sellers-guide-request": "bg-pink-500",
+	"buyers-guide-request": "bg-cyan-500",
 };
 
 /**
