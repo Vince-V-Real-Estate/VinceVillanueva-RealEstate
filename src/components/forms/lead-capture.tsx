@@ -21,7 +21,7 @@ const formSchema = z
 		source: z.string().optional(),
 	})
 	.superRefine((data, ctx) => {
-		if ((data.source === "sellers-guide-request" || data.source === "buyers-guide-request") && !data.phone) {
+		if ((data.source === "sellers-guide-request" || data.source === "buyers-guide-request") && !data?.phone?.trim()) {
 			ctx.addIssue({
 				code: z.ZodIssueCode.custom,
 				path: ["phone"],
