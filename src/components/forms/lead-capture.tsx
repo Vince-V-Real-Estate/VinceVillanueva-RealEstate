@@ -21,7 +21,7 @@ const formSchema = z
 		source: z.string().optional(),
 	})
 	.superRefine((data, ctx) => {
-		if (data.source === "sellers-guide-request" && (!data.phone || !PHONE_NUMBER_REGEX.test(data.phone))) {
+		if ((data.source === "sellers-guide-request" || data.source === "buyers-guide-request") && !data?.phone?.trim()) {
 			ctx.addIssue({
 				code: z.ZodIssueCode.custom,
 				path: ["phone"],
@@ -105,6 +105,7 @@ export function LeadCaptureForm({type, className, onSuccess}: LeadCaptureFormPro
 			case "call":
 				return "Book Consultation";
 			case "sellers-guide-request":
+			case "buyers-guide-request":
 				return "Send Me the Guide";
 			default:
 				return "Submit Request";
@@ -174,13 +175,13 @@ export function LeadCaptureForm({type, className, onSuccess}: LeadCaptureFormPro
 				</div>
 
 				{/* Optional Phone */}
-				{(type === "listings" || type === "call" || type === "sellers-guide-request") && (
+				{(type === "listings" || type === "call" || type === "sellers-guide-request" || type === "buyers-guide-request") && (
 					<div className="group relative">
 						<label
 							htmlFor="phone"
 							className={labelClasses("phone")}
 						>
-							Phone Number {type !== "sellers-guide-request" && <span className="tracking-normal text-gray-300 normal-case">(Optional)</span>}
+							Phone Number {type !== "sellers-guide-request" && type !== "buyers-guide-request" && <span className="tracking-normal text-gray-300 normal-case">(Optional)</span>}
 						</label>
 						<input
 							id="phone"

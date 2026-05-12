@@ -95,6 +95,7 @@ export class Lead implements ILead {
 			call: "Consultation Request",
 			newsletter: "Newsletter Subscription",
 			"sellers-guide-request": "Sellers Guide Request",
+			"buyers-guide-request": "Buyers Guide Request",
 		};
 		return labels[this.source];
 	}
