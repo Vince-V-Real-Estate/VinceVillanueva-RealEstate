@@ -12,9 +12,12 @@ import {createLogger} from "@/lib/logger";
 import {countWords} from "@/utils/string";
 import {presaleInputSchema, updatePresaleInputSchema} from "@/lib/zod/presale";
 import {MAX_PRESALE_IMAGES, type PresaleListing, type PresaleListingMutationInput} from "@/lib/presales/types";
-import {PresalesApiError, createPresaleListing, updatePresaleListing} from "@/lib/presales/client";
+import {createPresaleListing, updatePresaleListing} from "@/lib/presales/client";
 import {uploadFiles} from "@/lib/uploadthing";
 import {requestUploadThingFileDeletion} from "@/lib/uploadthing/cleanup";
+import {ALLOWED_IMAGE_MIME_TYPES, MAX_IMAGE_UPLOAD_BYTES} from "@/lib/uploadthing/constants";
+import {getUploadedFileUrl} from "@/lib/uploadthing/file-url";
+import {getErrorMessage} from "@/utils/error";
 
 import {PreSaleImageUpload} from "./PreSaleImageUpload";
 
@@ -67,14 +70,6 @@ const INITIAL_SUBMIT_STATE: PreSaleSubmitState = {
 interface PendingPresaleImage {
 	file: File;
 	previewUrl: string;
-}
-
-function getUploadedFileUrl(file: {serverData?: {url?: string} | null; ufsUrl?: string; url?: string} | undefined): string | null {
-	if (!file) {
-		return null;
-	}
-
-	return file.serverData?.url ?? file.ufsUrl ?? file.url ?? null;
 }
 
 function revokePendingImagePreviews(images: PendingPresaleImage[]): void {
@@ -205,21 +200,6 @@ function parseFormForUpdate(form: PreSaleFormState): {data: Partial<PresaleListi
 	}
 
 	return {data: result.data};
-}
-
-/**
- * Extracts a user-friendly error message from an unknown error.
- * @param error - The error to extract a message from.
- * @returns A formatted error message string.
- */
-function getErrorMessage(error: unknown): string {
-	if (error instanceof PresalesApiError) {
-		return error.message;
-	}
-	if (error instanceof Error) {
-		return error.message;
-	}
-	return "An unexpected error occurred";
 }
 
 /**
@@ -466,7 +446,7 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 			return;
 		}
 
-		const allowedMimeTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+		const allowedMimeTypes = ALLOWED_IMAGE_MIME_TYPES;
 		const existingImages = pendingCreateImagesRef.current;
 		const remainingSlots = MAX_PRESALE_IMAGES - existingImages.length;
 		if (remainingSlots <= 0) {
@@ -484,7 +464,7 @@ export function PreSaleForm({selectedListing, listingsCount, canCreateMore, isDe
 				continue;
 			}
 
-			if (file.size > 8 * 1024 * 1024) {
+			if (file.size > MAX_IMAGE_UPLOAD_BYTES) {
 				oversizeCount += 1;
 				continue;
 			}

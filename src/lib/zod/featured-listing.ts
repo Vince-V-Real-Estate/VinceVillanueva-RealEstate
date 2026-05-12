@@ -1,8 +1,7 @@
 import {z} from "zod";
+import {BATHROOM_INCREMENT} from "@/lib/constants/shared";
+import {MAX_DESCRIPTION_WORDS} from "@/lib/constants/featured-listing";
 import {countWords} from "@/utils/string";
-
-const BATHROOM_INCREMENT = 0.5;
-const DESCRIPTION_MAX_WORDS = 50;
 
 export const featuredListingIdSchema = z.string().uuid("Invalid featured listing id");
 
@@ -13,7 +12,7 @@ export const featuredListingInputSchema = z.object({
 		.trim()
 		.min(10, "Description must be at least 10 characters")
 		.max(400, "Description cannot exceed 400 characters")
-		.refine((value) => countWords(value) <= DESCRIPTION_MAX_WORDS, `Description cannot exceed ${DESCRIPTION_MAX_WORDS} words`),
+		.refine((value) => countWords(value) <= MAX_DESCRIPTION_WORDS, `Description cannot exceed ${MAX_DESCRIPTION_WORDS} words`),
 	imageUrl: z.string().url("A valid image URL is required"),
 	price: z.number().int("Price must be a whole number").min(1, "Price is required"),
 	address: z.string().trim().min(5, "Address must be at least 5 characters").max(200, "Address cannot exceed 200 characters"),

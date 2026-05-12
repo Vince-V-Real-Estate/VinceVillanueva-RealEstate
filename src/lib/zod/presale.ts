@@ -1,9 +1,9 @@
 import {z} from "zod";
 
+import {BATHROOM_INCREMENT} from "@/lib/constants/shared";
 import {MAX_PRESALE_IMAGES} from "@/lib/presales/types";
 import {countWords} from "@/utils/string";
 
-const BATHROOM_INCREMENT = 0.5;
 const DESCRIPTION_MAX_WORDS = 100;
 
 export const presaleIdSchema = z.string().uuid("Invalid presale listing id");

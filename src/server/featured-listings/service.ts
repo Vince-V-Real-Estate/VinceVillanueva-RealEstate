@@ -1,6 +1,6 @@
 import {and, eq, sql, type InferSelectModel} from "drizzle-orm";
 
-import {MAX_FEATURED_LISTINGS, type FeaturedListing, type FeaturedListingMutationInput, type FeaturedListingUpdateInput} from "@/lib/featured-listings/types";
+import {type FeaturedListing, type FeaturedListingMutationInput, type FeaturedListingUpdateInput} from "@/lib/featured-listings/types";
 import {db} from "@/server/db";
 import {featuredListing} from "@/server/db/schema";
 
@@ -177,25 +177,3 @@ export async function deleteFeaturedListingForRealtor(id: string, realtorId: str
 		imageUrl: deletedRow?.imageUrl ?? null,
 	};
 }
-
-/**
- * Parses and validates the "limit" query parameter for listing endpoints.
- * @param limitParam - The raw string value from the URL query parameter
- * @returns Valid integer limit (1-5), or null if invalid/missing (defaults handled by caller)
- */
-export function parseFeaturedListingsLimit(limitParam: string | null): number | null {
-	if (limitParam === null) {
-		return MAX_FEATURED_LISTINGS;
-	}
-
-	const parsedLimit = Number.parseInt(limitParam, 10);
-
-	if (!Number.isInteger(parsedLimit) || parsedLimit < 1 || parsedLimit > MAX_FEATURED_LISTINGS) {
-		return null;
-	}
-
-	return parsedLimit;
-}
-
-/** Alias for parseFeaturedListingsLimit - may be used for consistency with other modules */
-export const getFeaturedListingsLimit = parseFeaturedListingsLimit;

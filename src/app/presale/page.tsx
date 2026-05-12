@@ -8,12 +8,13 @@ import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import {PRESALE_IMAGE_FALLBACK} from "@/lib/constants/shared";
 import {createLogger} from "@/lib/logger";
 import {fetchPresaleListings} from "@/lib/presales/client";
 import {type PresaleListing} from "@/lib/presales/types";
+import {isAbortError} from "@/utils/error";
 
 const COMPLETION_YEAR_REGEX = /\b\d{4}\b/;
-const PRESALE_IMAGE_FALLBACK = "/vv-asset-2-desktop.png";
 const log = createLogger("presale-page");
 
 /**
@@ -36,7 +37,7 @@ export default function PresalePage() {
 				setListings(loadedListings);
 				setLoadError(null);
 			} catch (error) {
-				if (error instanceof DOMException && error.name === "AbortError") {
+				if (isAbortError(error)) {
 					return;
 				}
 

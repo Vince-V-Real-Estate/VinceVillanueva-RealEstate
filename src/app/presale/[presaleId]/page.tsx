@@ -5,10 +5,9 @@ import {Bath, Bed, Building, Calendar, CheckCircle2, ChevronLeft, MapPin, Square
 
 import {buttonVariants} from "@/components/ui/button-variants";
 import {Badge} from "@/components/ui/badge";
-import {formatBathroomCount, formatFeaturedListingPrice} from "@/lib/featured-listings/types";
+import {PRESALE_IMAGE_FALLBACK} from "@/lib/constants/shared";
 import {getPresaleListingById} from "@/server/presales/service";
-
-const PRESALE_IMAGE_FALLBACK = "/vv-asset-2-desktop.png";
+import {formatBathrooms, formatPrice} from "@/utils/format";
 
 interface PresaleDetailPageProps {
 	params: Promise<{presaleId: string}>;
@@ -72,7 +71,7 @@ export default async function PresaleDetailPage({params}: PresaleDetailPageProps
 							{listing.address}
 						</div>
 						<div className="hidden text-white/40 sm:block">-</div>
-						<p className="text-3xl font-semibold text-white">{formatFeaturedListingPrice(listing.price)}</p>
+						<p className="text-3xl font-semibold text-white">{formatPrice(listing.price)}</p>
 					</div>
 				</div>
 			</div>
@@ -88,7 +87,7 @@ export default async function PresaleDetailPage({params}: PresaleDetailPageProps
 							</div>
 							<div className="flex flex-col items-center justify-center rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-transform hover:-translate-y-1">
 								<Bath className="text-primary/70 mb-3 h-8 w-8" />
-								<p className="text-2xl font-bold text-gray-900">{formatBathroomCount(listing.bathrooms)}</p>
+								<p className="text-2xl font-bold text-gray-900">{formatBathrooms(listing.bathrooms)}</p>
 								<p className="text-xs font-medium tracking-wider text-gray-500 uppercase">Bathrooms</p>
 							</div>
 							<div className="flex flex-col items-center justify-center rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-transform hover:-translate-y-1">

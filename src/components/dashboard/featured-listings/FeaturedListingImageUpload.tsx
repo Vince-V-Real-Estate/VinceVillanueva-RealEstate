@@ -3,6 +3,7 @@ import Image from "next/image";
 import {Button} from "@/components/ui/button";
 import {Label} from "@/components/ui/label";
 import {FileUpload} from "@/components/ui/file-upload";
+import {IMAGE_ACCEPT_ATTRIBUTE} from "@/lib/uploadthing/constants";
 
 import type {UploadedUploadThingFile} from "@/components/ui/file-upload";
 
@@ -68,7 +69,7 @@ export function FeaturedListingImageUpload({
 					<input
 						ref={fileInputRef}
 						type="file"
-						accept="image/jpeg,image/png,image/webp"
+						accept={IMAGE_ACCEPT_ATTRIBUTE}
 						onChange={handleSelectFile}
 						disabled={!canUploadImage}
 						className="hidden"
