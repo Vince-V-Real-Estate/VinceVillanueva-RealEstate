@@ -34,12 +34,19 @@ interface CreateApiClientOptions<E extends ApiError> {
 /**
  * Builds a typed JSON API client that normalizes error parsing across endpoints.
  * The returned `request` function throws `ErrorClass` when the response is
- * non-OK or contains an empty body.
+ * non-OK or contains an unexpected empty body.
  * @param options Configuration controlling the error constructor and fallback message.
  * @returns Object containing a single `request` function.
  */
 export function createApiClient<E extends ApiError>(options: CreateApiClientOptions<E>) {
 	const {ErrorClass, fallbackMessage} = options;
+
+	function allowsEmptySuccessBody(response: Response, init?: RequestInit): boolean {
+		if (response.status === 204 || response.status === 205) return true;
+
+		const method = (init?.method ?? "GET").toUpperCase();
+		return method === "HEAD";
+	}
 
 	function getApiErrorMessage(body: ApiErrorShape | null): string {
 		const baseMessage = body?.error ?? fallbackMessage;
@@ -79,6 +86,10 @@ export function createApiClient<E extends ApiError>(options: CreateApiClientOpti
 		}
 
 		if (!body) {
+			if (allowsEmptySuccessBody(response, init)) {
+				return undefined as T;
+			}
+
 			throw new ErrorClass("Empty API response", response.status);
 		}
 

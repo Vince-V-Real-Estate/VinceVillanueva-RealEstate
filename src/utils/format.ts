@@ -29,10 +29,14 @@ export type DateFormatStyle = "short" | "long" | "datetime";
  * - "datetime": "Mon, Jan 15, 2026, 3:45 PM"
  * @param date The Date object or ISO date string to format.
  * @param style The formatting style to apply. Defaults to "short".
- * @returns Formatted date string.
+ * @returns Formatted date string, or "N/A" for invalid dates.
  */
 export function formatDate(date: Date | string, style: DateFormatStyle = "short"): string {
 	const d = typeof date === "string" ? new Date(date) : date;
+
+	if (Number.isNaN(d.getTime())) {
+		return "N/A";
+	}
 
 	if (style === "long") {
 		return d.toLocaleDateString("en-US", {
