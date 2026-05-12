@@ -3,34 +3,15 @@
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {createLogger} from "@/lib/logger";
-import {z} from "zod";
+import {leadCaptureSchema, type LeadCaptureValues} from "@/lib/zod/lead-capture";
 import {cn} from "@/lib/utils";
 import {ArrowRight, Loader2} from "lucide-react";
 import {useState} from "react";
-import {LEAD_FIELD_LIMITS, PHONE_NUMBER_REGEX, type LeadSource} from "@/utils/leads/types";
+import {type LeadSource} from "@/utils/leads/types";
 
 const log = createLogger("lead-capture");
 
-const formSchema = z
-	.object({
-		name: z.string().min(2, "Name is required").max(LEAD_FIELD_LIMITS.NAME_MAX, `Name cannot exceed ${LEAD_FIELD_LIMITS.NAME_MAX} characters`),
-		email: z.string().email("Valid email is required"),
-		phone: z.string().regex(PHONE_NUMBER_REGEX, "Invalid phone number").optional().or(z.literal("")),
-		message: z.string().max(LEAD_FIELD_LIMITS.MESSAGE_MAX, `Message cannot exceed ${LEAD_FIELD_LIMITS.MESSAGE_MAX} characters`).optional(),
-		address: z.string().max(LEAD_FIELD_LIMITS.ADDRESS_MAX, `Address cannot exceed ${LEAD_FIELD_LIMITS.ADDRESS_MAX} characters`).optional(),
-		source: z.string().optional(),
-	})
-	.superRefine((data, ctx) => {
-		if ((data.source === "sellers-guide-request" || data.source === "buyers-guide-request") && !data?.phone?.trim()) {
-			ctx.addIssue({
-				code: z.ZodIssueCode.custom,
-				path: ["phone"],
-				message: "A valid phone number is required",
-			});
-		}
-	});
-
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = LeadCaptureValues;
 
 interface LeadCaptureFormProps {
 	type: LeadSource;
@@ -42,7 +23,7 @@ export function LeadCaptureForm({type, className, onSuccess}: LeadCaptureFormPro
 	const [focusedField, setFocusedField] = useState<string | null>(null);
 
 	const form = useForm<FormValues>({
-		resolver: zodResolver(formSchema),
+		resolver: zodResolver(leadCaptureSchema),
 		defaultValues: {
 			name: "",
 			email: "",
@@ -210,7 +191,7 @@ export function LeadCaptureForm({type, className, onSuccess}: LeadCaptureFormPro
 						<input
 							id="address"
 							type="text"
-							{...register("address", {required: type === "valuation"})}
+							{...register("address")}
 							onFocus={() => setFocusedField("address")}
 							onBlur={async (e) => {
 								await register("address").onBlur(e);

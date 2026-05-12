@@ -13,6 +13,7 @@ import {Badge} from "@/components/ui/badge";
 import {Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose} from "@/components/ui/dialog";
 import {updateProfileSchema, type UpdateProfileFormData} from "@/lib/zod/update-profile-validation";
 import {authClient} from "@/server/better-auth/client";
+import {formatDate} from "@/utils/format";
 
 export default function AccountPage() {
 	const router = useRouter();
@@ -92,13 +93,7 @@ export default function AccountPage() {
 		router.push("/");
 	};
 
-	const formatDate = (date: string | Date) => {
-		return new Date(date).toLocaleDateString("en-US", {
-			year: "numeric",
-			month: "long",
-			day: "numeric",
-		});
-	};
+	const formatMemberSince = (date: string | Date) => formatDate(date, "long");
 
 	return (
 		<div className="container mx-auto max-w-2xl px-4 py-10">
@@ -137,7 +132,7 @@ export default function AccountPage() {
 						</div>
 						<div>
 							<p className="text-muted-foreground text-sm font-medium">Member Since</p>
-							<p className="text-base">{formatDate(user.createdAt)}</p>
+							<p className="text-base">{formatMemberSince(user.createdAt)}</p>
 						</div>
 					</div>
 				</CardContent>

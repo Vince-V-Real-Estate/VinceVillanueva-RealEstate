@@ -3,8 +3,9 @@ import {NextResponse} from "next/server";
 import {MAX_FEATURED_LISTINGS} from "@/lib/featured-listings/types";
 import {featuredListingInputSchema} from "@/lib/zod/featured-listing";
 import {createLogger} from "@/lib/logger";
-import {countFeaturedListingsForRealtor, createFeaturedListingForRealtor, listFeaturedListings, parseFeaturedListingsLimit} from "@/server/featured-listings/service";
+import {countFeaturedListingsForRealtor, createFeaturedListingForRealtor, listFeaturedListings} from "@/server/featured-listings/service";
 import {deleteUploadThingFileByUrl} from "@/server/uploadthing/cleanup";
+import {parseListingsLimit} from "@/server/utils";
 import {parseAndValidateBody, withApiHandler} from "@/utils/api/route-helpers";
 
 const log = createLogger("featured-listings-api");
@@ -24,7 +25,7 @@ export const GET = withApiHandler(
 	async (request) => {
 		const requestUrl = new URL(request.url);
 		const limitParam = requestUrl.searchParams.get("limit");
-		const limit = parseFeaturedListingsLimit(limitParam);
+		const limit = parseListingsLimit(limitParam, MAX_FEATURED_LISTINGS);
 
 		if (limit === null) {
 			return NextResponse.json(

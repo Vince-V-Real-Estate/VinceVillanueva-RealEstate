@@ -1,6 +1,7 @@
 import type {LeadSource} from "@/utils/leads/types";
+import {formatDate} from "@/utils/format";
 import type {Lead} from "./types";
-import {SOURCE_COLORS, SOURCE_LABELS, formatDate} from "./constants";
+import {SOURCE_COLORS, SOURCE_LABELS} from "./constants";
 
 interface LeadTableProps {
 	leads: Lead[];

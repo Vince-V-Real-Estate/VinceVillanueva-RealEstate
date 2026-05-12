@@ -3,8 +3,9 @@ import {NextResponse} from "next/server";
 import {MAX_PRESALE_LISTINGS} from "@/lib/presales/types";
 import {presaleInputSchema} from "@/lib/zod/presale";
 import {createLogger} from "@/lib/logger";
-import {createPresaleListingWithLimit, listPresaleListings, parsePresaleListingsLimit} from "@/server/presales/service";
+import {createPresaleListingWithLimit, listPresaleListings} from "@/server/presales/service";
 import {deleteUploadThingFileByUrl} from "@/server/uploadthing/cleanup";
+import {parseListingsLimit} from "@/server/utils";
 import {parseAndValidateBody, withApiHandler} from "@/utils/api/route-helpers";
 
 const log = createLogger("presales-api");
@@ -23,7 +24,7 @@ export const GET = withApiHandler(
 	async (request) => {
 		const requestUrl = new URL(request.url);
 		const limitParam = requestUrl.searchParams.get("limit");
-		const limit = parsePresaleListingsLimit(limitParam);
+		const limit = parseListingsLimit(limitParam, MAX_PRESALE_LISTINGS);
 
 		if (limit === null) {
 			return NextResponse.json(

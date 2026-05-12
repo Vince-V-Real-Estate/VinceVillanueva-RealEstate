@@ -4,8 +4,8 @@ import {notFound} from "next/navigation";
 import {Bath, Bed, MapPin, Square} from "lucide-react";
 
 import {buttonVariants} from "@/components/ui/button";
-import {formatBathroomCount, formatFeaturedListingPrice} from "@/lib/featured-listings/types";
 import {getFeaturedListingById} from "@/server/featured-listings/service";
+import {formatBathrooms, formatPrice} from "@/utils/format";
 
 interface FeaturedListingPageProps {
 	params: Promise<{featuredId: string}>;
@@ -45,7 +45,7 @@ export default async function FeaturedListingPage({params}: FeaturedListingPageP
 						<div className="absolute right-6 bottom-6 left-6 text-white">
 							<p className="text-sm font-medium tracking-wider text-white/80 uppercase">Featured Listing</p>
 							<h1 className="mt-1 text-3xl font-bold md:text-4xl">{listing.title}</h1>
-							<p className="mt-2 text-2xl font-semibold md:text-3xl">{formatFeaturedListingPrice(listing.price)}</p>
+							<p className="mt-2 text-2xl font-semibold md:text-3xl">{formatPrice(listing.price)}</p>
 						</div>
 					</div>
 
@@ -68,7 +68,7 @@ export default async function FeaturedListingPage({params}: FeaturedListingPageP
 									<div className="mb-1 flex items-center gap-2 text-sm text-gray-500">
 										<Bath className="h-4 w-4" /> Bathrooms
 									</div>
-									<p className="text-lg font-semibold text-gray-900">{formatBathroomCount(listing.bathrooms)}</p>
+									<p className="text-lg font-semibold text-gray-900">{formatBathrooms(listing.bathrooms)}</p>
 								</div>
 
 								<div className="rounded-lg border border-gray-200 p-4">

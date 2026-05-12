@@ -1,5 +1,6 @@
 import type {SlideData} from "@/components/ui/carousel";
-import {buildFeaturedListingPath, formatFeaturedListingPrice, type FeaturedListing} from "@/lib/featured-listings/types";
+import {buildFeaturedListingPath, type FeaturedListing} from "@/lib/featured-listings/types";
+import {formatPrice} from "@/utils/format";
 
 /**
  * Converts a FeaturedListing domain object into a SlideData object for use in the homepage carousel.
@@ -13,7 +14,7 @@ export function mapFeaturedListingToCarouselSlide(listing: FeaturedListing): Sli
 		title: listing.title,
 		description: listing.description,
 		src: listing.imageUrl,
-		price: formatFeaturedListingPrice(listing.price),
+		price: formatPrice(listing.price),
 		address: listing.address,
 		specs: {
 			beds: listing.bedrooms,

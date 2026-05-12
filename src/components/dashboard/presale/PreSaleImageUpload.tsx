@@ -9,6 +9,7 @@ import {FileUpload} from "@/components/ui/file-upload";
 import type {UploadedUploadThingFile} from "@/components/ui/file-upload";
 import {Label} from "@/components/ui/label";
 import {MAX_PRESALE_IMAGES} from "@/lib/presales/types";
+import {IMAGE_ACCEPT_ATTRIBUTE} from "@/lib/uploadthing/constants";
 
 interface PreSaleImageUploadProps {
 	imageUrls: string[];
@@ -91,7 +92,7 @@ export function PreSaleImageUpload({imageUrls, disabled, isUploading, deferUploa
 					<input
 						ref={fileInputRef}
 						type="file"
-						accept="image/jpeg,image/png,image/webp"
+						accept={IMAGE_ACCEPT_ATTRIBUTE}
 						multiple
 						onChange={handleSelectFiles}
 						disabled={!canUploadMore}

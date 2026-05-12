@@ -1,7 +1,7 @@
-import {z} from "zod";
 import {withApiHandler, parseAndValidateBody} from "@/utils/api/route-helpers";
+import {createLeadSchema} from "@/lib/zod/lead-capture";
 import {Lead} from "@/utils/leads/lead";
-import {LEAD_FIELD_LIMITS, LEAD_SOURCES, PHONE_NUMBER_REGEX, type LeadSource} from "@/utils/leads/types";
+import {type LeadSource} from "@/utils/leads/types";
 import {createLogger} from "@/lib/logger";
 import {getEmailService} from "@/server/email";
 import {db} from "@/server/db";
@@ -18,20 +18,6 @@ const log = createLogger("leads-api");
  * Adjust based on your actual database limits
  */
 const ESTIMATED_MAX_ROWS = 10000;
-
-/**
- * Zod schema for lead submission validation
- */
-const createLeadSchema = z.object({
-	fullName: z.string().min(2, "Name must be at least 2 characters").max(LEAD_FIELD_LIMITS.NAME_MAX, `Name cannot exceed ${LEAD_FIELD_LIMITS.NAME_MAX} characters`),
-	email: z.string().email("Invalid email address"),
-	phone: z.string().regex(PHONE_NUMBER_REGEX, "Invalid phone number").optional().or(z.literal("")),
-	message: z.string().max(LEAD_FIELD_LIMITS.MESSAGE_MAX, `Message cannot exceed ${LEAD_FIELD_LIMITS.MESSAGE_MAX} characters`).optional(),
-	address: z.string().max(LEAD_FIELD_LIMITS.ADDRESS_MAX, `Address cannot exceed ${LEAD_FIELD_LIMITS.ADDRESS_MAX} characters`).optional(),
-	source: z.enum(LEAD_SOURCES, {
-		errorMap: () => ({message: "Invalid lead source"}),
-	}),
-});
 
 /**
  * POST /api/leads

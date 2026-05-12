@@ -5,6 +5,7 @@ import Carousel, {type SlideData} from "@/components/ui/carousel";
 import {fetchFeaturedListings} from "@/lib/featured-listings/client";
 import {mapFeaturedListingToCarouselSlide} from "@/lib/featured-listings/mappers";
 import {createLogger} from "@/lib/logger";
+import {isAbortError} from "@/utils/error";
 
 const log = createLogger("featured-listings");
 
@@ -23,7 +24,7 @@ export default function FeaturedListings() {
 				setSlides(listings.map(mapFeaturedListingToCarouselSlide));
 				setLoadError(null);
 			} catch (error) {
-				if (error instanceof DOMException && error.name === "AbortError") {
+				if (isAbortError(error)) {
 					return;
 				}
 

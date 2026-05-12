@@ -1,6 +1,6 @@
 import {and, eq, sql, type InferSelectModel} from "drizzle-orm";
 
-import {MAX_PRESALE_LISTINGS, type PresaleListing, type PresaleListingMutationInput, type PresaleListingUpdateInput} from "@/lib/presales/types";
+import {type PresaleListing, type PresaleListingMutationInput, type PresaleListingUpdateInput} from "@/lib/presales/types";
 import {db} from "@/server/db";
 import {presaleListing} from "@/server/db/schema";
 
@@ -70,46 +70,6 @@ export async function getPresaleListingById(id: string): Promise<PresaleListing 
 	}
 
 	return toPresaleListing(row);
-}
-
-/**
- * Counts the total number of presale listings in the database.
- * Used to enforce the maximum listings limit before creation.
- * @async
- * @returns Count of presale listings
- */
-export async function countPresaleListings(): Promise<number> {
-	const countResult = await db.select({count: sql<number>`count(*)`}).from(presaleListing);
-
-	return Number(countResult[0]?.count ?? 0);
-}
-
-/**
- * Creates a new presale listing in the database.
- * @async
- * @param realtorId - The ID of the admin creating the listing
- * @param input - Presale listing data
- * @returns The newly created listing with generated ID and timestamps
- * @throws Throws when the insert operation fails to return a result
- */
-export async function createPresaleListing(realtorId: string, input: PresaleListingMutationInput): Promise<PresaleListing> {
-	const now = new Date();
-
-	const [createdListing] = await db
-		.insert(presaleListing)
-		.values({
-			...input,
-			realtorId,
-			createdAt: now,
-			updatedAt: now,
-		})
-		.returning();
-
-	if (!createdListing) {
-		throw new Error("Failed to create presale listing");
-	}
-
-	return toPresaleListing(createdListing);
 }
 
 /**
@@ -224,23 +184,4 @@ export async function deletePresaleListing(id: string, realtorId: string): Promi
 		deleted: Boolean(deletedRow),
 		imageUrls: deletedRow?.imageUrls ?? [],
 	};
-}
-
-/**
- * Parses and validates the "limit" query parameter for presale listing endpoints.
- * @param limitParam - The raw string value from the URL query parameter
- * @returns Valid integer limit (1-5), or null if invalid
- */
-export function parsePresaleListingsLimit(limitParam: string | null): number | null {
-	if (limitParam === null) {
-		return MAX_PRESALE_LISTINGS;
-	}
-
-	const parsedLimit = Number.parseInt(limitParam, 10);
-
-	if (!Number.isInteger(parsedLimit) || parsedLimit < 1 || parsedLimit > MAX_PRESALE_LISTINGS) {
-		return null;
-	}
-
-	return parsedLimit;
 }

@@ -6,39 +6,8 @@
  * `<style>` blocks.
  */
 
-import type {ILeadEmailData} from "@/utils/leads/types";
-
-/** Human-readable labels for each lead source. */
-const SOURCE_LABELS: Record<ILeadEmailData["source"], string> = {
-	listings: "New Listings Alert",
-	valuation: "Home Valuation Request",
-	call: "Consultation Request",
-	newsletter: "Newsletter Subscription",
-	"sellers-guide-request": "Sellers Guide Request",
-	"buyers-guide-request": "Buyers Guide Request",
-};
-
-/** Accent colour per source so the realtor can triage at a glance. */
-const SOURCE_COLORS: Record<ILeadEmailData["source"], string> = {
-	listings: "#2563eb",
-	valuation: "#7c3aed",
-	call: "#059669",
-	newsletter: "#d97706",
-	"sellers-guide-request": "#db2777",
-	"buyers-guide-request": "#0891b2",
-};
-
-/** Format a Date to a concise, human-readable string. */
-function formatDate(date: Date): string {
-	return date.toLocaleDateString("en-US", {
-		weekday: "short",
-		year: "numeric",
-		month: "short",
-		day: "numeric",
-		hour: "numeric",
-		minute: "2-digit",
-	});
-}
+import {SOURCE_COLORS, SOURCE_LABELS, type ILeadEmailData} from "@/utils/leads/types";
+import {formatDate} from "@/utils/format";
 
 /** Escape HTML entities to prevent XSS in email bodies. */
 function esc(value: string): string {
@@ -58,7 +27,7 @@ function esc(value: string): string {
 export function buildLeadNotificationHtml(data: ILeadEmailData): string {
 	const sourceLabel = SOURCE_LABELS[data.source];
 	const accent = SOURCE_COLORS[data.source];
-	const submitted = formatDate(data.createdAt);
+	const submitted = formatDate(data.createdAt, "datetime");
 
 	// -- optional detail rows ------------------------------------------------
 	const detailRows: string[] = [];

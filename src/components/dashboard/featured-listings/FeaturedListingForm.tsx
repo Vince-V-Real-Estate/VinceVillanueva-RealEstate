@@ -10,9 +10,12 @@ import {createLogger} from "@/lib/logger";
 import {countWords} from "@/utils/string";
 import {parseFeaturedListingFormInput} from "@/lib/zod/featured-listing-form";
 import {type FeaturedListing, type FeaturedListingMutationInput} from "@/lib/featured-listings/types";
-import {FeaturedListingsApiError, createFeaturedListing, updateFeaturedListing} from "@/lib/featured-listings/client";
+import {createFeaturedListing, updateFeaturedListing} from "@/lib/featured-listings/client";
 import {uploadFiles} from "@/lib/uploadthing";
 import {requestUploadThingFileDeletion} from "@/lib/uploadthing/cleanup";
+import {ALLOWED_IMAGE_MIME_TYPES, MAX_IMAGE_UPLOAD_BYTES} from "@/lib/uploadthing/constants";
+import {getUploadedFileUrl} from "@/lib/uploadthing/file-url";
+import {getErrorMessage} from "@/utils/error";
 
 import {FeaturedListingImageUpload} from "./FeaturedListingImageUpload";
 import type {FeaturedListingFormState, FeaturedListingSubmitState} from "./types";
@@ -39,14 +42,6 @@ const INITIAL_SUBMIT_STATE: FeaturedListingSubmitState = {
 interface PendingFeaturedImage {
 	file: File;
 	previewUrl: string;
-}
-
-function getUploadedFileUrl(file: {serverData?: {url?: string} | null; ufsUrl?: string; url?: string} | undefined): string | null {
-	if (!file) {
-		return null;
-	}
-
-	return file.serverData?.url ?? file.ufsUrl ?? file.url ?? null;
 }
 
 function revokePendingPreview(image: PendingFeaturedImage | null): void {
@@ -92,23 +87,6 @@ function toFormState(listing: FeaturedListing): FeaturedListingFormState {
  */
 function buildMutationInput(form: FeaturedListingFormState): FeaturedListingMutationInput {
 	return parseFeaturedListingFormInput(form);
-}
-
-/**
- * Extracts a user-friendly error message from an unknown error object.
- * @param {unknown} error - The error to extract a message from.
- * @returns {string} The formatted error message.
- */
-function getErrorMessage(error: unknown): string {
-	if (error instanceof FeaturedListingsApiError) {
-		return error.message;
-	}
-
-	if (error instanceof Error) {
-		return error.message;
-	}
-
-	return "An unexpected error occurred";
 }
 
 /**
@@ -332,13 +310,13 @@ export function FeaturedListingForm({selectedListing, listingsCount, canCreateMo
 			return;
 		}
 
-		const allowedMimeTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+		const allowedMimeTypes = ALLOWED_IMAGE_MIME_TYPES;
 		if (!allowedMimeTypes.has(selectedFile.type)) {
 			setErrorMessage("Only JPG, PNG, and WebP images are supported.");
 			return;
 		}
 
-		if (selectedFile.size > 8 * 1024 * 1024) {
+		if (selectedFile.size > MAX_IMAGE_UPLOAD_BYTES) {
 			setErrorMessage("Image size must be 8 MB or smaller.");
 			return;
 		}
