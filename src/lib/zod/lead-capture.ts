@@ -25,7 +25,7 @@ interface LeadConditionalInput {
 }
 
 const validateLeadConditionals = (data: LeadConditionalInput, ctx: z.RefinementCtx) => {
-	if (data.source === "sellers-guide-request" && (!data.phone || !PHONE_NUMBER_REGEX.test(data.phone))) {
+	if ((data.source === "sellers-guide-request" || data.source === "buyers-guide-request") && (!data.phone || !PHONE_NUMBER_REGEX.test(data.phone))) {
 		ctx.addIssue({
 			code: z.ZodIssueCode.custom,
 			path: ["phone"],
