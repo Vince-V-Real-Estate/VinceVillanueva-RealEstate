@@ -1,7 +1,8 @@
 import Image from "next/image";
 import {Loader2, Pencil, Trash2} from "lucide-react";
 import {Button} from "@/components/ui/button";
-import {formatBathroomCount, formatFeaturedListingPrice, type FeaturedListing} from "@/lib/featured-listings/types";
+import {type FeaturedListing} from "@/lib/featured-listings/types";
+import {formatBathrooms, formatPrice} from "@/utils/format";
 
 interface CurrentFeaturedListingsProps {
 	listings: FeaturedListing[];
@@ -45,7 +46,7 @@ export function CurrentFeaturedListings({listings, isLoading, isMutating, onEdit
 									<p className="truncate text-sm font-semibold text-gray-900">{listing.title}</p>
 									<p className="truncate text-sm text-gray-500">{listing.address}</p>
 									<p className="truncate text-xs text-gray-600">
-										{formatFeaturedListingPrice(listing.price)} • {listing.bedrooms} bd • {formatBathroomCount(listing.bathrooms)} ba • {listing.squareFeet.toLocaleString()} sqft
+										{formatPrice(listing.price)} • {listing.bedrooms} bd • {formatBathrooms(listing.bathrooms)} ba • {listing.squareFeet.toLocaleString()} sqft
 									</p>
 								</div>
 							</div>

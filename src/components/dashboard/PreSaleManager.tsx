@@ -2,38 +2,15 @@
 
 import {useCallback, useEffect, useMemo, useState} from "react";
 
-import {PresalesApiError, deletePresaleListing, fetchPresaleListings} from "@/lib/presales/client";
+import {deletePresaleListing, fetchPresaleListings} from "@/lib/presales/client";
 import {MAX_PRESALE_LISTINGS, type PresaleListing} from "@/lib/presales/types";
 import {createLogger} from "@/lib/logger";
+import {getErrorMessage, isAbortError} from "@/utils/error";
 
 import {CurrentPreSaleHomes} from "./presale/CurrentPreSaleHomes";
 import {PreSaleForm} from "./presale/PreSaleForm";
 
 const log = createLogger("dashboard-presales");
-
-/**
- * Extracts a user-friendly error message from an unknown error object.
- * @param error - The error to extract a message from.
- * @returns The formatted error message.
- */
-function getErrorMessage(error: unknown): string {
-	if (error instanceof PresalesApiError) {
-		return error.message;
-	}
-	if (error instanceof Error) {
-		return error.message;
-	}
-	return "An unexpected error occurred";
-}
-
-/**
- * Checks whether an error is caused by an aborted request.
- * @param error - The error to inspect.
- * @returns True when the error is an AbortError.
- */
-function isAbortError(error: unknown): boolean {
-	return error instanceof DOMException && error.name === "AbortError";
-}
 
 /**
  * Manages presale listings and coordinates list actions with the form panel.

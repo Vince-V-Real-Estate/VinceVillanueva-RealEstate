@@ -1,9 +1,10 @@
 import {z} from "zod";
+import {createEmailSchema} from "@/lib/zod/validate-email";
 
 export const signUpSchema = z.object({
 	firstName: z.string().min(1, "First name is required").max(50, "First name must be 50 characters or less"),
 	lastName: z.string().min(1, "Last name is required").max(50, "Last name must be 50 characters or less"),
-	email: z.string().min(1, "Email is required").email("Please enter a valid email address"),
+	email: createEmailSchema(),
 	password: z
 		.string()
 		.min(1, "Password is required")

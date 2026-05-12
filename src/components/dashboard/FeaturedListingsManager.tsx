@@ -2,40 +2,15 @@
 
 import {useCallback, useEffect, useMemo, useState} from "react";
 
-import {FeaturedListingsApiError, deleteFeaturedListing, fetchFeaturedListings} from "@/lib/featured-listings/client";
+import {deleteFeaturedListing, fetchFeaturedListings} from "@/lib/featured-listings/client";
 import {MAX_FEATURED_LISTINGS, type FeaturedListing} from "@/lib/featured-listings/types";
 import {createLogger} from "@/lib/logger";
+import {getErrorMessage, isAbortError} from "@/utils/error";
 
 import {CurrentFeaturedListings} from "./featured-listings/CurrentFeaturedListings";
 import {FeaturedListingForm} from "./featured-listings/FeaturedListingForm";
 
 const log = createLogger("dashboard-featured-listings");
-
-/**
- * Extracts a user-friendly error message from an unknown error object.
- * @param {unknown} error - The error to extract a message from.
- * @returns {string} The formatted error message.
- */
-function getErrorMessage(error: unknown): string {
-	if (error instanceof FeaturedListingsApiError) {
-		return error.message;
-	}
-
-	if (error instanceof Error) {
-		return error.message;
-	}
-
-	return "An unexpected error occurred";
-}
-
-/**
- * Checks whether an error is caused by an aborted request.
- * @param {unknown} error - The error to inspect.
- * @returns {boolean} True when the error is an AbortError.
- */
-function isAbortError(error: unknown): boolean {
-	return error instanceof DOMException && error.name === "AbortError";
-}
 
 /**
  * Manages featured listings and coordinates list actions with the form panel.

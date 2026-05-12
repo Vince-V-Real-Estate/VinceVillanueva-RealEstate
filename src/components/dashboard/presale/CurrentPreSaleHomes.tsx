@@ -5,6 +5,7 @@ import {Loader2, Pencil, Trash2} from "lucide-react";
 
 import {Button} from "@/components/ui/button";
 import type {PresaleListing} from "@/lib/presales/types";
+import {formatBathrooms, formatPrice} from "@/utils/format";
 
 interface CurrentPreSaleHomesProps {
 	listings: PresaleListing[];
@@ -12,24 +13,6 @@ interface CurrentPreSaleHomesProps {
 	isMutating: boolean;
 	onEdit: (listing: PresaleListing) => void;
 	onDelete: (listing: PresaleListing) => void;
-}
-
-/**
- * Formats a numeric price to a compact CAD currency string.
- * @param price - The numeric price value.
- * @returns Formatted price string (e.g., "$899,000").
- */
-function formatPrice(price: number): string {
-	return new Intl.NumberFormat("en-CA", {style: "currency", currency: "CAD", maximumFractionDigits: 0}).format(price);
-}
-
-/**
- * Formats a bathroom count, showing a decimal only when the value is not a whole number.
- * @param count - The number of bathrooms.
- * @returns Formatted string (e.g., "2" or "2.5").
- */
-function formatBathrooms(count: number): string {
-	return Number.isInteger(count) ? `${count}` : count.toFixed(1);
 }
 
 /**

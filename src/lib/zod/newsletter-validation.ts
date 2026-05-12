@@ -1,7 +1,8 @@
 import {z} from "zod";
+import {createEmailSchema} from "@/lib/zod/validate-email";
 
 export const newsletterSchema = z.object({
-	email: z.string().min(1, "Email is required").email("Please enter a valid email address"),
+	email: createEmailSchema(),
 });
 
 export type NewsletterFormData = z.infer<typeof newsletterSchema>;

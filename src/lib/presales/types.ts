@@ -15,9 +15,6 @@ export const MAX_PRESALE_LISTINGS = 5;
  */
 export const MAX_PRESALE_IMAGES = 3;
 
-/** Base URL path for presale listing pages */
-export const PRESALE_BASE_PATH = "/presale";
-
 /**
  * Complete presale listing data returned from the API.
  * Contains all property details along with system-generated fields.
@@ -71,13 +68,4 @@ export interface PresaleListingsListResponse {
 /** Response shape for single presale listing endpoints (GET by ID, POST, PATCH) */
 export interface PresaleListingResponse {
 	listing: PresaleListing;
-}
-
-/**
- * Builds the full URL path for a presale listing detail page.
- * @param presaleId - The unique identifier of the presale listing
- * @returns Full relative path (e.g., "/presale/uuid")
- */
-export function buildPresaleListingPath(presaleId: string): string {
-	return `${PRESALE_BASE_PATH}/${presaleId}`;
 }

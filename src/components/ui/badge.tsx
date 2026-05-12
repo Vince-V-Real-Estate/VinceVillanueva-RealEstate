@@ -40,4 +40,4 @@ function Badge({className, variant = "default", render, ...props}: useRender.Com
 	});
 }
 
-export {Badge, badgeVariants};
+export {Badge};

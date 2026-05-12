@@ -8,6 +8,7 @@ import {Label} from "@/components/ui/label";
 import {FileUpload, type UploadedUploadThingFile} from "@/components/ui/file-upload";
 import {createLogger} from "@/lib/logger";
 import {DEFAULT_HERO_DESKTOP_IMAGE_URL, DEFAULT_HERO_MOBILE_IMAGE_URL, type HeroImage} from "@/lib/hero-image/types";
+import {getUploadedFileUrl} from "@/lib/uploadthing/file-url";
 
 const log = createLogger("hero-image-form");
 
@@ -33,8 +34,7 @@ export function HeroImageForm({heroImage, isSaving, onReplace, onRevertToDefault
 
 	const handleUploadComplete = async (files: UploadedUploadThingFile[]) => {
 		setIsUploading(false);
-		const uploaded = files[0];
-		const url = uploaded?.ufsUrl ?? uploaded?.url ?? uploaded?.serverData?.url;
+		const url = getUploadedFileUrl(files[0]);
 		if (!url) {
 			log.warn("Upload completed with no URL");
 			return;
