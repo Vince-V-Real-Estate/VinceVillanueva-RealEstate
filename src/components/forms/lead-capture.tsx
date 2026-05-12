@@ -11,30 +11,7 @@ import {type LeadSource} from "@/utils/leads/types";
 
 const log = createLogger("lead-capture");
 
-<<<<<<< Updated upstream
-const formSchema = z
-	.object({
-		name: z.string().min(2, "Name is required").max(LEAD_FIELD_LIMITS.NAME_MAX, `Name cannot exceed ${LEAD_FIELD_LIMITS.NAME_MAX} characters`),
-		email: z.string().email("Valid email is required"),
-		phone: z.string().regex(PHONE_NUMBER_REGEX, "Invalid phone number").optional().or(z.literal("")),
-		message: z.string().max(LEAD_FIELD_LIMITS.MESSAGE_MAX, `Message cannot exceed ${LEAD_FIELD_LIMITS.MESSAGE_MAX} characters`).optional(),
-		address: z.string().max(LEAD_FIELD_LIMITS.ADDRESS_MAX, `Address cannot exceed ${LEAD_FIELD_LIMITS.ADDRESS_MAX} characters`).optional(),
-		source: z.string().optional(),
-	})
-	.superRefine((data, ctx) => {
-		if ((data.source === "sellers-guide-request" || data.source === "buyers-guide-request") && !data?.phone?.trim()) {
-			ctx.addIssue({
-				code: z.ZodIssueCode.custom,
-				path: ["phone"],
-				message: "A valid phone number is required",
-			});
-		}
-	});
-
-type FormValues = z.infer<typeof formSchema>;
-=======
 type FormValues = LeadCaptureValues;
->>>>>>> Stashed changes
 
 interface LeadCaptureFormProps {
 	type: LeadSource;
